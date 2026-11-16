@@ -813,7 +813,7 @@
   .np-body { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; transform-origin: 50% 100%; animation: npBreath 4.8s ease-in-out infinite; }
   .np-head { position: absolute; left: 14.844%; top: 1.946%; width: 66.295%; height: 47.283%; transform-origin: 43.65% 96.87%; animation: npHeadBreath 4.8s ease-in-out infinite; }
   .np-neck, .np-act { position: absolute; inset: 0; transform-origin: 43.65% 96.87%; }
-  .np-neck { transform: translate(calc(var(--lx) * 1.4%), calc(var(--ly) * .8%)) perspective(900px) rotateY(calc(var(--lx) * 10deg)) rotateX(calc(var(--ly) * -7deg)) rotate(calc(var(--lx) * 1.6deg)); transition: transform .35s ease-out; }
+  .np-neck { transform: translate(calc(var(--lx) * 2%), calc(var(--ly) * 1%)) perspective(900px) rotateY(calc(var(--lx) * 16deg)) rotateX(calc(var(--ly) * -9deg)) rotate(calc(var(--lx) * 2.2deg)); transition: transform .35s ease-out; }
   .np-head img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; }
   .np-screen { position: absolute; left: 0; top: 0; width: 400px; height: 275px; transform-origin: 0 0; pointer-events: none; }
   .np-screen .nf { width: 100%; height: 100%; aspect-ratio: auto; mix-blend-mode: screen; transition: filter .6s, opacity .6s; }
@@ -826,6 +826,41 @@
   .np[data-pose="sleep"] .nb-zzz i { animation: nbZ 3s ease-in infinite; }
   .np[data-pose="sleep"] .nb-zzz i:nth-child(2) { animation-delay: 1s; font-size: 11cqw; }
   .np[data-pose="sleep"] .nb-zzz i:nth-child(3) { animation-delay: 2s; font-size: 13cqw; }
+  /* things Nine's display shows besides the face */
+  .nf-show { position: absolute; inset: 4% 6%; color: #e3f7ff; opacity: 0; transform: scale(.85); transition: opacity .2s, transform .25s; pointer-events: none; filter: drop-shadow(0 0 6px #7fdcff); font-family: var(--display); }
+  .nf-show svg { width: 100%; height: 100%; overflow: visible; }
+  .nf[data-show] .nf-show { opacity: 1; transform: none; }
+  .nf[data-show] .nf-eye, .nf[data-show] .nf-mouth { opacity: 0; transition: opacity .15s; }
+  .nfs-spin { transform-box: fill-box; transform-origin: center; animation: nfsSpin 1s linear infinite; }
+  .nfs-bob { animation: nfsBob .9s ease-in-out infinite; }
+  .nfs-eq { transform-box: fill-box; transform-origin: center; animation: nfsEq .7s ease-in-out infinite; }
+  .nfs-scroll { animation: nfsScroll 2.4s linear infinite; }
+  .nfs-fill { transform-box: fill-box; transform-origin: left; animation: nfsFill 1.8s ease-out both; }
+  .nfs-draw { stroke-dasharray: 220; animation: nfsDraw .45s ease-out both; }
+  .nfs-blink { animation: nfsBlinkRays 1s steps(2) infinite; }
+  .nfs-cycle { opacity: 0; animation: nfsCycle 3.5s infinite; }
+  .nf.is-glitch .nf-face { animation: nfsGlitch .12s steps(2) infinite; }
+  @keyframes nfsSpin { to { transform: rotate(360deg); } }
+  @keyframes nfsBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+  @keyframes nfsEq { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
+  @keyframes nfsScroll { from { transform: translateY(0); } to { transform: translateY(266px); } }
+  @keyframes nfsFill { from { transform: scaleX(.05); } to { transform: scaleX(1); } }
+  @keyframes nfsDraw { from { stroke-dashoffset: 220; } to { stroke-dashoffset: 0; } }
+  @keyframes nfsBlinkRays { 50% { opacity: .2; } }
+  @keyframes nfsCycle { 0%, 18% { opacity: 1; } 20%, 100% { opacity: 0; } }
+  @keyframes nfsGlitch { 0% { transform: translate(-6px, 2px); filter: hue-rotate(80deg) saturate(3); } 100% { transform: translate(5px, -3px); filter: hue-rotate(-60deg); } }
+  /* she leans her whole body toward the pointer */
+  .np-stage { transform: perspective(1400px) translate(calc(var(--lx) * -1.1%), calc(var(--ly) * -.7%)) rotateY(calc(var(--lx) * 5deg)) rotate(calc(var(--lx) * -.6deg)); transform-origin: 50% 100%; }
+  /* mini Nine at the bottom of the page: head and shoulders, glides after the pointer */
+  .nm-walker .np { width: 120px; pointer-events: auto; cursor: pointer; }
+  .nm-walker.is-hidden .np { pointer-events: none; }
+  .nm-walker .np-clip { aspect-ratio: .78; }
+  .nm-walker .np-stage { width: 118%; left: -9%; }
+  .nm-walker .np .nb-say { top: -34px; }
+  .np[data-act="walk"] .np-stage, .np[data-act="run"] .np-stage, .np[data-act="moon"] .np-stage { animation: npGlide .5s ease-in-out infinite; }
+  .np[data-act="run"] .np-stage { animation-duration: .3s; }
+  @keyframes npGlide { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3%; } }
+  @media (max-width: 560px) { .nm-walker .np { width: 88px; } }
   /* the 360 turn: rendered video frames drawn on a canvas; drag Nine to spin her */
   .np-turn { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; transition: opacity .18s; }
   .np.is-turning .np-turn { opacity: 1; }
@@ -1325,11 +1360,60 @@ const Faces = (() => {
   const SCREEN = `<div class="nf nf-screen" data-mood="idle"><div class="nf-face">
         <span class="nf-eye nf-l"></span><span class="nf-eye nf-r"></span>
         <span class="nf-mouth">${SMILE.map(c => `<i style="--c:${c}cqw"></i>`).join("")}</span>
+        <div class="nf-show"></div>
       </div></div>`;
+  /* ---- what the display can show besides the face (drawn in a 400 x 272 box) ---- */
+  const star = (cx, cy, r) => Array.from({ length: 10 }, (_, i) => { const a = Math.PI / 5 * i - Math.PI / 2, k = i % 2 ? r * .45 : r; return `${(cx + Math.cos(a) * k).toFixed(1)},${(cy + Math.sin(a) * k).toFixed(1)}`; }).join(" ");
+  const spiral = (cx, cy) => { let d = ""; for (let i = 0; i <= 60; i++) { const a = i * .35, r = 2 + i * .75; d += `${i ? "L" : "M"}${(cx + Math.cos(a) * r).toFixed(1)} ${(cy + Math.sin(a) * r).toFixed(1)}`; } return d; };
+  const heart = (cx, cy, k) => `<path transform="translate(${cx} ${cy}) scale(${k})" d="M0 30C-40 0-30-35 0-14C30-35 40 0 0 30Z" fill="currentColor" stroke="none"/>`;
+  const txt = (x, y, size, t, extra = "") => `<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" font-weight="700" fill="currentColor" stroke="none" ${extra}>${t}</text>`;
+  const ICON = {
+    chart: `<path d="M110 220h180"/><rect x="125" y="165" width="30" height="45" rx="6" fill="currentColor"/><rect x="170" y="135" width="30" height="75" rx="6" fill="currentColor"/><rect x="215" y="100" width="30" height="110" rx="6" fill="currentColor"/><path d="M120 120l60-40 40 25 70-55m-30 0h30v30"/>`,
+    bolt: `<path d="M215 40l-70 110h55l-20 85 75-115h-55z" fill="currentColor" stroke="none"/>`,
+    cap: `<path d="M200 60l120 45-120 45-120-45z" fill="currentColor" stroke="none"/><path d="M135 128v45c40 30 90 30 130 0v-45M320 105v70"/><circle cx="320" cy="185" r="9" fill="currentColor"/>`,
+    shield: `<path d="M200 40l85 30v60c0 55-40 90-85 105-45-15-85-50-85-105V70z"/><path d="M160 135l30 30 55-60"/>`,
+    flask: `<path d="M175 45h50M185 45v60l-60 100c-6 12 2 25 15 25h120c13 0 21-13 15-25l-60-100V45"/><path d="M140 190h120"/><circle cx="185" cy="205" r="7" fill="currentColor"/><circle cx="220" cy="195" r="5" fill="currentColor"/>`
+  };
+  const SHOW = {
+    heart: () => heart(145, 100, 1.6) + heart(255, 100, 1.6) + `<path d="M160 200q40 35 80 0"/>`,
+    star: () => `<polygon points="${star(145, 105, 48)}" fill="currentColor" stroke="none"/><polygon points="${star(255, 105, 48)}" fill="currentColor" stroke="none"/><path d="M155 190q45 50 90 0z" fill="currentColor"/>`,
+    wink: () => `<path d="M115 110q30-35 60 0"/><rect x="232" y="62" width="46" height="96" rx="16" fill="currentColor" stroke="none"/><path d="M150 195q50 40 100 0"/>`,
+    dizzy: () => `<g class="nfs-spin"><path d="${spiral(145, 105)}" stroke-width="9"/></g><g class="nfs-spin"><path d="${spiral(255, 105)}" stroke-width="9"/></g><path d="M140 210q15-15 30 0t30 0t30 0t30 0" stroke-width="10"/>`,
+    question: () => `<circle cx="145" cy="110" r="20" fill="currentColor" stroke="none"/><rect x="232" y="60" width="46" height="100" rx="16" fill="currentColor" stroke="none"/><path d="M150 210l25-12 25 12 25-12 25 12" stroke-width="10"/>` + txt(335, 105, 90, "?", 'class="nfs-bob"'),
+    wow: () => `<circle cx="145" cy="105" r="40" stroke-width="12"/><circle cx="255" cy="105" r="40" stroke-width="12"/><circle cx="145" cy="105" r="14" fill="currentColor"/><circle cx="255" cy="105" r="14" fill="currentColor"/><ellipse cx="200" cy="205" rx="22" ry="26" stroke-width="12"/>`,
+    loading: () => `<g class="nfs-spin"><circle cx="200" cy="136" r="70" stroke-dasharray="140 300" stroke-width="16"/></g><circle cx="200" cy="136" r="70" stroke-width="16" opacity=".18"/>`,
+    check: () => `<circle cx="200" cy="136" r="92" stroke-width="12"/><path class="nfs-draw" d="M150 140l35 35 70-80" stroke-width="18"/>`,
+    eq: () => Array.from({ length: 11 }, (_, i) => `<rect class="nfs-eq" style="animation-delay:${(-i * .13).toFixed(2)}s" x="${68 + i * 25}" y="76" width="14" height="120" rx="7" fill="currentColor" stroke="none"/>`).join(""),
+    dots: () => [150, 200, 250].map((x, i) => `<circle class="nfs-bob" style="animation-delay:${i * .15}s" cx="${x}" cy="136" r="18" fill="currentColor" stroke="none"/>`).join(""),
+    clock: () => `<circle cx="200" cy="136" r="95" stroke-width="12"/><path d="M200 136v-50" stroke-width="14"/><g class="nfs-spin" style="animation-duration:1.6s"><path d="M200 136h70" stroke-width="10"/></g><circle cx="200" cy="136" r="10" fill="currentColor"/>`,
+    music: () => `<g class="nfs-bob"><ellipse cx="150" cy="190" rx="26" ry="20" fill="currentColor" stroke="none"/><path d="M174 188V60l70-18v120"/><ellipse cx="220" cy="168" rx="26" ry="20" fill="currentColor" stroke="none"/></g><g class="nfs-bob" style="animation-delay:.3s"><ellipse cx="300" cy="150" rx="20" ry="15" fill="currentColor" stroke="none"/><path d="M318 148V70l25 15"/></g>`,
+    idea: () => `<path d="M200 50c-38 0-62 28-62 60 0 25 15 38 25 52 6 8 8 15 8 25h58c0-10 2-17 8-25 10-14 25-27 25-52 0-32-24-60-62-60z"/><path d="M175 210h50M182 235h36"/><g class="nfs-blink"><path d="M120 40l-15-15M280 40l15-15M95 110h-25M305 110h25"/></g>`,
+    logo: () => `<circle cx="200" cy="80" r="26" fill="currentColor" stroke="none" class="nfs-bob"/>` + txt(200, 175, 52, "NINTH MIND", 'letter-spacing="6"') + txt(200, 225, 26, "AI is the process.", 'opacity=".75" font-weight="400"'),
+    text: t => txt(200, 160, String(t).length > 8 ? 54 : 90, t),
+    hi: () => txt(200, 185, 150, "Hi!"),
+    num: n => txt(200, 70, 34, "LEVEL", 'letter-spacing="8" opacity=".75" font-weight="400"') + txt(200, 225, 160, +n || 1),
+    matrix: () => `<g class="nfs-scroll">${Array.from({ length: 9 }, (_, c) => Array.from({ length: 14 }, (_, r) => `<text x="${40 + c * 42}" y="${r * 38 - 260 + (c % 3) * 12}" font-size="30" fill="currentColor" stroke="none" opacity="${(.3 + ((c * 7 + r * 3) % 7) / 10).toFixed(2)}">${(c * 5 + r * 3) % 2}</text>`).join("")).join("")}</g>`,
+    battery: () => `<rect x="105" y="85" width="180" height="100" rx="16" stroke-width="12"/><rect x="290" y="115" width="14" height="40" rx="4" fill="currentColor"/><rect class="nfs-fill" x="120" y="100" width="150" height="70" rx="8" fill="currentColor" stroke="none"/>`,
+    sun: () => `<circle cx="200" cy="136" r="48" fill="currentColor" stroke="none"/><g class="nfs-spin" style="animation-duration:6s"><path d="M200 50v-25M200 222v25M114 136h-25M286 136h25M139 75l-17-17M261 197l17 17M261 75l17-17M139 197l-17 17"/></g>`,
+    moon: () => `<path d="M235 50a90 90 0 1 0 50 150 75 75 0 1 1-50-150z" fill="currentColor" stroke="none"/><polygon points="${star(120, 70, 14)}" fill="currentColor" stroke="none" class="nfs-blink"/>`,
+    services: () => Object.values(ICON).map((g, i) => `<g class="nfs-cycle" style="animation-delay:${(i * .7).toFixed(1)}s">${g}</g>`).join(""),
+    chart: () => ICON.chart, cap: () => ICON.cap, shield: () => ICON.shield, bolt: () => ICON.bolt, flask: () => ICON.flask
+  };
+  function show(f, kind, ms = 2400, arg) {
+    if (!f || !f._showEl) return;
+    clearTimeout(f._showT);
+    if (kind === "glitch") { f.classList.add("is-glitch"); f._showT = setTimeout(() => f.classList.remove("is-glitch"), ms || 600); return; }
+    if (!kind || !SHOW[kind]) { delete f.dataset.show; return; }
+    f._showEl.innerHTML = `<svg viewBox="0 0 400 272" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SHOW[kind](arg)}</svg>`;
+    f.dataset.show = kind;
+    if (ms) f._showT = setTimeout(() => { if (f.dataset.show === kind) delete f.dataset.show; }, ms);
+  }
+  const SCREENS = ["heart", "star", "wink", "idea", "logo", "chart", "matrix", "music", "cap", "shield", "hi", "services", "glitch", "wow"];
   function mount(el, kind) {
     el.innerHTML = kind === "screen" ? SCREEN : HTML;
     const f = el.querySelector(".nf");
     f._lx = 0; f._ly = 0; f._energy = 0; f._bars = [...f.querySelectorAll(".nf-mouth i")];
+    f._showEl = f.querySelector(".nf-show");
     all.push(f); blinkLater(f);
     return f;
   }
@@ -1353,7 +1437,8 @@ const Faces = (() => {
       let tx = px, ty = py;
       if (f._lookAt && f._lookAt.isConnected) { const b = f._lookAt.getBoundingClientRect(); tx = b.left + b.width / 2; ty = b.top + b.height / 2; }
       else if (t - lastMove > 3500 && !reduce) { tx = cx + Math.sin(t / 1900 + r.left) * W * .35; ty = cy + Math.cos(t / 2600) * H * .18; }
-      let lx = Math.max(-1, Math.min(1, (tx - cx) / (W * .4))), ly = Math.max(-1, Math.min(1, (ty - cy) / (H * .45)));
+      const reach = f.classList.contains("nf-screen") ? .32 : .4;   // Photo Nine follows the pointer more keenly
+      let lx = Math.max(-1, Math.min(1, (tx - cx) / (W * reach))), ly = Math.max(-1, Math.min(1, (ty - cy) / (H * .45)));
       if (f._force) { lx = f._force.x; ly = f._force.y; }
       f._lx += (lx - f._lx) * .1; f._ly += (ly - f._ly) * .1;
       f.style.setProperty("--lx", f._lx.toFixed(3)); f.style.setProperty("--ly", f._ly.toFixed(3));
@@ -1382,6 +1467,7 @@ const Faces = (() => {
     },
     bump(f) { f._energy = 1; },
     force(f, v) { f._force = v || null; },
+    show, SCREENS,
     blink
   };
 })();
@@ -1448,6 +1534,8 @@ const Photo = (() => {
   }
   const turnReady = () => TURN && turnImgs.length === TURN.frames && turnImgs.every(im => im.complete && im.naturalWidth);
   addEventListener("load", () => setTimeout(loadTurn, 1200));
+  // actions that also put something on the display
+  const SCREEN_FOR = { dance: "music", watch: "clock", celebrate: "star", juggle: "services", hiccup: "glitch", sneeze: "glitch", trip: "dizzy", shrug: "question", stretch: "battery", bow: "heart", tap: "dots", kick: "wow", jump: "wow" };
   const all = [];
   function quadMatrix(pts) {
     const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = pts;
@@ -1484,6 +1572,7 @@ const Photo = (() => {
       },
       act(a, ms) {
         if (a === "spin" && el.dataset.pose === "stand" && c.turn && c.turn()) return;
+        if (SCREEN_FOR[a]) Faces.show(face, SCREEN_FOR[a], ms || 2200);
         clearTimeout(actT); el.dataset.act = a || ""; el.dataset.move = el.dataset.pose === "stand" ? (MOVES[a] ?? "") : "";
         if (ms) actT = setTimeout(() => { if (el.dataset.act === a) { el.dataset.act = ""; el.dataset.move = ""; } }, ms);
       },
@@ -1510,7 +1599,7 @@ const Photo = (() => {
       const step = t => {
         const i = Math.min(n - 1, (t - t0) / 1000 * TURN.fps);
         draw(i);
-        if (i < n - 1) raf = requestAnimationFrame(step); else setTimeout(() => { if (!drag) el.classList.remove("is-turning"); }, 80);
+        if (i < n - 1) raf = requestAnimationFrame(step); else setTimeout(() => { if (!drag) { el.classList.remove("is-turning"); if (Math.random() < .5) Faces.show(face, "dizzy", 1600); } }, 80);
       };
       raf = requestAnimationFrame(step);
       return (n - from) / TURN.fps * 1000;
@@ -1709,6 +1798,8 @@ const Nine = (() => {
     root.dataset.state = s;
     faceLabel.textContent = s === "listening" ? "Listening…" : s === "thinking" ? "Thinking…" : "";
     Faces.mood(asFace, s === "thinking" || s === "listening" ? s : moodNow);
+    if (s === "thinking") Faces.show(asFace, "loading", 0); else if (s === "listening") Faces.show(asFace, "eq", 0);
+    else if (asFace.dataset.show === "loading" || asFace.dataset.show === "eq") Faces.show(asFace, null);
     if (asBody.pose === "stand") asBody.act(s === "thinking" ? "think" : s === "listening" ? "listen" : s === "speaking" ? (moodNow === "happy" ? "wave" : "talk") : "");
   }
   let voice = null;
@@ -1887,6 +1978,7 @@ const Nine = (() => {
     step = "level-next"; remember(levelGap);
     const a = LEVELS[S.levelNow - 1], b = LEVELS[S.levelGoal - 1];
     if (a !== b) say(`So that's a move from level ${a.n}, ${a.name}, to level ${b.n}, ${b.name}.`);
+    Faces.show(asFace, "num", 3200, b.n);
     say(b.text);
     say(`Where we come in: ${b.role}`);
     ask("Would you like our team to help you plan it?", { options: [["Yes, let's plan it", "plan"], ["Back to the start", "home"]] });
@@ -1925,6 +2017,7 @@ const Nine = (() => {
   }
   function finish() {
     step = "finished";
+    Faces.show(asFace, "heart", 3500);
     say(`Thank you, ${first()}. I've sent this to the team, and someone will contact you at ${S.email}.`, { mood: "happy", gesture: "celebrate" });
     say({ html: `You can also reach our Managing Director, Anup Tabe, at <a href="mailto:anup.tabe@ninthmind.ai">anup.tabe@ninthmind.ai</a>.`, speak: "You can also reach our Managing Director, Anup Tabe, by email." }, { mood: "happy" });
     ask("Is there anything else I can help with?", { options: [["Back to the website", "close"], ["Start a new conversation", "reset"]] });
@@ -1932,6 +2025,7 @@ const Nine = (() => {
 
   function handle(t) {
     if (asBody.pose === "stand") asBody.act("nod", 900);   // Nine acknowledges every answer
+    Faces.show(asFace, "check", 900);
     switch (step) {
       case "menu":
         if (t === "m:project") { route = "project"; return next(); }
@@ -2031,7 +2125,7 @@ const Nine = (() => {
     if (cur.options) {
       const o = matchOption(t, cur.options, cur.free);
       if (o) { lastAnswer = t; hideAnswer(); return handle(o[1] ?? o[0]); }
-      if (!cur.free) { lastAnswer = t; return ask("Sorry, I didn't catch which one you meant. Choose one of these, or say it another way.", { options: cur.options, gesture: "shrug" }); }
+      if (!cur.free) { lastAnswer = t; Faces.show(asFace, "question", 2200); return ask("Sorry, I didn't catch which one you meant. Choose one of these, or say it another way.", { options: cur.options, gesture: "shrug" }); }
     }
     lastAnswer = t; hideAnswer(); handle(t);
   }
@@ -2201,6 +2295,7 @@ function autopilot(c, opt) {
       else if (idle > 20000) { if (c.pose === "stand" && !/walk|run/.test(c.el.dataset.act)) { c.act(""); c.setPose("sit"); napping = true; if (opt.talks) c.say(pickOne(LINES.sit)); } wait = 2000; }
       else if (c.pose === "stand" && !c.el.dataset.act) {
         const list = ACTIONS.slice();
+        if (c.face.classList.contains("nf-screen")) list.push(["screen", 2600, 2.2]);
         if (opt.host) list.push(["walk", 0, 5], ["run", 0, 1], ["sit", 6500, .6], ["moon", 0, .5], ["chase", 0, .6], ["peek", 0, .4]);
         const [a, ms] = weighted(list);
         let dur = ms;
@@ -2227,6 +2322,7 @@ function autopilot(c, opt) {
           dur = t1 + 900 + 2300 + 2500;
         }
         else if (a === "quote") { c.act("think", 1200); line("quote"); }
+        else if (a === "screen") { const k = pickOne(Faces.SCREENS); Faces.show(c.face, k, ms); if (k === "heart" || k === "star") happyFor(ms); }
         else if (a === "look") look();
         else if (a === "sit") { c.setPose("sit"); setTimeout(() => { if (!napping && c.pose === "sit") { c.setPose("stand"); c.act("stretch", 1200); } }, ms); }
         else {
@@ -2257,7 +2353,7 @@ const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const walkerHost = document.createElement("div");
 walkerHost.className = "nm-walker is-hidden"; walkerHost.setAttribute("aria-hidden", "true");
 document.body.appendChild(walkerHost);
-const walker = Bodies.mount(walkerHost);
+const walker = Photo.mount(walkerHost);
 walker.el.title = "Talk to Nine";
 walker.el.addEventListener("click", () => Nine.open({}));
 let heroInView = true, walkerOn = false;
@@ -2293,6 +2389,55 @@ checkHero();
 document.addEventListener("nine:toggle", syncWalker);
 addEventListener("resize", () => { if (walkerPilot.x > innerWidth - 60) walkerPilot.place(innerWidth - 120, 0); });
 setTimeout(() => { heroNine.act("wave", 2400); Faces.mood(heroNine.face, "happy"); setTimeout(() => Faces.mood(heroNine.face, "idle"), 2400); }, 900);
+/* ---------- Nine follows the pointer ----------
+   Mini Nine glides along the bottom toward wherever the pointer rests; every Nine's head and eyes track it. */
+let ptrX = innerWidth / 2, ptrStill = 0;
+addEventListener("pointermove", e => { ptrX = e.clientX; ptrStill = performance.now(); }, { passive: true });
+setInterval(() => {
+  if (!walkerOn || walker.pose !== "stand" || walker.el.dataset.act || walker.el.classList.contains("is-turning")) return;
+  const w = walker.el.offsetWidth || 120, target = Math.max(16, Math.min(innerWidth - w - 16, ptrX - w / 2));
+  if (performance.now() - ptrStill > 500 && Math.abs(target - walkerPilot.x) > 160) walkerPilot.walkTo(target, () => Faces.show(walker.face, "wink", 1200), 220);
+}, 700);
+
+/* ---------- Nine reacts to the page ---------- */
+const photoNines = [heroNine, walker, asBody];
+const visibleNine = () => (nineOpen() ? asBody : heroInView ? heroNine : walker);
+const flash = (kind, ms, arg) => Faces.show(visibleNine().face, kind, ms, arg);
+// a greeting for the time of day
+setTimeout(() => { const h = new Date().getHours(); flash("text", 2600, h < 12 ? "Morning!" : h < 17 ? "Afternoon!" : "Evening!"); }, 3400);
+// light and dark mode: a sun or a moon
+document.querySelectorAll("[data-theme-toggle]").forEach(b => b.addEventListener("click", () => {
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  photoNines.forEach(n => Faces.show(n.face, dark ? "moon" : "sun", 2000));
+}));
+// hovering a service area shows its symbol (Advise, Build, Train, Govern, Research)
+const AREA_ICON = ["chart", "bolt", "cap", "shield", "flask"];
+document.addEventListener("pointerover", e => {
+  const t = e.target.closest && e.target.closest(".nm-tile, .nm-card, .nm-rung");
+  if (!t || t === document._nineHover) return;
+  document._nineHover = t;
+  if (t.classList.contains("nm-rung")) flash("num", 1800, t.dataset.n);
+  else { const i = t.classList.contains("nm-tile") ? +t.dataset.n - 1 : +t.dataset.s; if (AREA_ICON[i]) flash(AREA_ICON[i], 1800); }
+});
+// copying text, coming back to the tab, scrolling very fast, clicking around
+document.addEventListener("copy", () => { flash("check", 1400); visibleNine().say("Copied!", 1400); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { const n = visibleNine(); flash("text", 2200, "Hi again!"); if (n.pose === "stand") n.act("wave", 1800); } });
+let lastY = scrollY, lastT = performance.now(), dizzyAt = 0;
+addEventListener("scroll", () => {
+  const t = performance.now(), v = Math.abs(scrollY - lastY) / Math.max(16, t - lastT);
+  lastY = scrollY; lastT = t;
+  if (v > 6 && t - dizzyAt > 6000) { dizzyAt = t; flash("dizzy", 1600); }
+}, { passive: true });
+document.addEventListener("click", e => {
+  if (e.target.closest(".np, .nm-as, a, button, input, textarea")) return;
+  const dot = document.createElement("i"); dot.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:1px;height:1px;pointer-events:none`;
+  document.body.appendChild(dot);
+  const n = visibleNine(); Faces.lookAt(n.face, dot); if (Math.random() < .35) Faces.show(n.face, "wow", 900);
+  setTimeout(() => { Faces.lookAt(n.face, null); dot.remove(); }, 1300);
+});
+// a long hover on Nine earns a heart
+photoNines.forEach(n => { let t = 0; n.el.addEventListener("pointerenter", () => { t = setTimeout(() => Faces.show(n.face, "heart", 1800), 2200); }); n.el.addEventListener("pointerleave", () => clearTimeout(t)); });
+
 // once she has waved, Nine shows off a full turn (when the 360 frames have loaded)
 setTimeout(() => { if (heroInView && !nineOpen() && heroNine.pose === "stand") heroNine.turn(); }, 6500);
 

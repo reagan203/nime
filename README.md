@@ -26,3 +26,7 @@ All free and open models, run locally on a 6 GB laptop GPU:
 | Turn frames cut out for the web | `turn_frames.py` | BiRefNet-lite (MIT) |
 
 The person in the body photo is AI-generated and fictional. The display head is an original design.
+
+## Documentation
+
+How everything in the site was made is in [docs/](docs/README.md).
