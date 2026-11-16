@@ -1525,7 +1525,7 @@ const Photo = (() => {
     spin: "shake", sneeze: "jerk", trip: "jerk", bow: "nod", tap: "nod", nod: "nod", stretch: "roll", yawn: "roll", think: "think",
     listen: "listen", talk: "talk", shrug: "shrug", watch: "down", look: "", point: "" };
   // the 360 turn, rendered with Wan 2.2 and cut out with BiRefNet (set to null if the frames are missing)
-  const TURN = { frames: 81, fps: 24, src: "assets/nine/turn/f{i}.webp" };
+  const TURN = { frames: 161, fps: 24, src: "assets/nine/turn/f{i}.webp" };
   const reduceTurn = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const turnImgs = [];
   function loadTurn() {

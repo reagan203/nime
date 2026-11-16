@@ -70,7 +70,7 @@ python export_web.py <website folder>
 
 - The prompt is encoded once on the processor, and then the 11 GB text encoder is dropped.
 - `enable_sequential_cpu_offload()` moves each layer onto the graphics card only while it runs, so the 5-billion-parameter model fits in 6 GB. One clip takes about 25–30 minutes.
-- The first clip (front to back) starts from `nine_green.png`. The second (back to front, the same way round) starts from the first clip's last frame. Together they make the full turn.
+- The first clip (front to back) starts from `nine_green.png`. The second starts from the first clip's last frame and keeps turning the same way round. Its first half (her back to her other side) is good; after that the model drifts (the monitor turns into a flat panel), so only frames 0–46 are used.
 
 ```bash
 python wan_clip.py <Wan folder> turn "<prompt>" 81 30
@@ -80,7 +80,14 @@ NINE_IMG=clips/turn/frame_080.png python wan_clip.py <Wan folder> turn2 "<prompt
 `turn_frames.py` cuts every frame out with BiRefNet, removes anything still plainly green and the green tint at the edges, and saves transparent WebP frames for the site.
 
 ```bash
-python turn_frames.py <BiRefNet folder> clips/turn <website>/assets/nine/turn
+python turn_frames.py <BiRefNet folder> clips/turn clips/turn_web
+python turn_frames.py <BiRefNet folder> clips/turn2 clips/turn2_web
+```
+
+`join_turn.py` makes the full 360 (161 frames) from them: clip 1 (front, her side, back), then clip 2 up to her other side, then clip 1's first quarter **mirrored and played backwards** (her other side back to the front). It picks the join between true side views where the silhouettes overlap most, ramps clip 2's colours toward clip 1 (clip 2 renders a little darker), and cross-fades five frames across the join.
+
+```bash
+python join_turn.py <website>/assets/nine/turn
 ```
 
 ## Problems met, and the fixes
@@ -91,5 +98,7 @@ python turn_frames.py <BiRefNet folder> clips/turn <website>/assets/nine/turn
 | Wan ran out of graphics memory with group offloading | Sequential offload, and encode the prompt on the processor first |
 | Wan's pipeline wanted the `ftfy` package | The prompts are plain text, so the clean-up step is replaced with a no-op in the script |
 | The depth-map cut-out left a ghost where the old head was | BiRefNet instead |
-| One 81-frame clip only turned her halfway | A second clip from her back to the front |
+| One 81-frame clip only turned her halfway | A second clip from her back onward |
+| The second clip drifted at the end (flat-panel monitor) | Keep its good half; finish the turn with the first clip mirrored and reversed |
+| Joining on silhouette alone matched a back view to a front view | Search only side-profile frames for the join |
 | Blender wrote the render to the wrong folder | Always pass a full output path |
