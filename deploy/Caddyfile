@@ -1,0 +1,9 @@
+# HTTPS for both addresses; the bare domain redirects to www.
+ninthmind.ai {
+	redir https://www.ninthmind.ai{uri} permanent
+}
+
+www.ninthmind.ai {
+	encode zstd gzip
+	reverse_proxy web:3000
+}

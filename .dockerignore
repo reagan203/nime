@@ -1,0 +1,17 @@
+node_modules
+dist
+.data
+.env
+.env.*
+!.env.example
+.git
+legacy
+brand
+pipeline
+tests
+docs
+*.blend
+*.blend1
+__pycache__
+.venv
+nine-artwork-brief.md

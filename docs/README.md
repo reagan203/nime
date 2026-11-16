@@ -5,6 +5,7 @@ This folder explains how everything in the site was built, so anyone can change 
 | Page | What it covers |
 |---|---|
 | [website.md](website.md) | The page itself: sections, where the words come from (the Sources switch), light and dark mode, phones and tablets |
+| [deploy.md](deploy.md) | Putting it live on ninthmind.ai: the server, GoDaddy DNS, HTTPS, email and backups |
 | [nine-chat.md](nine-chat.md) | Nine's conversation: the questions, what happens when someone says no, commands, voice, waiting, and how the answers are emailed |
 | [nine-avatar.md](nine-avatar.md) | Nine on the page: the layers, the live screen face and everything it can show, following the pointer, actions, page reactions and the 360 turn |
 | [making-nine.md](making-nine.md) | How Nine's images and video were produced with free models on a laptop, step by step, with commands |

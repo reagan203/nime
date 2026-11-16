@@ -37,6 +37,10 @@ bun run start        # serves dist/ with server.ts on $PORT (default 3000)
 
 Without an email service configured, development writes each email to `.data/outbox/` instead of sending it. Production refuses to pretend: it reports the failure to the visitor and offers retry or their own email app. Every lead is also appended to `.data/leads.jsonl`.
 
+## Going live
+
+The domain stays at GoDaddy and points to a small server running the site behind Caddy (automatic HTTPS). Step by step, including the DNS records and email setup: [docs/deploy.md](docs/deploy.md). The short version, on the server: `cp .env.example .env`, fill it in, then `cd deploy && docker compose up -d --build`.
+
 ## Checks
 
 ```sh
@@ -61,6 +65,7 @@ REPORT_KEY=… BASE_URL=http://localhost:3000 bun tests/e2e/chat.e2e.ts   # conv
 | `public/assets/` | Nine's images and the 360 turn frames, the logo and Anup Tabe's photo |
 | `brand/` | The full-size logo (not served) |
 | `pipeline/` | How Nine's images were made (run with `public` as the site folder) |
+| `Dockerfile`, `deploy/` | The production image, and Caddy + Docker Compose for a server |
 | `legacy/mock.html` | The original single-file mock, for reference |
 
 How everything was made, and how Nine works, is in [docs/](docs/README.md).

@@ -1,0 +1,33 @@
+# The site behind Caddy, which gets and renews the HTTPS certificates by itself.
+# On the server, from this folder:   docker compose up -d --build
+services:
+  web:
+    build: ..
+    restart: unless-stopped
+    env_file: ../.env
+    environment:
+      TRUST_PROXY: "true"            # Caddy passes the visitor's real address
+      CANONICAL_HOST: www.ninthmind.ai
+    volumes:
+      - data:/app/.data
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  data:
+  caddy_data:
+  caddy_config:

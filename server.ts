@@ -13,6 +13,9 @@ const CLIENT = join(import.meta.dir, "dist", "client");
 const port = Number(process.env.PORT || 3000);
 // behind a proxy (nginx, a load balancer) that sets X-Forwarded-For, set TRUST_PROXY=true
 const trustProxy = process.env.TRUST_PROXY === "true";
+// the one address the site answers on (e.g. www.ninthmind.ai): other hosts pointed here, like the bare
+// ninthmind.ai, get a permanent redirect so search engines see a single site
+const canonicalHost = (process.env.CANONICAL_HOST || "").toLowerCase();
 
 const COMPRESSIBLE = /^(text\/|application\/(javascript|json|xml|manifest\+json)|image\/svg\+xml)/;
 const SECURITY: Record<string, string> = {
@@ -58,6 +61,15 @@ const server = Bun.serve({
   port,
   async fetch(req, srv) {
     const url = new URL(req.url);
+    const host = (req.headers.get("host") || url.host).toLowerCase();
+    // for the host's health checks, which call by IP address and must not be redirected
+    if (url.pathname === "/healthz") return new Response("ok", { headers: { "Content-Type": "text/plain", "Cache-Control": "no-store" } });
+    const https = url.protocol === "https:" || req.headers.get("x-forwarded-proto") === "https";
+    if (canonicalHost && host !== canonicalHost && !/^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host)) {
+      return new Response(null, { status: 301, headers: { Location: `https://${canonicalHost}${url.pathname}${url.search}` } });
+    }
+    // once the site is served over HTTPS, browsers are told to keep using it
+    if (https) SECURITY["Strict-Transport-Security"] ??= "max-age=31536000";
     if (req.method === "GET" || req.method === "HEAD") {
       let path = "";
       try { path = normalize(decodeURIComponent(url.pathname)).replace(/^[\\/]+/, ""); } catch { /* a malformed URL is not a file */ }
