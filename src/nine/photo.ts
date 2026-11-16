@@ -3,10 +3,16 @@
    mapped onto the glass with a perspective transform; a 360 turn plays from
    rendered video frames and can be dragged by hand. */
 import { getFaces, type FaceEl } from "./faces";
+import { attachLiveBody } from "./livebody";
 
 const SRC = "/assets/nine/photo/";
-// from pipeline/export_web.py (nine.json): screen corners as fractions of the head image
-const QUAD = { tl: [0.0454, 0.0601], tr: [0.7727, 0.0449], br: [0.7715, 0.5638], bl: [0.0408, 0.5631] } as const;
+// The rig: where the head sits on the body, its pivot, and the screen's corners as fractions of
+// the head image. Written by the pipeline (pipeline/export_head.ts), so a new render lines up by itself.
+import rig from "../../public/assets/nine/photo/nine.json";
+const QUAD = rig.head.screen as Record<"tl" | "tr" | "br" | "bl", number[]>;
+const pc = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
+const PIVOT = `${(rig.head.pivot[0] * 100).toFixed(2)}% ${(rig.head.pivot[1] * 100).toFixed(2)}%`;
+const HEAD_BOX = `left:${pc(rig.head.x, rig.frame[0])};top:${pc(rig.head.y, rig.frame[1])};width:${pc(rig.head.w, rig.frame[0])};height:${pc(rig.head.h, rig.frame[1])};transform-origin:${PIVOT}`;
 const SW = 400, SH = 272;
 
 // the site's actions mapped to what a photo with a moving head can do
@@ -47,8 +53,8 @@ export function photoMarkup(priority = false) {
   const p = priority ? ' fetchpriority="high"' : ' loading="lazy"';
   return `<div class="np" data-pose="stand" data-act="" data-move=""><div class="np-clip"><div class="np-stage">
       <img class="np-body" src="${SRC}body.webp" alt="" width="896" height="1233" draggable="false" decoding="async"${p}>
-      <div class="np-head"><div class="np-neck"><div class="np-act">
-        <img src="${SRC}head.webp" alt="" width="594" height="583" draggable="false" decoding="async"${p}><div class="np-screen"></div>
+      <div class="np-head" style="${HEAD_BOX}"><div class="np-neck" style="transform-origin:${PIVOT}"><div class="np-act" style="transform-origin:${PIVOT}">
+        <img src="${SRC}head.webp" alt="" width="${rig.head.w}" height="${rig.head.h}" draggable="false" decoding="async"${p}><div class="np-screen"></div>
       </div></div></div>
       <canvas class="np-turn" aria-hidden="true"></canvas>
       <div class="nb-zzz"><i>z</i><i>z</i><i>Z</i></div>
@@ -164,6 +170,7 @@ export function mountPhoto(slot: HTMLElement): NineFigure {
   el.addEventListener("click", e => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
   el.classList.add("can-turn");
 
+  attachLiveBody(c);   // the suit breathes and moves with her (WebGL; the photo stays if unavailable)
   all.push(c);
   if (!following) {
     following = true;

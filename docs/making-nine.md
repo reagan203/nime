@@ -102,3 +102,23 @@ python join_turn.py <website>/assets/nine/turn
 | The second clip drifted at the end (flat-panel monitor) | Keep its good half; finish the turn with the first clip mirrored and reversed |
 | Joining on silhouette alone matched a back view to a front view | Search only side-profile frames for the join |
 | Blender wrote the render to the wrong folder | Always pass a full output path |
+
+## Version 2 of the head and neck (2026-11)
+
+`display_head.py` now adds more mechanical definition and renders at 2000 px (was 1400):
+
+- **Head:** a parting seam around the shell, cooling fins on both sides, hex screws in the bezel corners, and a camera module with an indicator light on the top bezel.
+- **Neck:** a toothed gear ring around the gimbal, two blue-grey anodised servo motors with output horns, screws and chrome links to the ball joint, ribs around every vertebra, knurled rings and end caps on the three pistons, a knurled grip band and three status lights on the collar, and a second (dark) cable spiralling the other way.
+- A soft light from below and in front lifts the neck's mechanics out of the shadow.
+
+```bash
+blender --background --factory-startup --python display_head.py -- D:/full/path/head -9 256 2000
+```
+
+`export_head.ts` places a new head render onto the existing body without needing the original body files or Python imaging: it scales the render so the collar is as wide as before, puts the collar where it was, crops it, saves `head.webp` at twice the display size, and rewrites the head box, pivot and screen corners in `nine.json`. The site reads those from `nine.json`, so the face lines up with any new render.
+
+```bash
+bun pipeline/export_head.ts D:/full/path/head          # writes public/assets/nine/photo/
+```
+
+The 360 turn frames were made with the first head; making them again needs the video model (step 6).

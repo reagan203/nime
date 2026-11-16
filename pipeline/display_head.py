@@ -2,7 +2,7 @@
 (graphite aluminium, satin bezel, curved glass with specks, blue light strip, screws, vents,
 ports, braided cables into a neck collar). Renders a transparent PNG for compositing onto
 the photographic body, plus the screen's corners for a live face.
-Run: blender --background --factory-startup --python display_head.py -- <out_dir> [yaw_deg] [samples]
+Run: blender --background --factory-startup --python display_head.py -- <out_dir> [yaw_deg] [samples] [resolution]
 """
 import bpy, bmesh, math, os, sys, json
 from mathutils import Vector
@@ -202,6 +202,80 @@ for k, start in enumerate(plug_pts):
     ob = bpy.data.objects.new(f"cable{k}", cu); ob.data.materials.append(rubber)
     scene.collection.objects.link(ob); parts.append(ob)
 
+# ------------------------------------------------------------------ v2: more mechanical definition
+# Head: a parting seam, side cooling fins, hex screws in the bezel corners, a camera module.
+# Neck: a toothed gear ring at the gimbal, two servo motors with linkages, ribbed vertebrae,
+# knurled rings on the pistons, status lights and a knurled grip on the collar, a second cable.
+def add(o): parts.append(o); return o
+anod, nt, b = principled("anodised_metal")             # blue-grey anodised aluminium, so the mechanics read against the dark head
+b.inputs["Base Color"].default_value = (0.11, 0.15, 0.21, 1); b.inputs["Metallic"].default_value = 1.0
+noise_into(nt, b.inputs["Roughness"], 300, 0.28, 0.38); bump(nt, b, 1200, 0.02)
+def radial(name, n, radius, z, size, mat, y0=Y0, phase=0.0, bevel=0.001):
+    for k in range(n):
+        a = phase + 2 * math.pi * k / n
+        o = add(rounded_box(f"{name}{k}", *size, bevel, 2, mat, (math.cos(a) * radius, y0 + math.sin(a) * radius, z)))
+        o.rotation_euler = (0, 0, a)
+
+# parting seam around the shell (a dark line where front and back halves meet)
+add(rounded_box("seam", W + 0.0016, 0.0028, H + 0.0016, 0.028, 8, gasket, (0, 0.014, 0)))
+# side cooling fins
+for sx in (-1, 1):
+    for i in range(7):
+        add(rounded_box(f"fin{sx}_{i}", 0.0042, D * 0.46, 0.0042, 0.0016, 2, bezel, (sx * (W / 2 + 0.0016), 0.028, H * 0.3 - i * 0.021)))
+# hex screws in the four bezel corners
+for sx in (-1, 1):
+    for sz in (-1, 1):
+        cyl(f"bezel_screw{sx}{sz}", 0.0034, 0.003, (sx * W * 0.452, -D / 2 - 0.0108, sz * H * 0.425), steel, rot=(math.radians(90), 0, 0), verts=6)
+# camera module and its indicator, centred on the top bezel
+cyl("cam_ring", 0.0058, 0.003, (0, -D / 2 - 0.0106, H * 0.447), steel, rot=(math.radians(90), 0, 0), bevel=0.0006)
+cyl("cam_lens", 0.0036, 0.004, (0, -D / 2 - 0.0112, H * 0.447), glass, rot=(math.radians(90), 0, 0))
+cyl("cam_led", 0.0013, 0.003, (0.012, -D / 2 - 0.0108, H * 0.447), led, rot=(math.radians(90), 0, 0), verts=16)
+
+# toothed gear ring around the gimbal cup
+cyl("gear_hub", 0.033, 0.008, (0, Y0, TOP - 0.042), anod, bevel=0.001)
+radial("gear_tooth", 30, 0.0352, TOP - 0.042, (0.0042, 0.005, 0.0075), anod)
+# two servo motors either side of the gimbal, with output horns and links to the ball
+for sx in (-1, 1):
+    cx = sx * 0.062
+    add(rounded_box(f"servo{sx}", 0.026, 0.032, 0.024, 0.003, 3, anod, (cx, Y0 + 0.004, TOP - 0.034)))
+    add(rounded_box(f"servo_label{sx}", 0.0005, 0.018, 0.008, 0.0002, 1, led, (cx + sx * 0.0132, Y0 - 0.004, TOP - 0.03)))
+    cyl(f"servo_horn{sx}", 0.0085, 0.004, (cx + sx * 0.015, Y0 + 0.004, TOP - 0.034), steel, rot=(0, math.radians(90), 0), bevel=0.0008)
+    cyl(f"servo_hub{sx}", 0.003, 0.006, (cx + sx * 0.017, Y0 + 0.004, TOP - 0.034), chrome, rot=(0, math.radians(90), 0), verts=6)
+    for k in (-1, 1):
+        cyl(f"servo_screw{sx}{k}", 0.0018, 0.004, (cx, Y0 - 0.012, TOP - 0.034 + k * 0.008), steel, rot=(math.radians(90), 0, 0), verts=6)
+    between(f"servo_link{sx}", (cx - sx * 0.013, Y0 - 0.006, TOP - 0.03), (sx * 0.02, Y0 - 0.008, TOP - 0.03), 0.0026, chrome)
+# ribs around each vertebra
+zr = TOP - 0.056
+for i in range(4):
+    zr -= 0.008
+    radial(f"rib{i}_", 14, 0.04 - i * 0.0015 + 0.0012, zr, (0.0048, 0.0036, 0.0095), alu, phase=i * 0.12)
+    zr -= 0.011
+# knurled rings and end caps on the pistons
+for k, a in enumerate((205, 335, 90)):
+    ar = math.radians(a)
+    lo = Vector((math.cos(ar) * 0.054, Y0 + math.sin(ar) * 0.054, BASE + 0.036))
+    hi = Vector((math.cos(ar) * 0.047, Y0 + math.sin(ar) * 0.047, TOP - 0.013))
+    d = hi - lo; q = d.to_track_quat("Z", "Y")
+    for f in (0.12, 0.2, 0.5):
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.0082, minor_radius=0.0016, location=lo + d * f, major_segments=32, minor_segments=8)
+        t = add(bpy.context.active_object); t.name = f"piston_knurl{k}_{f}"; t.data.materials.append(steel)
+        t.rotation_mode = "QUATERNION"; t.rotation_quaternion = q
+    cap = between(f"piston_cap{k}", lo + d * 0.53, lo + d * 0.57, 0.0084, steel)
+# collar: a knurled grip band and three status lights at the front
+radial("collar_knurl", 72, 0.0712, BASE + 0.006, (0.0016, 0.0024, 0.0075), steel)
+for k, a in enumerate((255, 270, 285)):
+    ar = math.radians(a)
+    o = cyl(f"status_led{k}", 0.0022, 0.003, (math.cos(ar) * 0.0712, Y0 + math.sin(ar) * 0.0712, BASE + 0.024), led, verts=16)
+    o.rotation_mode = "QUATERNION"; o.rotation_quaternion = Vector((math.cos(ar), math.sin(ar), 0)).to_track_quat("Z", "Y")
+# a second, dark cable spiralling the other way
+cu = bpy.data.curves.new("spine_cable2", "CURVE"); cu.dimensions = "3D"; cu.bevel_depth = 0.0026; cu.bevel_resolution = 4
+sp = cu.splines.new("NURBS"); n = 24; sp.points.add(n - 1)
+for i, pt in enumerate(sp.points):
+    t = i / (n - 1); a = math.pi - t * math.pi * 2.5
+    pt.co = (math.cos(a) * 0.035, Y0 + math.sin(a) * 0.035, BASE + 0.04 + t * (TOP - 0.05 - BASE - 0.04), 1)
+sp.use_endpoint_u = True; sp.order_u = 4
+ob = bpy.data.objects.new("spine_cable2", cu); ob.data.materials.append(rubber); scene.collection.objects.link(ob); parts.append(ob)
+
 for p in parts: p.parent = root
 root.rotation_euler = (math.radians(-2), 0, math.radians(YAW))
 
@@ -215,6 +289,7 @@ area("key", 180, (0.9, -1.0, 0.75), (55, 0, 40), 1.4, (1, 0.97, 0.94))
 area("fill", 70, (-1.1, -0.8, 0.3), (75, 0, -55), 1.8, (0.92, 0.95, 1))
 area("rim", 140, (-0.4, 0.9, 0.7), (-55, 0, 200), 1.0, (0.85, 0.92, 1))
 area("top", 60, (0, -0.2, 1.1), (0, 0, 0), 1.6)
+area("neck_fill", 55, (0.15, -0.9, -0.45), (118, 0, 10), 0.9, (0.95, 0.97, 1))   # v2: lifts the neck's mechanics out of the shadow
 # large reflection cards (seen only in reflections) give the glass and metal studio highlights
 for i, (x, rz) in enumerate(((-1.05, -55), (1.05, 55))):
     bpy.ops.mesh.primitive_plane_add(size=1, location=(x, -1.1, 0.25), rotation=(math.radians(90), 0, math.radians(rz)))
@@ -241,7 +316,8 @@ try:
     scene.cycles.device = "GPU"
 except Exception as e:
     log("cpu", e)
-scene.render.resolution_x, scene.render.resolution_y = 1400, 1400
+RES = int(args[3]) if len(args) > 3 else 2000   # v2: 2000 px for more definition (was 1400)
+scene.render.resolution_x, scene.render.resolution_y = RES, RES
 scene.render.film_transparent = True
 scene.view_settings.view_transform = "AgX"; scene.view_settings.look = "AgX - Medium High Contrast"
 scene.render.image_settings.file_format = "PNG"; scene.render.image_settings.color_mode = "RGBA"

@@ -94,3 +94,17 @@ The turn is 161 frames, rendered with a video model and cut out frame by frame (
 - lets visitors **drag Nine sideways to spin her by hand** (one width of drag is about one full turn). Let go and she finishes the turn and faces you again. A drag never opens the chat; a plain click still does.
 
 While the turn plays, the photo layers fade out and the canvas fades in; when she faces front again they swap back and the live face returns.
+
+## The living suit
+
+`src/nine/livebody.ts` redraws the body photo every frame with a small WebGL shader, so her clothes move with her:
+
+| Effect | What it does |
+|---|---|
+| Breathing | The chest rises and widens slightly, anchored at the waist; faster while she talks |
+| Follow-through | When the head turns, the torso and jacket follow on a damped spring: they lag, overshoot a little and settle |
+| Fabric folds | Soft travelling folds in the jacket (found by its dark navy colour), stronger right after a nod, greeting or hop, then calming down |
+| Shoulders | Lift a little on the side she turns toward |
+| Definition | Gentle sharpening, a fine twill on the jacket, a softer weave on the shirt, and a sheen across the cloth that follows the light as she turns |
+
+It only runs while she's on screen. Without WebGL, or with reduced motion, the still photo is shown.
