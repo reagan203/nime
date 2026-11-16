@@ -1,0 +1,2335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ninth Mind · AI-Powered Business Transformation & Training</title>
+<meta name="description" content="Ninth Mind helps organisations become AI-first: advice, building and integration, training, governance and research. Nairobi, Kenya.">
+<meta name="theme-color" content="#0a6fb8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cline x1='32' y1='14' x2='32' y2='6' stroke='%232b2d31' stroke-width='3'/%3E%3Ccircle cx='32' cy='6' r='5' fill='%231d97dc'/%3E%3Crect x='8' y='14' width='48' height='44' rx='17' fill='%23ffffff' stroke='%23d8e0e9' stroke-width='2'/%3E%3Crect x='14' y='22' width='36' height='26' rx='11' fill='%23081a2b'/%3E%3Crect x='22' y='28' width='5' height='9' rx='2' fill='%23e3f7ff'/%3E%3Crect x='37' y='28' width='5' height='9' rx='2' fill='%23e3f7ff'/%3E%3C/svg%3E">
+<script>
+  /* Pick the theme before the page paints: saved choice, else the device setting. */
+  (function () {
+    var t = null; try { t = localStorage.getItem("nm-theme"); } catch (e) {}
+    if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Tokens: the only place colours are defined ---------- */
+  :root {
+    --ink: #1f2125;
+    --text: #2b2d31;
+    --text-muted: #5c636d;
+    --text-soft: #868d97;
+    --surface: #ffffff;
+    --sunken: #f4f6f8;
+    --line: #e2e6eb;
+    --grid: rgba(15, 35, 60, .06);
+    --accent: #0a6fb8;
+    --accent-hover: #085d9b;
+    --accent-fg: #0a6fb8;
+    --accent-light: #36b6ea;
+    --accent-quiet: #eaf4fb;
+    --accent-text: #ffffff;
+    --band-bg: #0e1620;
+    --band-text: #eef2f6;
+    --band-muted: #9aa7b5;
+    --as-bg: radial-gradient(1100px 700px at 72% 50%, #ffffff 0%, #eceff3 75%);
+    --shadow: 0 1px 2px rgba(20, 24, 31, .06), 0 2px 8px rgba(20, 24, 31, .04);
+    --shadow-lift: 0 10px 30px -12px rgba(20, 40, 70, .25);
+    --sheet-shadow: -8px 0 32px rgba(20, 24, 31, .12);
+    --scrim: rgba(20, 24, 31, .32);
+    --header-bg: rgba(255, 255, 255, .86);
+    --logo-filter: none;
+    --rung-text-hi: #ffffff;
+    --nb-limb: #2b2d31;
+    --suit: #1f2b3d;
+    --suit-hi: #34465f;
+    --suit-lo: #141c28;
+    --tie: #0a6fb8;
+    --tie-dark: #074f87;
+    --skin: #b07850;
+    --skin-shade: #8a5638;
+    --hair: #221a17;
+    --iris: #4a2e1f;
+    --lip: #7b3a31;
+    --shirt: #0a6fb8;
+    --shirt-2: #08599a;
+    --pants: #2b2d31;
+    --shoe: #1c1d20;
+    --nb-shell-1: #ffffff;
+    --nb-shell-2: #d8e0e9;
+    --nb-sole: #0a6fb8;
+    --nb-chest: #2b2d31;
+    --r-control: 10px;
+    --r-card: 18px;
+    --font: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --display: "Montserrat", "DM Sans", system-ui, sans-serif;
+    --max: 1200px;
+    --gutter: clamp(18px, 4vw, 28px);
+    color-scheme: light;
+  }
+  [data-theme="dark"] {
+    --ink: #eef0f3;
+    --text: #d9dce1;
+    --text-muted: #a3a9b2;
+    --text-soft: #7f8691;
+    --surface: #111317;
+    --sunken: #181b20;
+    --line: #2a2e35;
+    --grid: rgba(255, 255, 255, .045);
+    --accent: #1a7fc6;
+    --accent-hover: #2690dc;
+    --accent-fg: #62c0f0;
+    --accent-quiet: rgba(54, 182, 234, .12);
+    --band-bg: #0a1017;
+    --as-bg: radial-gradient(1100px 700px at 72% 50%, #1d222a 0%, #0d0f13 75%);
+    --shadow: none;
+    --shadow-lift: 0 10px 30px -12px rgba(0, 0, 0, .6);
+    --sheet-shadow: -8px 0 32px rgba(0, 0, 0, .45);
+    --scrim: rgba(0, 0, 0, .55);
+    --header-bg: rgba(17, 19, 23, .84);
+    --logo-filter: invert(1) hue-rotate(180deg) brightness(1.15);
+    --rung-text-hi: #eef0f3;
+    --nb-limb: #6f7a87;
+    --suit: #2c3c55;
+    --suit-hi: #475b7a;
+    --suit-lo: #1c2636;
+    --nb-shell-1: #eef2f6;
+    --nb-shell-2: #b4c0cc;
+    --nb-sole: #36b6ea;
+    --nb-chest: #2b2d31;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: var(--font); font-size: 16px; line-height: 1.6; color: var(--text); background: var(--surface); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  img, svg { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+  button { -webkit-tap-highlight-color: transparent; }
+  h1, h2, h3, h4 { font-family: var(--display); color: var(--ink); margin: 0; font-weight: 600; letter-spacing: -0.02em; }
+  p { margin: 0; }
+  .nm-wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+  .nm-logo-img { filter: var(--logo-filter); }
+
+  /* ---------- Buttons ---------- */
+  .nm-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 999px; font: 500 15px/1 var(--font); border: 1px solid transparent; cursor: pointer; transition: background .15s, border-color .15s, color .15s, transform .15s; white-space: nowrap; }
+  .nm-btn:active { transform: scale(.98); }
+  .nm-btn-primary, .nm-btn-primary:hover { background: var(--accent); color: var(--accent-text); }
+  .nm-btn-primary:hover { background: var(--accent-hover); }
+  .nm-btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .nm-btn-ghost:hover { border-color: var(--text-soft); }
+  .nm-btn-sm { min-height: 40px; padding: 0 18px; font-size: 14px; }
+  .nm-icon-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--text-muted); cursor: pointer; display: grid; place-items: center; flex: none; }
+  .nm-icon-btn:hover { color: var(--ink); border-color: var(--text-soft); }
+
+  /* ---------- Header ---------- */
+  .nm-header { position: sticky; top: 0; z-index: 20; background: var(--header-bg); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid transparent; transition: border-color .2s; }
+  .nm-header.is-scrolled { border-bottom-color: var(--line); }
+  .nm-header-in { position: relative; display: flex; align-items: center; height: 72px; gap: 20px; }
+  .nm-logo img { height: 36px; width: auto; }
+  .nm-nav { display: flex; align-items: center; gap: 28px; margin-left: auto; }
+  .nm-nav a { font-size: 15px; color: var(--text-muted); transition: color .15s; }
+  .nm-nav a:hover, .nm-nav a.is-active { color: var(--ink); }
+  .nm-header-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+  .nm-menu-btn { display: none; }
+  .nm-theme-btn .nm-sun { display: none; }
+  [data-theme="dark"] .nm-theme-btn .nm-sun { display: block; }
+  [data-theme="dark"] .nm-theme-btn .nm-moon { display: none; }
+
+  /* ---------- Hero ---------- */
+  .nm-hero { position: relative; padding: clamp(40px, 7vw, 80px) 0 clamp(64px, 9vw, 112px); overflow: hidden; }
+  .nm-hero::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 56px 56px, linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 56px 56px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 80% at 70% 45%, #000 0%, transparent 75%); mask-image: radial-gradient(ellipse 70% 80% at 70% 45%, #000 0%, transparent 75%); }
+  .nm-hero::after { content: ""; position: absolute; width: 760px; height: 760px; right: -160px; top: 50%; transform: translateY(-50%); border-radius: 50%; background: radial-gradient(circle, var(--accent-quiet) 0%, transparent 65%); pointer-events: none; }
+  .nm-hero-in { position: relative; z-index: 1; display: grid; grid-template-columns: 1.2fr .8fr; gap: 48px; align-items: center; }
+  .nm-hero h1 { font-size: clamp(40px, 6.4vw, 80px); line-height: 1.02; letter-spacing: -0.04em; font-weight: 700; }
+  .nm-hero h1 em { font-style: normal; color: var(--accent-fg); display: block; }
+  .nm-hero-lead { margin-top: 28px; font-size: clamp(17px, 1.6vw, 19px); line-height: 1.6; color: var(--text-muted); max-width: 600px; }
+  .nm-hero-actions { display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap; }
+  .nm-hero-nine { position: relative; justify-self: center; width: min(380px, 100%); }
+  .nm-nine { display: block; width: 100%; background: none; border: 0; padding: 0; cursor: pointer; border-radius: 50%; }
+  .nm-nine:focus-visible { outline: 2px solid var(--accent-fg); outline-offset: 10px; }
+  .nm-bubble { position: absolute; z-index: 2; left: -6%; top: 2%; max-width: 230px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px 18px 18px 4px; padding: 12px 16px; font-size: 14px; line-height: 1.45; color: var(--text-muted); box-shadow: var(--shadow-lift); animation: nmBubble .5s .8s ease both; }
+  .nm-bubble strong { display: block; font: 600 16px var(--display); color: var(--ink); }
+  @keyframes nmBubble { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
+
+  /* ---------- Nine's face ---------- */
+  .nf { position: relative; width: 100%; aspect-ratio: 1; container-type: inline-size; --lx: 0; --ly: 0; --rx: 0deg; --ry: 0deg; --k: 1; }
+  .nf-float { position: absolute; inset: 0; animation: nfFloat 6s ease-in-out infinite; }
+  .nf-aura { position: absolute; inset: 2%; border-radius: 50%; background: radial-gradient(circle, rgba(54, 182, 234, .5) 0%, rgba(54, 182, 234, 0) 66%); filter: blur(5cqw); animation: nfAura 5s ease-in-out infinite; }
+  .nf-orbit { position: absolute; inset: 1%; border-radius: 50%; border: .35cqw solid rgba(54, 182, 234, .35); transform: rotateX(74deg) rotateZ(0deg); animation: nfOrbit 10s linear infinite; }
+  .nf-orbit i { position: absolute; top: -1.6cqw; left: calc(50% - 1.6cqw); width: 3.2cqw; height: 3.2cqw; border-radius: 50%; background: #5fd0f7; box-shadow: 0 0 2.5cqw #36b6ea; }
+  .nf-body { position: absolute; inset: 10%; border-radius: 50%; overflow: hidden;
+    background: radial-gradient(circle at 34% 26%, #d4f4ff 0%, #66cdf3 13%, #1d97dc 38%, #0b5e9e 70%, #06345a 100%);
+    box-shadow: inset -4cqw -6cqw 10cqw rgba(0, 12, 34, .45), inset 2cqw 3cqw 6cqw rgba(255, 255, 255, .22), 0 7cqw 14cqw -5cqw rgba(10, 111, 184, .6);
+    transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) scale(var(--amp, 1)); transition: transform .25s ease-out; }
+  .nf-visor { position: absolute; left: 13%; right: 13%; top: 31%; height: 42%; border-radius: 50% / 48%; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 25%, #163a58 0%, #081a2b 70%);
+    box-shadow: inset 0 1cqw 2.4cqw rgba(0, 0, 0, .65), 0 0 0 .7cqw rgba(255, 255, 255, .09);
+    transform: translate(calc(var(--lx) * 2.6cqw), calc(var(--ly) * 1.8cqw)); transition: transform .2s ease-out; }
+  .nf-visor::after { content: ""; position: absolute; top: -20%; bottom: -20%; width: 30%; left: -40%; background: linear-gradient(90deg, transparent, rgba(120, 220, 255, .18), transparent); transform: skewX(-18deg); opacity: 0; }
+  .nf[data-mood="thinking"] .nf-visor::after { opacity: 1; animation: nfScan 1.3s ease-in-out infinite; }
+  .nf-face { position: absolute; inset: 0; transform: translate(calc(var(--lx) * 3.6cqw), calc(var(--ly) * 2.6cqw)); transition: transform .15s ease-out; }
+  .nf-eye { position: absolute; top: 22%; width: 12.5%; height: 38%; border-radius: 3cqw; background: #e3f7ff;
+    box-shadow: 0 0 1.6cqw #8be0ff, 0 0 4.5cqw rgba(54, 182, 234, .85); transform-origin: 50% 55%;
+    transition: transform .11s ease, height .2s ease, width .2s ease, top .2s ease, border-radius .2s ease, background .2s ease; }
+  .nf-l { left: 28%; } .nf-r { right: 28%; }
+  .nf.is-blink .nf-eye { transform: scaleY(.07); }
+  .nf-mouth { position: absolute; left: 50%; bottom: 13%; transform: translateX(-50%); display: flex; gap: 1cqw; align-items: center; height: 16%; transition: transform .2s ease; }
+  .nf-mouth i { width: 1.7cqw; height: var(--m, 1.3cqw); border-radius: 1cqw; background: #c8f1ff; box-shadow: 0 0 1.4cqw #5fd0f7; transform: translateY(calc(var(--c, 0cqw) * var(--k))); transition: height .07s linear, transform .2s ease; }
+  .nf.is-talking .nf-mouth i { transform: none; }
+  .nf-ring { position: absolute; inset: 10%; border-radius: 50%; border: .6cqw solid #36b6ea; opacity: 0; pointer-events: none; }
+  .nf-shadow { position: absolute; left: 26%; right: 26%; bottom: -1%; height: 5%; border-radius: 50%; background: radial-gradient(ellipse, rgba(10, 30, 60, .28), transparent 70%); animation: nfShadow 6s ease-in-out infinite; }
+  [data-theme="dark"] .nf-shadow { background: radial-gradient(ellipse, rgba(0, 0, 0, .6), transparent 70%); }
+  /* moods */
+  .nf[data-mood="thinking"] .nf-face { transform: translate(3cqw, -3cqw); }
+  .nf[data-mood="thinking"] .nf-eye { height: 24%; top: 28%; }
+  .nf[data-mood="thinking"] .nf-r { height: 30%; top: 25%; }
+  .nf[data-mood="thinking"] .nf-mouth { transform: translateX(-20%); }
+  .nf[data-mood="thinking"] .nf-mouth i { transform: none; }
+  .nf[data-mood="listening"] .nf-eye { height: 44%; top: 18%; width: 14%; }
+  .nf[data-mood="listening"] .nf-ring { animation: nfRing 1.8s ease-out infinite; }
+  .nf[data-mood="listening"] .nf-ring.r2 { animation-delay: .6s; }
+  .nf[data-mood="listening"] .nf-ring.r3 { animation-delay: 1.2s; }
+  .nf[data-mood="listening"] .nf-aura { animation-duration: 1.6s; }
+  .nf[data-mood="happy"] { --k: 1.9; }
+  .nf[data-mood="happy"] .nf-eye { height: 15%; top: 30%; width: 14%; background: transparent; border: 1.7cqw solid #e3f7ff; border-bottom: 0; border-radius: 8cqw 8cqw 0 0; box-shadow: none; filter: drop-shadow(0 0 1.4cqw #7fdcff); }
+  .nf[data-mood="happy"].is-blink .nf-eye { transform: none; }
+  .nf[data-mood="surprised"] .nf-eye { width: 15%; height: 30%; top: 24%; border-radius: 50%; }
+  .nf[data-mood="surprised"] .nf-mouth { transform: translateX(-50%) scale(.6); }
+  .nf[data-mood="surprised"] .nf-mouth i { transform: none; }
+
+  /* robot head (original design: rounded head, face screen, ear pods, antenna with the logo's blue sphere) */
+  .nf-aura { display: none; }
+  .nf-body { inset: 20% 9% 4% 9%; border-radius: 34% / 38%; overflow: hidden;
+    background: linear-gradient(165deg, var(--nb-shell-1) 0%, var(--nb-shell-2) 100%);
+    box-shadow: inset -3cqw -4cqw 7cqw rgba(0, 20, 40, .18), inset 2cqw 2cqw 4cqw rgba(255, 255, 255, .6), 0 5cqw 10cqw -5cqw rgba(10, 40, 80, .35); }
+  .nf-visor { left: 10%; right: 10%; top: 16%; height: 64%; border-radius: 28% / 34%; }
+  .nf-ear { position: absolute; top: 47%; width: 11%; height: 24%; border-radius: 40%; background: linear-gradient(180deg, #4fc3f0, #0a6fb8); box-shadow: inset -1cqw -1.5cqw 2cqw rgba(0, 20, 50, .35); }
+  .nf-ear-l { left: 3.5%; } .nf-ear-r { right: 3.5%; }
+  .nf-antenna { position: absolute; left: calc(50% - 1.4cqw); top: 7%; width: 2.8cqw; height: 15%; background: var(--nb-limb); border-radius: 2cqw; transform-origin: 50% 100%; animation: nfAntenna 3.2s ease-in-out infinite; }
+  .nf-antenna i { position: absolute; left: 50%; top: -7cqw; width: 11cqw; height: 11cqw; margin-left: -5.5cqw; border-radius: 50%;
+    background: radial-gradient(circle at 34% 28%, #d4f4ff 0%, #66cdf3 18%, #1d97dc 45%, #0b5e9e 80%, #06345a 100%); box-shadow: 0 0 3cqw rgba(54, 182, 234, .7); }
+  .nf[data-mood="thinking"] .nf-antenna i { animation: nfBlinkBall .5s steps(2) infinite; }
+  .nf[data-mood="listening"] .nf-antenna i { box-shadow: 0 0 6cqw #36b6ea; }
+  .nf-ring { inset: 14% 4% 0 4%; border-radius: 40%; }
+  .nf[data-mood="sleep"] .nf-eye { height: 3.5%; top: 50%; border-radius: 2cqw; box-shadow: 0 0 1cqw #8be0ff; }
+  .nf[data-mood="sleep"] .nf-mouth { transform: translateX(-50%) scale(.55); }
+  .nf[data-mood="sleep"] .nf-mouth i { transform: none; }
+  .nf[data-mood="sleep"] .nf-antenna { animation-duration: 6s; }
+  @keyframes nfAntenna { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+  @keyframes nfBlinkBall { 50% { filter: brightness(1.6); } }
+  @keyframes nfFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.6cqw); } }
+  @keyframes nfShadow { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.82); opacity: .7; } }
+  @keyframes nfAura { 0%, 100% { opacity: .75; transform: scale(.96); } 50% { opacity: 1; transform: scale(1.04); } }
+  @keyframes nfOrbit { from { transform: rotateX(74deg) rotateZ(0deg); } to { transform: rotateX(74deg) rotateZ(360deg); } }
+  @keyframes nfScan { from { left: -40%; } to { left: 110%; } }
+  @keyframes nfRing { from { transform: scale(1); opacity: .6; } to { transform: scale(1.35); opacity: 0; } }
+
+  /* ---------- Nine's body ---------- */
+  .nb { position: relative; width: var(--nb-w, 120px); aspect-ratio: 1 / 2; container-type: inline-size;
+    --ul: 9deg; --fl: -8deg; --ur: -9deg; --fr: 8deg; --tl: 2deg; --sl: 0deg; --tr: -2deg; --sr: 0deg; --fy: 0cqw; --hr: 0deg; --tz: 0deg; }
+  .nb .nf-float { animation: none; }
+  .nb .nf-shadow, .nb .nf-orbit { display: none; }
+  .nb .nf-aura { inset: 6%; }
+  .nb-fig { position: absolute; inset: 0; transform: translateY(var(--fy)); transition: transform .6s cubic-bezier(.3, .7, .3, 1); }
+  .nb-head { position: absolute; left: 10cqw; top: 0; width: 80cqw; z-index: 4; transform: rotate(var(--hr)); transform-origin: 50% 88%; transition: transform .6s ease; }
+  .nb-neck { position: absolute; left: 43cqw; top: 64cqw; width: 14cqw; height: 14cqw; border-radius: 4cqw; background: var(--nb-limb); z-index: 2; }
+  .nb-torso { position: absolute; left: 23cqw; top: 73cqw; width: 54cqw; height: 52cqw; border-radius: 24cqw 24cqw 20cqw 20cqw; z-index: 3;
+    background: linear-gradient(160deg, var(--nb-shell-1), var(--nb-shell-2)); box-shadow: inset -3cqw -4cqw 6cqw rgba(0, 20, 40, .16), 0 2cqw 4cqw rgba(0, 20, 40, .12);
+    transform: rotate(var(--tz)); transform-origin: 50% 100%; transition: transform .6s ease; }
+  .nb-chest { position: absolute; left: 50%; top: 24%; width: 14cqw; height: 14cqw; margin-left: -7cqw; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #c8f1ff, #36b6ea 45%, #0a6fb8); box-shadow: 0 0 3cqw #36b6ea; animation: nbChest 2.4s ease-in-out infinite; }
+  .nb-torso::after { content: ""; position: absolute; left: 18%; right: 18%; bottom: 14%; height: 3cqw; border-radius: 2cqw; background: var(--nb-sole); opacity: .55; }
+  .nb-arm { position: absolute; top: 79cqw; width: 12cqw; z-index: 2; transform-origin: 6cqw 5cqw; }
+  .nb-arm-l { left: 15cqw; } .nb-arm-r { left: 73cqw; }
+  .nb-up, .nb-fore, .nb-thigh, .nb-shin { background: var(--nb-limb); transition: transform .5s ease; }
+  .nb-up { position: relative; width: 12cqw; height: 30cqw; border-radius: 6cqw; transform-origin: 6cqw 5cqw; transform: rotate(var(--ul)); }
+  .nb-arm-r .nb-up { transform: rotate(var(--ur)); }
+  .nb-fore { position: absolute; left: 0; top: 24cqw; width: 12cqw; height: 28cqw; border-radius: 6cqw; transform-origin: 6cqw 5cqw; transform: rotate(var(--fl)); }
+  .nb-arm-r .nb-fore { transform: rotate(var(--fr)); }
+  .nb-hand { position: absolute; left: -1cqw; bottom: -5cqw; width: 14cqw; height: 14cqw; border-radius: 50%; background: var(--nb-shell-1); box-shadow: inset -1.5cqw -2cqw 3cqw rgba(0, 20, 40, .2); }
+  .nb-leg { position: absolute; top: 118cqw; width: 15cqw; z-index: 1; }
+  .nb-leg-l { left: 30cqw; } .nb-leg-r { left: 55cqw; }
+  .nb-thigh { position: relative; width: 15cqw; height: 36cqw; border-radius: 7cqw; transform-origin: 7.5cqw 6cqw; transform: rotate(var(--tl)); }
+  .nb-leg-r .nb-thigh { transform: rotate(var(--tr)); }
+  .nb-shin { position: absolute; left: 0; top: 30cqw; width: 15cqw; height: 34cqw; border-radius: 7cqw; transform-origin: 7.5cqw 6cqw; transform: rotate(var(--sl)); }
+  .nb-leg-r .nb-shin { transform: rotate(var(--sr)); }
+  .nb-foot { position: absolute; bottom: -4cqw; width: 22cqw; height: 10cqw; border-radius: 10cqw 10cqw 4cqw 4cqw; background: var(--nb-shell-2); box-shadow: inset 0 -2.2cqw 0 var(--nb-sole); }
+  .nb-leg-l .nb-foot { left: -7cqw; } .nb-leg-r .nb-foot { left: 0; }
+  .nb-shadow { position: absolute; left: 16cqw; right: 16cqw; bottom: -3cqw; height: 8cqw; border-radius: 50%; background: radial-gradient(ellipse, rgba(10, 30, 60, .28), transparent 70%); }
+  [data-theme="dark"] .nb-shadow { background: radial-gradient(ellipse, rgba(0, 0, 0, .6), transparent 70%); }
+  .nb-zzz { position: absolute; left: 74cqw; top: 6cqw; font: 700 12cqw/1 var(--display); color: var(--accent-fg); pointer-events: none; z-index: 6; }
+  .nb-zzz i { position: absolute; font-style: normal; opacity: 0; }
+  .nb[data-pose="sleep"] .nb-zzz i { animation: nbZ 3s ease-in infinite; }
+  .nb[data-pose="sleep"] .nb-zzz i:nth-child(2) { animation-delay: 1s; font-size: 15cqw; }
+  .nb[data-pose="sleep"] .nb-zzz i:nth-child(3) { animation-delay: 2s; font-size: 19cqw; }
+  .nb-say { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translate(-50%, 6px); white-space: nowrap; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 7px 12px; font: 500 13px var(--font); box-shadow: var(--shadow-lift); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 7; }
+  .nb-say.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+  /* poses */
+  .nb[data-pose="sit"], .nb[data-pose="sleep"] { --fy: 42cqw; --tl: 72deg; --sl: -144deg; --tr: -72deg; --sr: 144deg; --ul: 28deg; --fl: -36deg; --ur: -28deg; --fr: 36deg; }
+  .nb[data-pose="sleep"] { --hr: 16deg; --tz: 3deg; }
+  .nb[data-pose="sleep"] .nb-fig { animation: nbBreathe 3.2s ease-in-out infinite; }
+  /* actions */
+  .nb[data-act="wave"] { --ur: -155deg; --fr: 0deg; }
+  .nb[data-act="wave"] .nb-arm-r .nb-fore { animation: nbWave .45s ease-in-out infinite alternate; }
+  .nb[data-act="stretch"] { --ul: 165deg; --fl: 0deg; --ur: -165deg; --fr: 0deg; --fy: -3cqw; }
+  .nb[data-act="think"] { --ur: 20deg; --fr: 131deg; --hr: -7deg; }
+  .nb[data-act="think"] .nb-arm-r { z-index: 5; }
+  .nb[data-act="listen"] { --ul: 150deg; --fl: 45deg; --hr: 6deg; }
+  .nb[data-act="tap"] { --ul: 38deg; --fl: -95deg; --ur: -38deg; --fr: 95deg; }
+  .nb[data-act="tap"] .nb-leg-r { animation: nbTap .4s ease-in-out infinite; }
+  .nb[data-act="talk"] .nb-arm-r .nb-fore { animation: nbGestureR 1.1s ease-in-out infinite alternate; }
+  .nb[data-act="talk"] .nb-arm-l .nb-fore { animation: nbGestureL 1.4s ease-in-out infinite alternate; }
+  .nb[data-act="jump"] .nb-fig { animation: nbJump .8s cubic-bezier(.3, .6, .4, 1); }
+  .nb[data-act="walk"] .nb-fig { animation: nbBob .48s ease-in-out infinite; }
+  .nb[data-act="walk"] .nb-leg-l { animation: nbStep .48s ease-in-out infinite; }
+  .nb[data-act="walk"] .nb-leg-r { animation: nbStep .48s ease-in-out -.24s infinite; }
+  .nb[data-act="walk"] .nb-arm-l { animation: nbSwing .48s ease-in-out infinite alternate; }
+  .nb[data-act="walk"] .nb-arm-r { animation: nbSwing .48s ease-in-out -.24s infinite alternate; }
+  @keyframes nbWave { from { transform: rotate(-30deg); } to { transform: rotate(22deg); } }
+  @keyframes nbTap { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4cqw); } }
+  @keyframes nbGestureR { from { transform: rotate(var(--fr)); } to { transform: rotate(calc(var(--fr) - 55deg)); } }
+  @keyframes nbGestureL { from { transform: rotate(var(--fl)); } to { transform: rotate(calc(var(--fl) + 45deg)); } }
+  @keyframes nbJump { 0% { transform: translateY(var(--fy)); } 25% { transform: translateY(calc(var(--fy) + 4cqw)) scaleY(.93); } 55% { transform: translateY(calc(var(--fy) - 30cqw)); } 80% { transform: translateY(calc(var(--fy) + 2cqw)) scaleY(.96); } 100% { transform: translateY(var(--fy)); } }
+  @keyframes nbBob { 0%, 50%, 100% { transform: translateY(var(--fy)); } 25%, 75% { transform: translateY(calc(var(--fy) - 2.5cqw)); } }
+  @keyframes nbStep { 0%, 50%, 100% { transform: translateY(0); } 25% { transform: translateY(-8cqw); } }
+  @keyframes nbSwing { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
+  @keyframes nbBreathe { 0%, 100% { transform: translateY(var(--fy)); } 50% { transform: translateY(calc(var(--fy) + 1cqw)); } }
+  @keyframes nbChest { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
+  @keyframes nbZ { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(14cqw, -30cqw); } }
+
+  /* where the bodies live */
+  .nm-hero-nine .nb { --nb-w: clamp(130px, 13vw, 175px); margin: 0 auto; }
+  .nm-as-face .nb { --nb-w: clamp(110px, 21vh, 200px); margin: 0 auto; }
+  .nm-walker { position: fixed; left: 0; bottom: 0; z-index: 25; pointer-events: none; transition: opacity .35s; will-change: transform; }
+  .nm-walker .nb { --nb-w: 84px; pointer-events: auto; cursor: pointer; }
+  .nm-walker.is-hidden { opacity: 0; }
+  .nm-walker.is-hidden .nb { pointer-events: none; }
+  @media (max-width: 820px) {
+    .nm-hero-nine .nb { --nb-w: 110px; }
+    .nm-as-face .nb { --nb-w: 58px; margin: 0; }
+  }
+  @media (max-width: 560px) { .nm-walker .nb { --nb-w: 58px; } }
+  @media (prefers-reduced-motion: reduce) { .nm-walker { display: none; } }
+
+
+  .nb-chest { position: absolute; left: 50%; top: 20%; width: 32cqw; height: auto; margin-left: -16cqw; color: var(--nb-chest); background: none; border-radius: 0; box-shadow: none; animation: none; }
+  .nb[data-act="run"] { --ul: 30deg; --fl: -80deg; --ur: -30deg; --fr: 80deg; }
+  .nb[data-act="run"] .nb-fig { animation: nbBob .3s ease-in-out infinite; }
+  .nb[data-act="run"] .nb-leg-l { animation: nbStep .3s ease-in-out infinite; }
+  .nb[data-act="run"] .nb-leg-r { animation: nbStep .3s ease-in-out -.15s infinite; }
+  .nb[data-act="run"] .nb-arm-l { animation: nbSwing .3s ease-in-out infinite alternate; }
+  .nb[data-act="run"] .nb-arm-r { animation: nbSwing .3s ease-in-out -.15s infinite alternate; }
+  .nb[data-act="dance"] .nb-fig { animation: nbDance .9s ease-in-out infinite; }
+  .nb[data-act="dance"] .nb-arm-l .nb-up { animation: nbDanceL .9s ease-in-out infinite; }
+  .nb[data-act="dance"] .nb-arm-r .nb-up { animation: nbDanceR .9s ease-in-out infinite; }
+  .nb[data-act="dance"] .nb-leg-l { animation: nbStep .45s ease-in-out infinite; }
+  .nb[data-act="dance"] .nb-leg-r { animation: nbStep .45s ease-in-out -.225s infinite; }
+  .nb[data-act="bow"] { --ul: 4deg; --ur: -4deg; --fy: 6cqw; }
+  .nb[data-act="bow"] .nb-head { transform: translateY(10cqw) scale(.94); }
+  .nb[data-act="bow"] .nb-torso { transform: scaleY(.9); }
+  .nb[data-act="shrug"] { --ul: 55deg; --fl: 115deg; --ur: -55deg; --fr: -115deg; --hr: 9deg; }
+  .nb[data-act="shrug"] .nb-arm { transform: translateY(-3cqw); }
+  .nb[data-act="celebrate"] { --ul: 150deg; --fl: -15deg; --ur: -150deg; --fr: 15deg; }
+  .nb[data-act="celebrate"] .nb-fig { animation: nbJump .7s cubic-bezier(.3, .6, .4, 1) 2; }
+  .nb[data-act="point"] { --ur: -90deg; --fr: 0deg; }
+  .nb[data-act="pointl"] { --ul: 90deg; --fl: 0deg; }
+  .nb[data-act="watch"] { --ul: 20deg; --fl: -125deg; --hr: -4deg; }
+  .nb[data-act="watch"] .nb-arm-l { z-index: 5; }
+  .nb[data-act="kick"] .nb-leg-r { animation: nbKick .7s ease-in-out; transform-origin: 7.5cqw 6cqw; }
+  .nb[data-act="spin"] .nb-fig { animation: nbSpin 1s ease-in-out; }
+  @keyframes nbDance { 0%, 100% { transform: translateY(var(--fy)) rotate(-6deg); } 50% { transform: translateY(calc(var(--fy) - 3cqw)) rotate(6deg); } }
+  @keyframes nbDanceL { 0%, 100% { transform: rotate(150deg); } 50% { transform: rotate(40deg); } }
+  @keyframes nbDanceR { 0%, 100% { transform: rotate(-40deg); } 50% { transform: rotate(-150deg); } }
+  @keyframes nbKick { 0%, 100% { transform: rotate(0); } 40% { transform: rotate(-35deg) translateY(-4cqw); } }
+  @keyframes nbSpin { 0% { transform: translateY(var(--fy)) scaleX(1); } 50% { transform: translateY(calc(var(--fy) - 4cqw)) scaleX(-1); } 100% { transform: translateY(var(--fy)) scaleX(1); } }
+
+  /* more antics */
+  .nb[data-act="trip"] { --ul: 120deg; --ur: -120deg; }
+  .nb[data-act="trip"] .nb-fig { animation: nbTrip 2.6s ease-in-out; transform-origin: 50% 95%; }
+  .nb[data-act="hiccup"] .nb-fig { animation: nbHic .5s ease-out 3; }
+  .nb[data-act="sneeze"] .nb-head { animation: nbSneeze 1.2s ease-in-out; }
+  .nb[data-act="yawn"] { --ul: 165deg; --ur: -165deg; --fl: -20deg; --fr: 20deg; }
+  .nb[data-act="yawn"] .nf-mouth { transform: translateX(-50%) scale(1.3, 2.6); }
+  .nb[data-act="yawn"] .nf-eye { height: 10%; top: 40%; }
+  .nb[data-act="moon"] .nb-leg-l { animation: nbSlide .7s ease-in-out infinite; }
+  .nb[data-act="moon"] .nb-leg-r { animation: nbSlide .7s ease-in-out -.35s infinite; }
+  .nb[data-act="moon"] .nb-fig { animation: nbBob .7s ease-in-out infinite; }
+  .nb[data-act="juggle"] { --ul: 40deg; --fl: -110deg; --ur: -40deg; --fr: 110deg; }
+  .nb-balls { position: absolute; left: 20cqw; right: 20cqw; top: 40cqw; height: 60cqw; pointer-events: none; display: none; z-index: 6; }
+  .nb[data-act="juggle"] .nb-balls { display: block; }
+  .nb-balls i { position: absolute; bottom: 0; left: 0; width: 10cqw; height: 10cqw; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #d4f4ff, #1d97dc 55%, #0b5e9e); animation: nbJuggle 1.2s linear infinite; }
+  .nb-balls i:nth-child(2) { animation-delay: -.4s; }
+  .nb-balls i:nth-child(3) { animation-delay: -.8s; }
+  @keyframes nbTrip { 0% { transform: translateY(var(--fy)) rotate(0); } 15% { transform: translateY(var(--fy)) rotate(-12deg); } 35%, 70% { transform: translateY(calc(var(--fy) + 22cqw)) rotate(84deg); } 85% { transform: translateY(var(--fy)) rotate(-6deg); } 100% { transform: translateY(var(--fy)) rotate(0); } }
+  @keyframes nbHic { 0%, 100% { transform: translateY(var(--fy)); } 30% { transform: translateY(calc(var(--fy) - 6cqw)); } }
+  @keyframes nbSneeze { 0% { transform: rotate(0); } 50% { transform: rotate(-10deg) translateY(-3cqw); } 62% { transform: rotate(14deg) translateY(4cqw); } 100% { transform: rotate(0); } }
+  @keyframes nbSlide { 0%, 100% { transform: translateX(0); } 50% { transform: translate(-6cqw, -2cqw); } }
+  @keyframes nbJuggle { 0% { transform: translate(0, 0); } 25% { transform: translate(15cqw, -55cqw); } 50% { transform: translate(40cqw, 0); } 75% { transform: translate(15cqw, -30cqw); } 100% { transform: translate(0, 0); } }
+  .nm-bubble.is-gone { opacity: 0; transform: translateY(6px); transition: opacity .5s, transform .5s; pointer-events: none; }
+
+
+  /* ---------- Human look: face (SVG) and clothes ---------- */
+  .hf { display: block; width: 100%; height: auto; overflow: visible; --lx: 0; --ly: 0; --mo: .3; }
+  .hf-head { transform-box: fill-box; transform-origin: 50% 85%; transform: translate(calc(var(--lx) * 3px), calc(var(--ly) * 2px)) rotate(calc(var(--lx) * 4deg)); transition: transform .2s ease-out; }
+  .hf-hair, .hf-fringe { fill: var(--hair); }
+  .hf-skin, .hf-ear { fill: var(--skin); }
+  .hf-jaw { fill: var(--skin-shade); opacity: .3; }
+  .hf-earin { fill: none; stroke: var(--skin-shade); stroke-width: 2.5; stroke-linecap: round; }
+  .hf-cheek { fill: #e0786a; opacity: .22; transition: opacity .3s; }
+  .hf-white { fill: #fff; }
+  .hf-iris { fill: var(--iris); }
+  .hf-pupil { fill: #120c0a; }
+  .hf-glint { fill: #fff; }
+  .hf-iris-g { transform: translate(calc(var(--lx) * 4.5px), calc(var(--ly) * 3px)); transition: transform .15s ease-out; }
+  .hf-lash { fill: none; stroke: #1a1210; stroke-width: 2.6; stroke-linecap: round; }
+  .hf-eye-in { transform-box: fill-box; transform-origin: 50% 50%; transition: transform .1s ease, opacity .1s; }
+  .hf.is-blink .hf-eye-in { transform: scaleY(.08); }
+  .hf-shut { fill: none; stroke: #1a1210; stroke-width: 3; stroke-linecap: round; opacity: 0; }
+  .hf-brow { fill: none; stroke: var(--hair); stroke-width: 5; stroke-linecap: round; transform-box: fill-box; transform-origin: center; transition: transform .25s ease; }
+  .hf-nose { fill: none; stroke: var(--skin-shade); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .hf-smile, .hf-side { fill: none; stroke: var(--lip); stroke-width: 3.6; stroke-linecap: round; transition: opacity .15s; }
+  .hf-side { opacity: 0; }
+  .hf-grin { fill: #5a2620; opacity: 0; }
+  .hf-teeth { fill: #fff; opacity: 0; }
+  .hf-open { fill: #5a2620; transform-box: fill-box; transform-origin: 50% 30%; transform: scaleY(0); transition: transform .07s linear; }
+  .hf-listen path { fill: none; stroke: var(--accent-light); stroke-width: 3.5; stroke-linecap: round; opacity: 0; }
+  .hf.is-talking .hf-smile { opacity: 0; }
+  .hf.is-talking .hf-open { transform: scaleY(var(--mo)); }
+  .hf[data-mood="happy"] .hf-smile { opacity: 0; }
+  .hf[data-mood="happy"] .hf-grin, .hf[data-mood="happy"] .hf-teeth { opacity: 1; }
+  .hf[data-mood="happy"].is-talking .hf-grin, .hf[data-mood="happy"].is-talking .hf-teeth { opacity: 0; }
+  .hf[data-mood="happy"] .hf-eye-in { transform: scaleY(.72); }
+  .hf[data-mood="happy"] .hf-cheek { opacity: .42; }
+  .hf[data-mood="happy"] .hf-brow { transform: translateY(-3px); }
+  .hf[data-mood="thinking"] .hf-brow-l { transform: translateY(-6px) rotate(-8deg); }
+  .hf[data-mood="thinking"] .hf-iris-g { transform: translate(5px, -4px); }
+  .hf[data-mood="thinking"] .hf-smile { opacity: 0; }
+  .hf[data-mood="thinking"] .hf-side { opacity: 1; }
+  .hf[data-mood="listening"] .hf-brow { transform: translateY(-5px); }
+  .hf[data-mood="listening"] .hf-listen path { animation: hfListen 1.2s ease-in-out infinite; }
+  .hf[data-mood="listening"] .hf-listen path + path { animation-delay: .3s; }
+  .hf[data-mood="surprised"] .hf-brow { transform: translateY(-8px); }
+  .hf[data-mood="surprised"] .hf-smile { opacity: 0; }
+  .hf[data-mood="surprised"] .hf-open { transform: scale(.7, .9); }
+  .hf[data-mood="sleep"] .hf-eye-in { opacity: 0; }
+  .hf[data-mood="sleep"] .hf-shut { opacity: 1; }
+  .hf[data-mood="sleep"] .hf-brow { transform: translateY(2px); }
+  .hf[data-mood="sleep"] .hf-smile { opacity: 0; }
+  .hf[data-mood="sleep"] .hf-open { transform: scale(.6, .35); }
+  .nb[data-act="yawn"] .hf-open { transform: scale(1.2, 1.9); }
+  .nb[data-act="yawn"] .hf-smile { opacity: 0; }
+  .nb[data-act="yawn"] .hf-eye-in { transform: scaleY(.25); }
+  @keyframes hfListen { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+
+  .nb-head { left: 17cqw; width: 66cqw; transform-origin: 50% 92%; }
+  .nb-neck { left: 42cqw; top: 54cqw; width: 16cqw; height: 22cqw; border-radius: 0 0 6cqw 6cqw; background: var(--skin); }
+  .nb-torso { left: 22cqw; top: 70cqw; width: 56cqw; height: 54cqw; border-radius: 20cqw 20cqw 9cqw 9cqw; background: linear-gradient(170deg, var(--shirt), var(--shirt-2)); box-shadow: inset -3cqw -3cqw 6cqw rgba(0, 20, 40, .2); }
+  .nb-torso::before { content: ""; position: absolute; left: 50%; top: -1cqw; width: 16cqw; height: 12cqw; margin-left: -8cqw; background: var(--skin); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+  .nb-torso::after { left: 0; right: 0; bottom: 0; height: 6cqw; border-radius: 0 0 9cqw 9cqw; background: #1b1c1f; opacity: 1; }
+  .nb-chest { left: auto; right: 12%; top: 26%; width: 12cqw; margin-left: 0; color: rgba(255, 255, 255, .92); }
+  .nb-arm { top: 74cqw; }
+  .nb-arm-l { left: 14cqw; }
+  .nb-arm-r { left: 74cqw; }
+  .nb-up { width: 13cqw; height: 28cqw; background: var(--shirt); }
+  .nb-fore { left: 1cqw; top: 23cqw; width: 11cqw; height: 26cqw; background: var(--skin); }
+  .nb-hand { left: -1cqw; width: 13cqw; height: 13cqw; background: var(--skin); box-shadow: inset -1.5cqw -2cqw 3cqw rgba(60, 20, 0, .25); }
+  .nb-thigh, .nb-shin { background: var(--pants); }
+  .nb-foot { background: var(--shoe); box-shadow: inset 0 -2.2cqw 0 #e9edf1; }
+  .nb[data-pose="sit"] .nb-foot, .nb[data-pose="sleep"] .nb-foot { box-shadow: none; }
+
+  /* ---------- Nine: a man in a suit with an original robot head ---------- */
+  .nb { aspect-ratio: 1 / 2.4; }
+  .nb-head { left: 29cqw; top: 0; width: 42cqw; transform-origin: 50% 95%; }
+  .nb-neck { left: 44cqw; top: 36cqw; width: 12cqw; height: 14cqw; border-radius: 3cqw; background: linear-gradient(90deg, #4b525b, #9aa3ad 45%, #4b525b); }
+  .nb-torso { left: 17cqw; top: 46cqw; width: 66cqw; height: 84cqw; border-radius: 16cqw 16cqw 7cqw 7cqw / 11cqw 11cqw 5cqw 5cqw;
+    background: linear-gradient(160deg, var(--suit-hi) 0%, var(--suit) 45%, var(--suit-lo) 100%); box-shadow: inset -3cqw -4cqw 6cqw rgba(0, 0, 0, .25), 0 3cqw 6cqw -3cqw rgba(0, 0, 0, .35); overflow: hidden; }
+  .nb-torso::before, .nb-torso::after { content: none; }
+  .nb-jacket { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .nb-shirt { fill: #f3f5f8; }
+  .nb-collar { fill: #ffffff; stroke: #cfd6de; stroke-width: .4; }
+  .nb-tie { fill: var(--tie); }
+  .nb-tie-k { fill: var(--tie-dark); }
+  .nb-lapel { fill: var(--suit-lo); opacity: .9; }
+  .nb-pin { fill: #36b6ea; }
+  .nb-square { fill: #36b6ea; }
+  .nb-pocket, .nb-seam { fill: none; stroke: var(--suit-lo); stroke-width: .6; }
+  .nb-btn { fill: #0d1118; }
+  .nb-arm { top: 50cqw; width: 12cqw; }
+  .nb-arm-l { left: 14cqw; }
+  .nb-arm-r { left: 74cqw; }
+  .nb-up { width: 12cqw; height: 40cqw; border-radius: 6cqw; background: linear-gradient(90deg, var(--suit-hi), var(--suit) 60%, var(--suit-lo)); }
+  .nb-fore { left: .5cqw; top: 34cqw; width: 11cqw; height: 41cqw; border-radius: 5.5cqw; background: linear-gradient(90deg, var(--suit-hi), var(--suit) 60%, var(--suit-lo)); }
+  .nb-fore::after { content: ""; position: absolute; left: .5cqw; right: .5cqw; bottom: -1cqw; height: 4cqw; border-radius: 1.5cqw; background: #f3f5f8; }
+  .nb-hand { position: absolute; left: -.5cqw; top: 38cqw; bottom: auto; width: 12cqw; height: 16cqw; background: none; border-radius: 0; box-shadow: none; overflow: visible; }
+  .nb-arm-r .nb-hand { transform: scaleX(-1); }
+  .nb-skin { fill: var(--skin); }
+  .nb-knuckle { fill: none; stroke: var(--skin-shade); stroke-width: .9; stroke-linecap: round; opacity: .6; }
+  .nb-leg { top: 126cqw; width: 15cqw; }
+  .nb-leg-l { left: 31cqw; }
+  .nb-leg-r { left: 54cqw; }
+  .nb-thigh { height: 54cqw; border-radius: 7cqw; background: linear-gradient(90deg, var(--suit-hi), var(--suit) 55%, var(--suit-lo)); transform: rotate(var(--tl)) scaleY(var(--tsy, 1)); }
+  .nb-leg-r .nb-thigh { transform: rotate(var(--tr)) scaleY(var(--tsy, 1)); }
+  .nb-shin { top: 48cqw; height: 52cqw; border-radius: 6cqw; background: linear-gradient(90deg, var(--suit-hi), var(--suit) 55%, var(--suit-lo)); transform-origin: 7.5cqw 0; transform: rotate(var(--sl)) scaleY(var(--ssy, 1)); }
+  .nb-leg-r .nb-shin { transform: rotate(var(--sr)) scaleY(var(--ssy, 1)); }
+  .nb-thigh::after, .nb-shin::after { content: ""; position: absolute; left: 50%; top: 8%; bottom: 8%; width: .5cqw; margin-left: -.25cqw; background: rgba(255, 255, 255, .12); }
+  .nb-foot { bottom: -5cqw; width: 21cqw; height: 9cqw; border-radius: 10cqw 12cqw 3cqw 3cqw; background: linear-gradient(180deg, #2b2e33, #0d0e10); box-shadow: inset 0 -1.4cqw 0 #050607; }
+  .nb-foot::after { content: ""; position: absolute; left: 25%; top: 18%; width: 30%; height: 22%; border-radius: 50%; background: rgba(255, 255, 255, .28); }
+  .nb-leg-l .nb-foot { left: -6cqw; }
+  .nb-leg-r .nb-foot { left: 0; }
+  .nb[data-pose="sit"] .nb-foot, .nb[data-pose="sleep"] .nb-foot { box-shadow: inset 0 -1.4cqw 0 #050607; }
+  .nb-shadow { left: 18cqw; right: 18cqw; bottom: 0; height: 6cqw; }
+  .nb-seat { position: absolute; left: 20cqw; right: 20cqw; bottom: 1cqw; height: 60cqw; border-radius: 4cqw 4cqw 2cqw 2cqw; z-index: 0;
+    background: linear-gradient(180deg, #5b6573 0 9%, #353c46 9% 100%); box-shadow: inset -2cqw -2cqw 4cqw rgba(0, 0, 0, .3);
+    opacity: 0; transform: translateY(8cqw); transition: opacity .4s, transform .4s; }
+  .nb[data-pose="sit"] .nb-seat, .nb[data-pose="sleep"] .nb-seat { opacity: 1; transform: none; }
+  .nb-zzz { left: 66cqw; top: -2cqw; }
+  .nb-balls { left: 20cqw; right: 20cqw; top: 12cqw; height: 50cqw; }
+  /* poses retuned for the taller body */
+  .nb[data-pose="sit"], .nb[data-pose="sleep"] { --fy: 44cqw; --tsy: .18; --ssy: 5.56; --tl: 3deg; --sl: -3deg; --tr: -3deg; --sr: 3deg; --ul: 14deg; --fl: -50deg; --ur: -14deg; --fr: 50deg; }
+  .nb[data-pose="sleep"] { --hr: 16deg; --tz: 2deg; --ul: 6deg; --fl: -8deg; --ur: -6deg; --fr: 8deg; }
+  .nb[data-act="listen"] { --ul: 120deg; --fl: 137deg; --hr: 6deg; }
+  .nb[data-act="think"] .nb-arm-r, .nb[data-act="watch"] .nb-arm-l { z-index: 5; }
+  .nb[data-act="bow"] .nb-head { transform: translateY(6cqw) scale(.95); }
+  /* sizes where Nine appears */
+  .nm-hero-nine .nb { --nb-w: clamp(100px, 9vw, 128px); }
+  .nm-as-face .nb { --nb-w: clamp(76px, 14vh, 124px); }
+  .nm-walker .nb { --nb-w: 62px; }
+  @media (max-width: 820px) {
+    .nm-hero-nine .nb { --nb-w: 88px; }
+    .nm-as-face .nb { --nb-w: 44px; }
+  }
+  @media (max-width: 560px) { .nm-walker .nb { --nb-w: 46px; } }
+
+  /* ---------- Commissioned artwork: when NINE_ART is on, assets/nine/*.png replace the drawn body ---------- */
+  .nine-art .nb-torso, .nine-art .nb-up, .nine-art .nb-fore, .nine-art .nb-thigh, .nine-art .nb-shin, .nine-art .nb-foot { background: none; box-shadow: none; border-radius: 0; overflow: visible; }
+  .nine-art .nb-jacket, .nine-art .nb-hand { display: none; }
+  .nine-art .nb-torso::before, .nine-art .nb-up::before, .nine-art .nb-fore::before, .nine-art .nb-fore::after,
+  .nine-art .nb-thigh::before, .nine-art .nb-shin::before, .nine-art .nb-foot::before { content: ""; position: absolute; inset: 0; width: auto; height: auto; margin: 0; clip-path: none; opacity: 1; border-radius: 0; background: center / 100% 100% no-repeat; pointer-events: none; }
+  .nine-art .nb-thigh::after, .nine-art .nb-shin::after, .nine-art .nb-foot::after { content: none; }
+  .nine-art .nb-torso::before { background-image: url("assets/nine/torso.png"); }
+  .nine-art .nb-up::before { background-image: url("assets/nine/upper-arm.png"); }
+  .nine-art .nb-fore::before { background-image: url("assets/nine/forearm.png"); }
+  .nine-art .nb-fore::after { inset: auto; left: -.5cqw; top: 38cqw; width: 12cqw; height: 16cqw; background-image: url("assets/nine/hand.png"); }
+  .nine-art .nb-thigh::before { background-image: url("assets/nine/thigh.png"); }
+  .nine-art .nb-shin::before { background-image: url("assets/nine/shin.png"); }
+  .nine-art .nb-foot::before { background-image: url("assets/nine/shoe.png"); }
+  .nine-art .nb-arm-r .nb-up::before, .nine-art .nb-arm-r .nb-fore::before, .nine-art .nb-arm-r .nb-fore::after,
+  .nine-art .nb-leg-r .nb-thigh::before, .nine-art .nb-leg-r .nb-shin::before, .nine-art .nb-leg-r .nb-foot::before { transform: scaleX(-1); }
+
+  /* ---------- Statement band ---------- */
+  .nm-band { background: var(--band-bg); color: var(--band-text); padding: clamp(72px, 10vw, 120px) 0; }
+  .nm-band h2 { color: var(--band-text); font-size: clamp(30px, 4.6vw, 58px); line-height: 1.08; letter-spacing: -0.035em; max-width: 980px; }
+  .nm-band h2 span { color: var(--band-muted); }
+  .nm-band p { margin-top: 32px; font-size: clamp(17px, 1.6vw, 19px); line-height: 1.6; color: var(--band-muted); max-width: 720px; }
+
+  /* ---------- Sections ---------- */
+  .nm-section { padding: clamp(72px, 9vw, 112px) 0; }
+  .nm-section-sunken { background: var(--sunken); }
+  .nm-section-head { max-width: 740px; margin-bottom: clamp(32px, 4vw, 52px); }
+  .nm-section-head h2, .nm-h2 { font-size: clamp(30px, 3.8vw, 48px); line-height: 1.08; letter-spacing: -0.035em; }
+  .nm-section-head p { margin-top: 18px; font-size: clamp(16px, 1.5vw, 18px); color: var(--text-muted); }
+
+  /* ---------- Maturity ladder ---------- */
+  .nm-ladder { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; align-items: end; height: 360px; }
+  .nm-rung { height: var(--h); text-align: left; font: inherit; color: var(--ink); border: 0; border-radius: 18px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; position: relative; overflow: hidden;
+    background: color-mix(in srgb, var(--accent) calc(var(--n) * 18%), var(--sunken)); transition: transform .2s, box-shadow .2s; }
+  .nm-rung:nth-child(n+4) { color: var(--rung-text-hi); }
+  .nm-rung::before { content: attr(data-n); position: absolute; top: 6px; right: 14px; font: 700 64px/1 var(--display); opacity: .14; }
+  .nm-rung small { font-size: 13px; opacity: .8; white-space: nowrap; }
+  .nm-rung strong { font: 600 17px/1.25 var(--display); }
+  .nm-rung:hover { transform: translateY(-3px); }
+  .nm-rung[aria-selected="true"] { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--accent-fg); }
+  .nm-rung:focus-visible { outline: 2px solid var(--accent-fg); outline-offset: 4px; }
+  .nm-level { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--line); }
+  .nm-level h3 { font-size: clamp(22px, 2.4vw, 28px); line-height: 1.2; grid-column: 1 / -1; }
+  .nm-level h4 { font: 600 15px var(--font); color: var(--ink); margin-bottom: 8px; letter-spacing: 0; }
+  .nm-level p { color: var(--text-muted); font-size: 17px; }
+  .nm-backwards { margin-top: 56px; display: flex; align-items: center; justify-content: space-between; gap: 24px 32px; flex-wrap: wrap; padding: clamp(24px, 3vw, 36px); border-radius: 24px; background: var(--accent-quiet); }
+  .nm-backwards p { font: 600 clamp(20px, 2.2vw, 26px)/1.3 var(--display); color: var(--ink); max-width: 680px; letter-spacing: -0.02em; }
+
+  /* ---------- Split lists ---------- */
+  .nm-split { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(36px, 6vw, 80px); align-items: start; }
+  .nm-split > div > p { margin-top: 18px; font-size: 18px; color: var(--text-muted); }
+  .nm-list > div { padding: 22px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 210px 1fr; gap: 24px; }
+  .nm-list > div:last-child { border-bottom: 1px solid var(--line); }
+  .nm-list h3 { font-size: 17px; line-height: 1.35; letter-spacing: -0.01em; }
+  .nm-list p { color: var(--text-muted); }
+  .nm-quote { margin-top: 32px; font: 600 20px/1.4 var(--display); color: var(--ink); letter-spacing: -0.01em; }
+
+  /* ---------- Services: bento + detail ---------- */
+  .nm-bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 72px; }
+  .nm-tile { grid-column: span 2; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 26px; min-height: 230px; border-radius: 22px; background: var(--sunken); border: 1px solid var(--line); transition: border-color .2s, transform .2s, box-shadow .2s; }
+  .nm-tile:nth-child(1), .nm-tile:nth-child(2) { grid-column: span 3; }
+  .nm-tile:hover { border-color: var(--accent-fg); transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+  .nm-tile::after { content: attr(data-n); position: absolute; right: 18px; bottom: -18px; font: 700 140px/1 var(--display); color: var(--accent-fg); opacity: .07; }
+  .nm-tile small { font-size: 13px; color: var(--accent-fg); font-weight: 600; }
+  .nm-tile h3 { font-size: 22px; line-height: 1.2; }
+  .nm-tile ul { list-style: none; margin: auto 0 0; padding: 0; display: grid; gap: 4px; font-size: 14px; color: var(--text-muted); position: relative; z-index: 1; }
+  .nm-tile li::before { content: "•"; color: var(--accent-light); margin-right: 8px; }
+  .nm-stage { display: grid; grid-template-columns: 300px 1fr; gap: clamp(28px, 5vw, 64px); padding: 56px 0; border-top: 1px solid var(--line); }
+  .nm-stage-side { position: sticky; top: 100px; align-self: start; }
+  .nm-stage-num { font-size: 14px; color: var(--text-soft); }
+  .nm-stage-side h3 { font-size: 24px; margin-top: 6px; line-height: 1.25; }
+  .nm-stage-tag { display: inline-block; margin-top: 12px; font-size: 14px; font-weight: 500; color: var(--accent-fg); background: var(--accent-quiet); padding: 3px 12px; border-radius: 999px; }
+  .nm-stage-side p { margin-top: 16px; color: var(--text-muted); }
+  .nm-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .nm-card { text-align: left; font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: var(--shadow); padding: 22px 24px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; transition: border-color .15s; }
+  .nm-card:hover { border-color: var(--accent-fg); }
+  .nm-card:focus-visible { outline: 2px solid var(--accent-fg); outline-offset: 2px; }
+  .nm-card h4 { font-size: 17px; line-height: 1.35; letter-spacing: -0.01em; }
+  .nm-card p { font-size: 15px; color: var(--text-muted); }
+  .nm-card-more { margin-top: auto; padding-top: 6px; font-size: 14px; font-weight: 500; color: var(--accent-fg); }
+
+  /* ---------- Programme timeline ---------- */
+  .nm-timeline { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .nm-timeline::before { content: ""; position: absolute; left: 7px; right: 0; top: 7px; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-light) 60%, var(--line)); }
+  .nm-phase { position: relative; padding-top: 36px; }
+  .nm-phase::before { content: ""; position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); border: 3px solid var(--accent); }
+  .nm-phase small { font-size: 14px; color: var(--accent-fg); font-weight: 600; }
+  .nm-phase h3 { font-size: 19px; margin: 6px 0 14px; line-height: 1.3; }
+  .nm-phase ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; color: var(--text-muted); font-size: 15px; }
+  .nm-pipeline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 64px; }
+  .nm-pipeline .nm-pipe { padding: 10px 18px; border: 1px solid var(--line); border-radius: 999px; font-weight: 500; color: var(--ink); background: var(--surface); }
+  .nm-pipeline svg { color: var(--text-soft); }
+  .nm-pipeline > p { width: 100%; color: var(--text-muted); margin-bottom: 6px; }
+  .nm-rules { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 56px; }
+  .nm-rule { border: 1px solid var(--line); border-radius: 22px; padding: clamp(22px, 3vw, 30px); background: var(--surface); }
+  .nm-rule h3 { font-size: 20px; }
+  .nm-rule > p { margin-top: 10px; color: var(--text-muted); }
+  .nm-classes { margin: 16px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 10px 18px; font-size: 15px; }
+  .nm-classes dt { font-weight: 600; color: var(--ink); }
+  .nm-classes dd { margin: 0; color: var(--text-muted); }
+  .nm-structures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 56px; }
+  .nm-structures h3 { font-size: 18px; }
+  .nm-structures p { margin-top: 8px; color: var(--text-muted); font-size: 15px; }
+
+  /* ---------- Planned ---------- */
+  .nm-future { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .nm-future-card { border: 1px dashed var(--text-soft); border-radius: var(--r-card); padding: 24px; }
+  .nm-pill { display: inline-block; font-size: 13px; font-weight: 500; color: var(--text-muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; }
+  .nm-future-card h3 { font-size: 18px; margin-top: 14px; line-height: 1.35; letter-spacing: -0.01em; }
+  .nm-future-card p { margin-top: 10px; font-size: 15px; color: var(--text-muted); }
+
+  /* ---------- Contact: Nine + the managing director ---------- */
+  .nm-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .nm-panel { border: 1px solid var(--line); border-radius: 26px; padding: clamp(24px, 3.4vw, 40px); background: var(--surface); }
+  .nm-panel-nine { display: block; background: var(--band-bg); border-color: transparent; color: var(--band-text); }
+  .nm-panel-nine h2 { color: var(--band-text); font-size: clamp(26px, 2.8vw, 34px); }
+  .nm-panel-nine p { margin-top: 10px; color: var(--band-muted); }
+  .nm-panel-nine small { display: block; margin-top: 14px; font-size: 13px; color: var(--band-muted); }
+  .nm-panel-nine .nm-btn-ghost { color: var(--band-text); border-color: rgba(255, 255, 255, .2); }
+  .nm-talk-actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .nm-person { display: grid; grid-template-columns: 96px 1fr; gap: 22px; align-items: start; }
+  .nm-avatar { position: relative; width: 96px; height: 96px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: var(--accent-quiet); color: var(--accent-fg); font: 700 30px var(--display); box-shadow: 0 0 0 4px var(--surface), 0 0 0 6px var(--accent-light); }
+  .nm-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .nm-person h3 { font-size: 24px; line-height: 1.2; }
+  .nm-person-role { margin-top: 4px; color: var(--accent-fg); font-weight: 600; }
+  .nm-person-tags { margin-top: 2px; font-size: 14px; color: var(--text-muted); }
+  .nm-contacts { margin: 22px 0 0; display: grid; gap: 10px; }
+  .nm-contacts a, .nm-contacts div { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; font-size: 15px; color: var(--text); overflow-wrap: anywhere; }
+  .nm-contacts a:hover span { color: var(--accent-fg); text-decoration: underline; text-underline-offset: 3px; }
+  .nm-contacts svg { color: var(--text-soft); margin-top: 2px; }
+  .nm-contacts em { font-style: normal; color: var(--text-soft); margin-right: 6px; }
+
+  /* ---------- Footer ---------- */
+  .nm-footer { border-top: 1px solid var(--line); padding: 48px 0 calc(32px + env(safe-area-inset-bottom)); }
+  .nm-footer-top { display: flex; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+  .nm-footer-top img { height: 34px; width: auto; }
+  .nm-footer-addr { margin-top: 14px; font-size: 14px; color: var(--text-muted); }
+  .nm-footer-cols { display: flex; gap: clamp(32px, 6vw, 64px); flex-wrap: wrap; }
+  .nm-footer-cols h4 { margin: 0 0 10px; font: 600 14px var(--font); color: var(--ink); letter-spacing: 0; }
+  .nm-footer-cols a, .nm-footer-cols button { display: block; font: 15px var(--font); color: var(--text-muted); padding: 4px 0; background: none; border: 0; cursor: pointer; text-align: left; }
+  .nm-footer-cols a:hover, .nm-footer-cols button:hover { color: var(--ink); }
+  .nm-footer-bottom { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 14px; color: var(--text-soft); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+  /* ---------- Sources switch (for reviewing the mock) ---------- */
+  .nm-src-btn { position: fixed; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 30; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text-muted); font: 500 13px var(--font); cursor: pointer; box-shadow: var(--shadow-lift); }
+  .nm-src-btn[aria-pressed="true"] { color: var(--accent-text); background: var(--accent); border-color: var(--accent); }
+  .nm-src-legend { position: fixed; left: 16px; bottom: calc(64px + env(safe-area-inset-bottom)); z-index: 30; width: min(360px, calc(100vw - 32px)); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; font-size: 13px; color: var(--text-muted); box-shadow: var(--shadow-lift); display: none; }
+  .show-src .nm-src-legend { display: block; }
+  .nm-src-legend strong { color: var(--ink); }
+  .nm-src-legend dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; }
+  .nm-src-legend dt { font-weight: 700; color: var(--accent-fg); }
+  .nm-src-legend dd { margin: 0; }
+  .show-src [data-src]::after { content: attr(data-src); display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 6px; vertical-align: middle; font: 600 11px/1.6 var(--font); letter-spacing: 0; color: var(--accent-fg); background: var(--accent-quiet); border: 1px solid var(--accent-light); white-space: nowrap; }
+  .nm-band .show-src [data-src]::after, .show-src .nm-band [data-src]::after { background: rgba(54, 182, 234, .18); color: #9fdcff; }
+
+  /* ---------- Service sheet ---------- */
+  .nm-scrim { position: fixed; inset: 0; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
+  .nm-sheet { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); background: var(--surface); box-shadow: var(--sheet-shadow); transform: translateX(100%); transition: transform .25s ease; z-index: 50; display: flex; flex-direction: column; }
+  .nm-sheet-open .nm-scrim { opacity: 1; pointer-events: auto; }
+  .nm-sheet-open .nm-sheet { transform: none; }
+  .nm-sheet-head { padding: 24px 28px 20px; border-bottom: 1px solid var(--line); display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; }
+  .nm-sheet-stage { font-size: 14px; color: var(--text-muted); }
+  .nm-sheet-head h3 { font-size: 22px; margin-top: 6px; line-height: 1.3; }
+  .nm-sheet-body { padding: 24px 28px 36px; overflow-y: auto; display: grid; gap: 24px; align-content: start; }
+  .nm-sheet-body > p { font-size: 17px; color: var(--text); }
+  .nm-sheet-block h5 { margin: 0 0 10px; font: 600 15px var(--font); color: var(--ink); }
+  .nm-sheet-block ul { margin: 0; padding-left: 20px; display: grid; gap: 10px; }
+  .nm-sheet-block li { font-size: 15px; padding-left: 4px; color: var(--text-muted); }
+  .nm-sheet-block li::marker { color: var(--accent-light); }
+  .nm-sheet-src { border-top: 1px solid var(--line); padding-top: 16px; font-size: 13px; color: var(--text-soft); }
+  .nm-sheet-foot { margin-top: auto; padding: 16px 28px calc(16px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+
+  /* ---------- Nine: full-screen conversation ---------- */
+  .nm-as { position: fixed; inset: 0; z-index: 60; background: var(--as-bg); display: grid; grid-template-rows: auto 1fr auto; opacity: 0; visibility: hidden; transition: opacity .25s, visibility 0s .25s; height: 100dvh; }
+  .nm-as.is-open { opacity: 1; visibility: visible; transition: opacity .25s; }
+  .nm-as-top, .nm-as-bottom { display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; gap: 16px; }
+  .nm-as-bottom { padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+  .nm-as-top img { height: 30px; width: auto; }
+  .nm-as-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); align-items: center; gap: 56px; padding: 0 32px; max-width: 1240px; width: 100%; margin: 0 auto; min-height: 0; overflow-y: auto; }
+  .nm-as-talk { max-width: 560px; padding: 24px 0; }
+  .nm-as-prev { font-size: 15px; line-height: 1.5; color: var(--text-soft); min-height: 1.5em; margin-bottom: 16px; }
+  .nm-as-prev.is-user { color: var(--accent-fg); }
+  .nm-as-prev.is-user::before { content: "You: "; color: var(--text-soft); }
+  .nm-as-now { font: 500 clamp(21px, 2.3vw, 30px)/1.36 var(--display); color: var(--ink); min-height: 2.8em; letter-spacing: -0.015em; }
+  .nm-as-now.is-fade { animation: nmFade .3s ease; }
+  .nm-as-now dl { font: 400 15px/1.5 var(--font); letter-spacing: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; margin: 16px 0 0; }
+  .nm-as-now dt { color: var(--text-muted); }
+  .nm-as-now dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+  .nm-as-now a { color: var(--accent-fg); text-decoration: underline; text-underline-offset: 3px; }
+  @keyframes nmFade { from { opacity: 0; } to { opacity: 1; } }
+  .nm-as-opts { display: grid; margin-top: 24px; }
+  .nm-as-opts:empty { display: none; }
+  .nm-as-opt { display: flex; justify-content: space-between; align-items: center; gap: 16px; width: 100%; min-height: 48px; text-align: left; background: none; border: 0; border-top: 1px solid var(--line); padding: 12px 2px; font: 500 17px/1.4 var(--font); color: var(--text); cursor: pointer; opacity: 0; animation: nmOpt .3s ease forwards; }
+  .nm-as-opt:last-child { border-bottom: 1px solid var(--line); }
+  .nm-as-opt .nm-arr { color: var(--text-soft); transition: transform .15s, color .15s; flex: none; }
+  .nm-as-opt:hover, .nm-as-opt:focus-visible { color: var(--ink); outline: none; }
+  .nm-as-opt:hover .nm-arr, .nm-as-opt:focus-visible .nm-arr { color: var(--accent-fg); transform: translateX(4px); }
+  @keyframes nmOpt { to { opacity: 1; } }
+  .nm-as-form { display: flex; align-items: center; gap: 10px; margin-top: 20px; border-bottom: 2px solid var(--line); transition: border-color .15s; }
+  .nm-as-form:focus-within { border-color: var(--accent-fg); }
+  .nm-as-form input { flex: 1; min-width: 0; background: none; border: 0; outline: none; font: 400 18px var(--font); color: var(--ink); padding: 12px 0; }
+  .nm-as-form input::placeholder { color: var(--text-soft); }
+  .nm-as-hidden { display: none !important; }
+  .nm-as-round { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; flex: none; transition: background .15s, color .15s, border-color .15s; }
+  .nm-as-round:hover { border-color: var(--text-soft); }
+  .nm-as-round:disabled { opacity: .35; cursor: default; }
+  .nm-as-round.is-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  .nm-as-mic { position: relative; }
+  .nm-as-mic.is-on { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  .nm-as-mic.is-on::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--accent-light); animation: nfRing 1.4s ease-out infinite; }
+  .nm-as-status { margin-top: 12px; font-size: 14px; color: var(--text-muted); min-height: 1.4em; }
+  .nm-as-sound { display: inline-flex; align-items: center; gap: 10px; font: 14px var(--font); color: var(--text-muted); background: none; border: 0; cursor: pointer; padding: 0; }
+  .nm-as-sound:hover { color: var(--ink); }
+  .nm-as-sound .nm-as-round { pointer-events: none; }
+  .nm-as-sound .nm-off, .nm-as-sound[aria-pressed="false"] .nm-on { display: none; }
+  .nm-as-sound[aria-pressed="false"] .nm-off { display: block; }
+  .nm-as-face { justify-self: center; width: min(400px, 36vw); position: relative; }
+  .nm-as-face-label { position: absolute; top: 100%; left: 0; right: 0; margin-top: 10px; text-align: center; font-size: 14px; color: var(--text-muted); min-height: 1.4em; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .nm-as-opt { opacity: 1; }
+  }
+
+  /* ---------- Laptop / small desktop ---------- */
+  @media (max-width: 1180px) {
+    .nm-nav { gap: 22px; }
+    .nm-stage { grid-template-columns: 260px 1fr; }
+  }
+  /* ---------- Tablet ---------- */
+  @media (max-width: 1024px) {
+    .nm-hero-in { grid-template-columns: 1fr 300px; gap: 32px; }
+    .nm-bubble { left: -10%; max-width: 200px; }
+    .nm-stage { grid-template-columns: 1fr; gap: 24px; padding: 44px 0; }
+    .nm-stage-side { position: static; }
+    .nm-bento { grid-template-columns: repeat(2, 1fr); }
+    .nm-tile, .nm-tile:nth-child(1), .nm-tile:nth-child(2) { grid-column: span 1; }
+    .nm-tile:nth-child(5) { grid-column: span 2; }
+    .nm-timeline { grid-template-columns: repeat(2, 1fr); gap: 40px 24px; }
+    .nm-timeline::before { display: none; }
+    .nm-structures, .nm-future { grid-template-columns: 1fr 1fr; }
+    .nm-contact { grid-template-columns: 1fr; }
+    .nm-split { grid-template-columns: 1fr; }
+    .nm-list > div { grid-template-columns: 200px 1fr; }
+    .nm-as-main { gap: 32px; }
+  }
+  /* ---------- Small tablet / large phone ---------- */
+  @media (max-width: 820px) {
+    .nm-nav { display: none; position: absolute; top: 72px; left: 0; right: 0; background: var(--surface); border-bottom: 1px solid var(--line); flex-direction: column; align-items: stretch; gap: 0; padding: 8px var(--gutter) 16px; box-shadow: var(--shadow-lift); }
+    .nm-nav.is-open { display: flex; }
+    .nm-nav a { padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 16px; }
+    .nm-nav a:last-child { border-bottom: 0; }
+    .nm-header-actions { margin-left: auto; }
+    .nm-menu-btn { display: grid; }
+    .nm-hero-in { grid-template-columns: 1fr; gap: 40px; }
+    .nm-hero-nine { width: min(280px, 72vw); grid-row: 1; }
+    .nm-bubble { left: auto; right: -4%; top: -2%; border-radius: 18px 18px 4px 18px; }
+    .nm-ladder { grid-template-columns: 1fr; height: auto; gap: 8px; }
+    .nm-rung { height: auto; min-height: 64px; flex-direction: row; justify-content: flex-start; align-items: center; gap: 14px; margin-left: calc((5 - var(--n)) * 0px); width: calc(60% + var(--n) * 8%); }
+    .nm-rung::before { font-size: 40px; top: 50%; transform: translateY(-50%); }
+    .nm-level { grid-template-columns: 1fr; gap: 20px; }
+    .nm-list > div { grid-template-columns: 1fr; gap: 6px; }
+    .nm-rules, .nm-cards { grid-template-columns: 1fr; }
+    .nm-panel-nine { grid-template-columns: 1fr; }
+    .nm-panel-nine .nm-nine { width: 120px; }
+    .nm-as-main { grid-template-columns: 1fr; gap: 0; align-content: start; padding: 0 20px; }
+    .nm-as-face { width: 130px; order: -1; justify-self: start; margin-top: 4px; }
+    .nm-as-face-label { text-align: left; margin-top: 2px; }
+    .nm-as-top, .nm-as-bottom { padding: 14px 20px; }
+    .nm-as-bottom { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+    .nm-as-sound-label { display: none; }
+  }
+  /* ---------- Phone ---------- */
+  @media (max-width: 560px) {
+    .nm-logo img { height: 28px; }
+    .nm-header-in { gap: 8px; height: 64px; }
+    .nm-nav { top: 64px; }
+    .nm-header-cta { padding: 0 14px; font-size: 13px; min-height: 38px; }
+    .nm-theme-btn { display: none; }
+    .nm-nav .nm-theme-row { display: flex; }
+    .nm-hero-actions .nm-btn { flex: 1 1 100%; }
+    .nm-bento, .nm-timeline, .nm-structures, .nm-future { grid-template-columns: 1fr; }
+    .nm-tile:nth-child(5) { grid-column: span 1; }
+    .nm-tile { min-height: 0; }
+    .nm-person { grid-template-columns: 1fr; gap: 16px; }
+    .nm-pipeline .nm-pipe { padding: 8px 14px; font-size: 14px; }
+    .nm-backwards .nm-btn { width: 100%; }
+    .nm-talk-actions .nm-btn { flex: 1 1 auto; }
+    .nm-as-face { width: 104px; }
+    .nm-as-now { min-height: 0; }
+    .nm-src-btn { left: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); width: 40px; height: 40px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
+  }
+  .nm-theme-row { display: none; align-items: center; justify-content: space-between; padding: 14px 0 0; color: var(--text-muted); font-size: 16px; }
+
+  /* ---------- Photo Nine: a photographic body with a display head (assets/nine/photo) ----------
+     The head is its own layer, so it can look, nod and tilt; the face is live HTML mapped onto the screen. */
+  .np { position: relative; width: 100%; container-type: inline-size; --lx: 0; --ly: 0; }
+  .np-clip { position: relative; aspect-ratio: 896 / 1233; isolation: isolate;
+    -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 99%); mask-image: linear-gradient(to bottom, #000 80%, transparent 99%); }
+  .np-clip::before { content: ""; position: absolute; left: 8%; right: 8%; top: 6%; height: 62%; border-radius: 50%; background: radial-gradient(closest-side, rgba(54, 182, 234, .16), transparent); filter: blur(10px); z-index: -1; }
+  .np-stage { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 896 / 1233; transform: translate(calc(var(--lx) * -1.1%), calc(var(--ly) * -.7%)); transition: transform .4s ease-out; }
+  .np-body { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; transform-origin: 50% 100%; animation: npBreath 4.8s ease-in-out infinite; }
+  .np-head { position: absolute; left: 14.844%; top: 1.946%; width: 66.295%; height: 47.283%; transform-origin: 43.65% 96.87%; animation: npHeadBreath 4.8s ease-in-out infinite; }
+  .np-neck, .np-act { position: absolute; inset: 0; transform-origin: 43.65% 96.87%; }
+  .np-neck { transform: translate(calc(var(--lx) * 1.4%), calc(var(--ly) * .8%)) perspective(900px) rotateY(calc(var(--lx) * 10deg)) rotateX(calc(var(--ly) * -7deg)) rotate(calc(var(--lx) * 1.6deg)); transition: transform .35s ease-out; }
+  .np-head img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; }
+  .np-screen { position: absolute; left: 0; top: 0; width: 400px; height: 275px; transform-origin: 0 0; pointer-events: none; }
+  .np-screen .nf { width: 100%; height: 100%; aspect-ratio: auto; mix-blend-mode: screen; transition: filter .6s, opacity .6s; }
+  .np-screen .nf-face::after { content: ""; position: absolute; inset: -10%; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 4px); pointer-events: none; }
+  .np-screen .nf-eye { width: 12.5%; height: 42%; top: 18%; }
+  .np-screen .nf-mouth { bottom: 12%; }
+  .np-screen .nf-l { left: 30%; } .np-screen .nf-r { right: 30%; }
+  .np .nb-say { bottom: auto; top: 3%; }
+  .np .nb-zzz { left: 72cqw; top: 2cqw; font-size: 9cqw; z-index: 3; }
+  .np[data-pose="sleep"] .nb-zzz i { animation: nbZ 3s ease-in infinite; }
+  .np[data-pose="sleep"] .nb-zzz i:nth-child(2) { animation-delay: 1s; font-size: 11cqw; }
+  .np[data-pose="sleep"] .nb-zzz i:nth-child(3) { animation-delay: 2s; font-size: 13cqw; }
+  /* the 360 turn: rendered video frames drawn on a canvas; drag Nine to spin her */
+  .np-turn { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; transition: opacity .18s; }
+  .np.is-turning .np-turn { opacity: 1; }
+  .np-body, .np-head { transition: opacity .18s; }
+  .np.is-turning .np-body, .np.is-turning .np-head { opacity: 0; }
+  .np.can-turn .np-clip { cursor: grab; touch-action: pan-y; }
+  .np.is-dragging .np-clip { cursor: grabbing; }
+  /* poses */
+  .np[data-pose="sit"] .np-act { transform: translateY(1.5%) rotate(3deg); transition: transform .8s ease; }
+  .np[data-pose="sleep"] .np-act { transform: translateY(5%) perspective(900px) rotateX(16deg) rotate(-7deg); transition: transform 1.6s ease; }
+  .np[data-pose="sleep"] .np-screen .nf { filter: brightness(.55); }
+  .np[data-pose="sleep"] .np-body { animation-duration: 6.5s; }
+  .np[data-pose="stand"] .np-act { transition: transform .5s ease; }
+  /* moves (set from the actions the site asks for) */
+  .np[data-move="greet"] .np-act { animation: npGreet 1.1s ease-in-out infinite; }
+  .np[data-move="nod"] .np-act { animation: npNod .8s ease-in-out infinite; }
+  .np[data-move="think"] .np-act { transform: translateY(-1%) rotate(-6deg); transition: transform .5s ease; }
+  .np[data-move="listen"] .np-act { transform: translateX(1.5%) rotate(5deg); transition: transform .5s ease; }
+  .np[data-move="talk"] .np-act { animation: npTalk 2.4s ease-in-out infinite; }
+  .np[data-move="shrug"] .np-body { translate: 0 -1.2%; transition: translate .35s ease; }
+  .np[data-move="shrug"] .np-act { transform: translateY(-2.5%) rotate(-5deg); transition: transform .35s ease; }
+  .np[data-move="hop"] .np-act { animation: npHop .7s ease-out; }
+  .np[data-move="sway"] .np-act { animation: npSway 1s ease-in-out infinite; }
+  .np[data-move="sway"] .np-body { animation: npBreath 4.8s ease-in-out infinite, npBodySway 1s ease-in-out infinite; }
+  .np[data-move="shake"] .np-act { animation: npShake .9s ease-in-out; }
+  .np[data-move="jerk"] .np-act { animation: npJerk .8s ease-out; }
+  .np[data-move="roll"] .np-act { animation: npRoll 1.8s ease-in-out; }
+  .np[data-move="down"] .np-act { transform: translate(-1%, 2%) perspective(900px) rotateX(12deg) rotate(-3deg); transition: transform .5s ease; }
+  .np[data-act="yawn"] .nf-mouth { transform: translateX(-50%) scale(1.3, 2.6); }
+  .np[data-act="yawn"] .nf-eye { height: 10%; top: 40%; }
+  @keyframes npBreath { 0%, 100% { scale: 1 1; } 50% { scale: 1.004 1.009; } }
+  @keyframes npHeadBreath { 0%, 100% { translate: 0 0; } 50% { translate: 0 -.9%; } }
+  @keyframes npGreet { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-5deg) translateY(-1%); } 65% { transform: rotate(4deg); } }
+  @keyframes npNod { 0%, 100% { transform: none; } 45% { transform: translateY(2%) perspective(900px) rotateX(14deg); } }
+  @keyframes npTalk { 0%, 100% { transform: none; } 25% { transform: rotate(-1.5deg); } 60% { transform: rotate(1.2deg) translateY(-.5%); } }
+  @keyframes npHop { 0%, 100% { transform: none; } 35% { transform: translateY(-4%); } 70% { transform: translateY(.6%); } }
+  @keyframes npSway { 0%, 100% { transform: rotate(-4deg) translateX(-1%); } 50% { transform: rotate(4deg) translateX(1%); } }
+  @keyframes npBodySway { 0%, 100% { translate: -.5% 0; } 50% { translate: .5% 0; } }
+  @keyframes npShake { 0%, 100% { transform: none; } 20%, 60% { transform: perspective(900px) rotateY(-12deg); } 40%, 80% { transform: perspective(900px) rotateY(12deg); } }
+  @keyframes npJerk { 0%, 100% { transform: none; } 30% { transform: translateY(-2%) perspective(900px) rotateX(-10deg); } 45% { transform: translateY(2.5%) perspective(900px) rotateX(16deg) scale(1.02); } }
+  @keyframes npRoll { 0%, 100% { transform: none; } 30% { transform: rotate(-9deg) translateY(-1%); } 70% { transform: rotate(8deg) translateY(-1%); } }
+  /* where Photo Nine lives */
+  .nm-hero-nine .nm-nine { border-radius: 0; }
+  .nm-hero-nine .nm-bubble { top: 56%; }
+  .nm-as-face .np { width: 100%; }
+  @media (max-width: 820px) {
+    .nm-as-face .np-clip { aspect-ratio: 1; }
+    .nm-as-face .np-stage { width: 150%; left: -25%; top: 0; }
+    .nm-as-face .np .nb-say { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .np-body, .np-head, .np-act { animation: none !important; }
+    .np-stage, .np-neck { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nm-header" id="top">
+  <div class="nm-wrap nm-header-in">
+    <a class="nm-logo" href="#top" aria-label="Ninth Mind home">
+      <img class="nm-logo-img" src="assets/ninth-mind-logo.png" alt="Ninth Mind: AI-Powered Business Transformation & Training">
+    </a>
+    <nav class="nm-nav" id="nav" aria-label="Main">
+      <a href="#approach">Approach</a>
+      <a href="#services">Services</a>
+      <a href="#programme">How we work</a>
+      <a href="#contact">Contact</a>
+      <div class="nm-theme-row"><span>Dark mode</span><button class="nm-icon-btn" type="button" data-theme-toggle aria-label="Switch theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button></div>
+    </nav>
+    <div class="nm-header-actions">
+      <button class="nm-icon-btn nm-theme-btn" type="button" data-theme-toggle aria-label="Switch to dark mode">
+        <svg class="nm-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="nm-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>
+      </button>
+      <button class="nm-btn nm-btn-primary nm-btn-sm nm-header-cta" type="button" data-talk>Talk to Nine</button>
+      <button class="nm-icon-btn nm-menu-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="nm-hero">
+  <div class="nm-wrap nm-hero-in">
+    <div>
+      <h1 data-src="F">AI is not the answer. <em>AI is the process.</em></h1>
+      <p class="nm-hero-lead" data-src="F">Buying ChatGPT, Claude, Gemini, Copilot or any other platform won't transform an organisation. Redesigning how work gets done, and building the people who can work that way, will. That is the work we do.</p>
+      <div class="nm-hero-actions">
+        <button class="nm-btn nm-btn-primary" type="button" data-talk data-voice>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          Talk to Nine
+        </button>
+        <a class="nm-btn nm-btn-ghost" href="#approach">See the five levels</a>
+      </div>
+    </div>
+    <div class="nm-hero-nine">
+      <div class="nm-bubble"><strong>Hi, I'm Nine.</strong>Ninth Mind's assistant. Tap me, or just say hello.</div>
+      <button class="nm-nine" type="button" data-talk aria-label="Talk to Nine, Ninth Mind's assistant"><span id="heroBody"></span></button>
+    </div>
+  </div>
+</section>
+
+<section class="nm-band">
+  <div class="nm-wrap">
+    <h2 data-src="F">Everyone is buying AI. <span>Very few organisations are becoming AI-first.</span></h2>
+    <p data-src="F">If AI is used only to draft emails or summarise meetings, a task has improved. If it is embedded into every stage of the business, and every person is equipped to use it, the business has been transformed.</p>
+  </div>
+</section>
+
+<section class="nm-section" id="approach">
+  <div class="nm-wrap">
+    <div class="nm-section-head">
+      <h2>Five levels of AI maturity</h2>
+      <p data-src="F">Each level changes more of how work gets done, from individual tasks to the whole business. Select a level to see what it looks like.</p>
+    </div>
+    <div class="nm-ladder" id="ladder" role="tablist" aria-label="AI maturity levels"></div>
+    <div class="nm-level" id="levelPanel" role="tabpanel" aria-live="polite"></div>
+    <div class="nm-backwards">
+      <p data-src="F">Where are you today, and where should you be in 12 months?</p>
+      <button class="nm-btn nm-btn-primary" type="button" data-talk="level">Find your level with Nine</button>
+    </div>
+  </div>
+</section>
+
+<section class="nm-section nm-section-sunken" id="training">
+  <div class="nm-wrap nm-split">
+    <div>
+      <h2 class="nm-h2" data-src="F">Tools can be purchased in a day. Capability cannot.</h2>
+      <p data-src="F">That is why upskilling is not a stage in the journey. It is the thread that holds every stage together.</p>
+      <p class="nm-quote" data-src="F">An organisation moves up the maturity ladder only as fast as its people do.</p>
+    </div>
+    <div class="nm-list">
+      <div><h3>Foundational literacy</h3><p data-src="F">For all staff: safe, confident, everyday use.</p></div>
+      <div><h3>Role-based training</h3><p data-src="F">As workflows are redesigned around specific use cases.</p></div>
+      <div><h3>Leadership briefings</h3><p data-src="F">So senior management can sponsor and govern AI with confidence.</p></div>
+      <div><h3>Continuous refreshers</h3><p data-src="F">Through the AI Edge Series, community groups and regular AI updates, because the AI landscape changes every day.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="nm-section" id="services">
+  <div class="nm-wrap">
+    <div class="nm-section-head">
+      <h2 data-src="P">Our service portfolio: where we create impact</h2>
+      <p>Five service areas, one for each stage. Select a service to see what it involves.</p>
+    </div>
+    <div class="nm-bento" id="bento"></div>
+    <div id="stages"></div>
+  </div>
+</section>
+
+<section class="nm-section nm-section-sunken" id="programme">
+  <div class="nm-wrap">
+    <div class="nm-section-head">
+      <h2 data-src="S §10">How a two-year programme runs</h2>
+      <p data-src="S §1">Five workstreams (awareness, use-case discovery, implementation, governance and institutionalisation) delivered in four phases.</p>
+    </div>
+    <div class="nm-timeline">
+      <div class="nm-phase"><small>Months 1–6</small><h3>Foundation &amp; awareness</h3><ul><li>AI Edge Series and awareness sessions</li><li>Department-wise process understanding</li><li>Draft AI usage, governance and data classification frameworks</li><li>Form the AI Steering Committee and identify AI champions</li></ul></div>
+      <div class="nm-phase"><small>Months 7–12</small><h3>Pilot &amp; capability</h3><ul><li>Hackathons and use-case workshops</li><li>Proofs of concept and pilots</li><li>SOP documentation and process refinement</li><li>First knowledge base, AI agents and bridge tools</li></ul></div>
+      <div class="nm-phase"><small>Months 13–18</small><h3>Scale &amp; integration</h3><ul><li>Scale successful pilots</li><li>Integrate AI tools with existing systems</li><li>Launch the internal AI portal</li><li>Expand private / offline LLM use on approved documents</li></ul></div>
+      <div class="nm-phase"><small>Months 19–24</small><h3>Institutionalise &amp; improve</h3><ul><li>Establish the AI Centre of Excellence</li><li>Embed AI into SOPs, reporting, training and reviews</li><li>Track adoption across functions</li><li>Review AI policy, governance and data controls</li></ul></div>
+    </div>
+
+    <div class="nm-pipeline" aria-label="How an idea becomes a deployed solution">
+      <p data-src="S §3">Every idea moves through one pipeline. High-impact, low-risk, scalable use cases go first.</p>
+      <span class="nm-pipe">Idea</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      <span class="nm-pipe">Proof of concept</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      <span class="nm-pipe">Pilot</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      <span class="nm-pipe">Full deployment</span>
+    </div>
+
+    <div class="nm-rules">
+      <div class="nm-rule">
+        <h3>People stay in charge</h3>
+        <p data-src="S §6">AI assists decision-making; it does not replace approval authority. Sensitive outputs are reviewed by the person responsible, and human approval is mandatory for financial decisions, legal matters, employee matters, external communication, regulatory submissions and high-risk operational decisions.</p>
+      </div>
+      <div class="nm-rule">
+        <h3 data-src="S §7">Data is classified before it meets AI</h3>
+        <dl class="nm-classes">
+          <dt>Public</dt><dd>Public and internal AI tools</dd>
+          <dt>Internal</dt><dd>Approved internal AI tools; not public tools without approval</dd>
+          <dt>Confidential</dt><dd>Internal or private AI tools only, under access controls</dd>
+          <dt>Restricted</dt><dd>Private or offline AI tools only, with prior approval</dd>
+          <dt>Highly sensitive</dt><dd>No AI tool without explicit senior approval and dedicated safeguards</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="nm-structures">
+      <div><h3>AI Steering Committee</h3><p data-src="S §8">Management, IT, finance, operations, risk, HR, compliance and the AI team approve priority use cases and policies, and review risk and adoption.</p></div>
+      <div><h3>AI Champions</h3><p data-src="S §8">One or two per department or company, driving awareness, collecting use cases and supporting training.</p></div>
+      <div><h3>Centre of Excellence</h3><p data-src="S §8">Keeps reusable templates, prompts, SOPs and standards, so capability does not depend on individuals.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="nm-section" id="mfi">
+  <div class="nm-wrap nm-split">
+    <div>
+      <h2 class="nm-h2">We start with our own group</h2>
+      <p data-src="F, S §1">Ninth Mind leads the AI journey within the MFI Group, across its companies, departments, countries and business functions. The maturity ladder, the training and the programme on this page are the approach we use there.</p>
+    </div>
+    <div class="nm-list">
+      <div><h3>Every function</h3><p data-src="S §2, F">Sales, service, operations, procurement, stores, finance, HR, risk, compliance, IT and administration.</p></div>
+      <div><h3>Every person</h3><p data-src="F">From foundational literacy for all staff to role-based training and leadership briefings.</p></div>
+      <div><h3>Every stage of the work</h3><p data-src="F">From lead generation and quotation through delivery, installation and after-sales service to billing and collections.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="nm-section nm-section-sunken" id="planned">
+  <div class="nm-wrap">
+    <div class="nm-section-head">
+      <h2 data-src="P">Future plans</h2>
+      <p>Areas we plan to offer next. They are not available yet.</p>
+    </div>
+    <div class="nm-future">
+      <div class="nm-future-card"><span class="nm-pill">Planned</span><h3 data-src="P">AI for Government &amp; Public Sector, E-Governance Solutions</h3></div>
+      <div class="nm-future-card"><span class="nm-pill">Planned</span><h3 data-src="P">Sovereign AI &amp; Local Data Infrastructure</h3></div>
+      <div class="nm-future-card"><span class="nm-pill">Planned</span><h3 data-src="P">Sector-Specific AI Solutions</h3><p>Custom AI and machine learning development for specific industries (vertical specialisation).</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="nm-section" id="contact">
+  <div class="nm-wrap">
+    <div class="nm-section-head">
+      <h2>Get in touch</h2>
+      <p>Talk to Nine, or contact our Managing Director directly.</p>
+    </div>
+    <div class="nm-contact">
+      <div class="nm-panel nm-panel-nine">
+        <div>
+          <h2>Talk to Nine</h2>
+          <p>Nine asks a few questions about what you need and passes your answers to our team. Type, tap or just speak.</p>
+          <div class="nm-talk-actions">
+            <button class="nm-btn nm-btn-primary" type="button" data-talk data-voice>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+              Start talking
+            </button>
+            <button class="nm-btn nm-btn-ghost" type="button" data-talk>Type instead</button>
+          </div>
+          <small>Voice uses your browser's built-in speech service.</small>
+        </div>
+      </div>
+
+      <div class="nm-panel">
+        <div class="nm-person">
+          <div class="nm-avatar" aria-hidden="true"><span>AT</span></div>
+          <div>
+            <h3>CA Anup Tabe</h3>
+            <p class="nm-person-role">Founder &amp; Managing Director, Ninth Mind Limited</p>
+            <p class="nm-person-tags">AI-Powered Business Transformation · AI Training &amp; Upskilling</p>
+            <div class="nm-contacts">
+              <a href="mailto:anup.tabe@ninthmind.ai"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span><em>Email</em>anup.tabe@ninthmind.ai</span></a>
+              <a href="tel:+254116744777"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18h2"/></svg><span><em>Mobile</em>+254 11 67 44 777</span></a>
+              <a href="https://wa.me/917769055500" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.2A8.5 8.5 0 1 1 20 11.5Z"/><path d="M9 9.5c.3 1.8 2.2 3.8 4 4.2l1.1-1.1 1.9.8c-.2 1-1.1 1.6-2 1.5-3-.4-5.4-2.9-5.8-5.8-.1-.9.5-1.8 1.5-2l.8 1.9L9 9.5Z"/></svg><span><em>WhatsApp</em>+91 77 690 555 00</span></a>
+              <a href="https://www.google.com/maps/search/?api=1&amp;query=16+Kanjata+Road+Nairobi+Kenya" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span><em>Office</em>No. 16 Kanjata Road, off James Gichuru Road, Nairobi, Kenya</span></a>
+              <a href="https://www.ninthmind.ai" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span>www.ninthmind.ai</span></a>
+              <a href="https://www.linkedin.com/in/caanuptabe" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4M12 10v7"/></svg><span>linkedin.com/in/caanuptabe</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="nm-footer">
+  <div class="nm-wrap">
+    <div class="nm-footer-top">
+      <div>
+        <img class="nm-logo-img" src="assets/ninth-mind-logo.png" alt="Ninth Mind: AI-Powered Business Transformation & Training">
+        <p class="nm-footer-addr">No. 16 Kanjata Road, off James Gichuru Road, Nairobi, Kenya<br><a href="mailto:anup.tabe@ninthmind.ai">anup.tabe@ninthmind.ai</a> · <a href="https://www.ninthmind.ai" target="_blank" rel="noopener">www.ninthmind.ai</a></p>
+      </div>
+      <div class="nm-footer-cols">
+        <div>
+          <h4>Services</h4>
+          <a href="#stage-think">AI Advisory</a>
+          <a href="#stage-build">AI Build &amp; Integration</a>
+          <a href="#stage-enable">AI Learning &amp; Development</a>
+          <a href="#stage-sustain">AI Assurance &amp; Governance</a>
+          <a href="#stage-innovate">AI Innovation &amp; Research</a>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <a href="#approach">Five levels of AI maturity</a>
+          <a href="#programme">How we work</a>
+          <a href="#mfi">Our work in the MFI Group</a>
+          <a href="#planned">Future plans</a>
+          <button type="button" data-talk>Talk to Nine</button>
+        </div>
+      </div>
+    </div>
+    <div class="nm-footer-bottom"><span>© <span id="year"></span> Ninth Mind Limited</span><span>AI-Powered Business Transformation &amp; Training</span></div>
+  </div>
+</footer>
+
+<!-- Sources switch: shows which document backs each statement -->
+<div class="nm-src-legend" role="note">
+  <strong>Where each statement comes from</strong>
+  <dl>
+    <dt>P</dt><dd>Our Service Portfolio: Where We Create Impact</dd>
+    <dt>S §</dt><dd>AI Adoption Strategy for Group MFI, management note (section number)</dd>
+    <dt>F</dt><dd>The MFI AI Transformation Journey Framework, V1</dd>
+  </dl>
+  <p style="margin-top:8px">Unmarked text is navigation or instructions, not a claim. Contact details: Anup Tabe's email signature.</p>
+</div>
+<button class="nm-src-btn" id="srcBtn" type="button" aria-pressed="false">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11l5 5v9a1 1 0 0 1-1 1H4z"/><path d="M15 5v5h5M8 13h8M8 17h5"/></svg>
+  Sources
+</button>
+
+<!-- Service detail sheet -->
+<div class="nm-scrim" id="scrim"></div>
+<aside class="nm-sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" aria-hidden="true">
+  <div class="nm-sheet-head">
+    <div><div class="nm-sheet-stage" id="sheetStage"></div><h3 id="sheetTitle"></h3></div>
+    <button class="nm-icon-btn" id="sheetClose" type="button" aria-label="Close">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="nm-sheet-body" id="sheetBody"></div>
+  <div class="nm-sheet-foot"><button class="nm-btn nm-btn-primary" type="button" id="sheetCta">Ask Nine about this</button></div>
+</aside>
+
+<!-- Nine: full-screen conversation -->
+<div class="nm-as" id="as" role="dialog" aria-modal="true" aria-label="Nine, Ninth Mind's assistant" aria-hidden="true" data-state="idle">
+  <div class="nm-as-top">
+    <img class="nm-logo-img" src="assets/ninth-mind-logo.png" alt="Ninth Mind">
+    <button class="nm-icon-btn" id="asClose" type="button" aria-label="Close Nine">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="nm-as-main">
+    <div class="nm-as-talk">
+      <p class="nm-as-prev" id="asPrev"></p>
+      <div class="nm-as-now" id="asNow" aria-live="polite"></div>
+      <div class="nm-as-opts" id="asOpts"></div>
+      <form class="nm-as-form nm-as-hidden" id="asForm" autocomplete="off">
+        <input id="asInput" aria-label="Your answer" enterkeyhint="send">
+        <button type="button" class="nm-as-round nm-as-mic" id="asMic" aria-label="Speak your answer" aria-pressed="false" title="Speak">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
+        <button type="submit" class="nm-as-round is-primary" aria-label="Send">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+      <p class="nm-as-status" id="asStatus" role="status"></p>
+    </div>
+    <div class="nm-as-face" aria-hidden="true">
+      <div id="asBody"></div>
+      <div class="nm-as-face-label" id="asFaceLabel"></div>
+    </div>
+  </div>
+  <div class="nm-as-bottom">
+    <button class="nm-as-round" id="asBack" type="button" aria-label="Go back" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    </button>
+    <button class="nm-as-sound" id="asSound" type="button" aria-pressed="true">
+      <span class="nm-as-sound-label" id="asSoundLabel">Nine speaks out loud</span>
+      <span class="nm-as-round">
+        <svg class="nm-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        <svg class="nm-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m16 9 5 6M21 9l-5 6"/></svg>
+      </span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* Nine's body artwork. Set to true once the commissioned PNGs are in assets/nine/ (see nine-artwork-brief.md). */
+const NINE_ART = false;
+if (NINE_ART) document.documentElement.classList.add("nine-art");
+
+/* Every statement below is taken from one of three documents:
+   P = Our Service Portfolio, S = AI Adoption Strategy (section), F = AI Transformation Journey Framework. */
+const STAGES = [
+  { id: "think", stage: "Think", area: "AI Advisory Services",
+    intro: "Strategy and readiness, data and infrastructure, tools and vendors, and funding: the decisions before anything is built.",
+    services: [
+      { title: "AI Strategy & Readiness Assessment", about: "Where AI can help, which use cases to start with, and what needs to be in place first.",
+        do: [["Department-by-department discovery of real business problems and automation ideas", "S §3"],
+             ["Score use cases on business impact, ease of implementation, data availability, cost, risk, scalability and expected time saving", "S §3"],
+             ["Sequence high-impact, low-risk, scalable use cases first", "S §3"],
+             ["Agree where each department is today and where it should be in 12 months", "F"]] },
+      { title: "Data Strategy & Infrastructure Advisory", about: "Getting data, systems and infrastructure ready for AI.",
+        do: [["Map current systems, workflows and data flows", "S §5"],
+             ["A data classification framework that sets what may be used with which AI tools", "S §7"],
+             ["Plan infrastructure, cloud or server requirements and security", "S §9"],
+             ["Integration architecture and data strategy that connect the business", "F"]] },
+      { title: "AI Procurement & Vendor Advisory", about: "Choosing AI tools and vendors, and deciding which tools staff may use.",
+        do: [["Set permitted and prohibited use of public tools such as ChatGPT, Gemini, Claude and Copilot", "S §7"],
+             ["Vendor risk assessment", "S §7"],
+             ["Find bridge software that improves efficiency without immediately replacing existing systems", "S §5"],
+             ["A phased budget for software, infrastructure, security and AI tools", "S §9"]] },
+      { title: "AI-Powered Grants, Funding & Impact Advisory", about: "AI-powered advice on grants, funding and impact.", do: [] }
+    ] },
+  { id: "build", stage: "Build & Transform", area: "AI Build & Integration Services",
+    intro: "Implementation, integration and automation for complete business process transformation, private AI, and AI products.",
+    services: [
+      { title: "AI Implementation, Integration & Automation", about: "Complete business process transformation, with AI built in, not bolted on.",
+        do: [["Document existing processes and find gaps, loopholes, duplication, manual dependencies and control weaknesses", "S §4"],
+             ["Produce process maps, SOPs, checklists and approval matrices", "S §4"],
+             ["Build utilities for reporting, reconciliations, document processing, approvals, data extraction, MIS and workflow automation", "S §5"],
+             ["Deploy AI agents for repetitive, rule-based and knowledge-intensive tasks, with human review, approval controls, access logs and audit trails", "S §5"],
+             ["Role-based training so teams own the new workflows", "F"]] },
+      { title: "Custom AI/ML Solution Development (Offline GPTs)", about: "Custom AI and machine learning, including private GPTs that run offline.",
+        do: [["A secure internal GPT grounded on your approved data", "S §5"],
+             ["Knowledge search, SOP and policy reference, compliance support and department-level Q&A", "S §5"],
+             ["Role-based access, with the knowledge base expanded gradually under governance", "S §5"]] },
+      { title: "AI Product Development & SaaS", about: "Building AI products, including software as a service.",
+        do: [["Internal AI portals: one role-based access point for approved tools, knowledge, SOPs, training, dashboards and use-case trackers", "S §5"]] }
+    ] },
+  { id: "enable", stage: "Enable", area: "AI Learning & Development Services",
+    intro: "AI training, workshops and capacity building, certification courses, and MOUs with education institutions.",
+    services: [
+      { title: "AI Training, Workshops & Capacity Building", about: "AI skills for staff, management and leadership.",
+        do: [["The AI Edge Series: practical AI updates, tools, workflows, risks and business use cases", "S §2"],
+             ["AI fluency across finance, operations, sales, risk, HR, procurement, IT, compliance and management teams", "S §2"],
+             ["Internal AI learning modules and a knowledge centre for use cases, SOPs, prompts, templates and best practices", "S §2"],
+             ["Hackathons and innovation challenges on real business problems", "S §3"],
+             ["A network of AI champions across departments", "S §8"]] },
+      { title: "Certification Courses", about: "AI certification courses.", do: [] },
+      { title: "MOUs with Education Institutions", about: "Memoranda of understanding with various education institutions.", do: [] }
+    ] },
+  { id: "sustain", stage: "Sustain", area: "AI Assurance & Governance Services",
+    intro: "AI audit and assurance, and AI governance, ethics and compliance.",
+    services: [
+      { title: "AI Audit & Assurance Services", about: "Keeping AI controlled, secure and compliant once it is in use.",
+        do: [["Check for human review, approval controls, access logs and audit trails", "S §5"],
+             ["Output validation and periodic management review", "S §12"],
+             ["Track compliance with AI policy and data governance", "S §11"],
+             ["Monitoring, review, escalation and exception handling", "S §7"]] },
+      { title: "AI Governance, Ethics & Compliance", about: "The framework, policies and roles for responsible AI use.",
+        do: [["An AI governance framework: responsible and ethical use, data privacy, cybersecurity, risk management, approvals and auditability", "S §7"],
+             ["An AI usage policy: permitted tools, rules for uploading data, approvals for sensitive use cases", "S §7"],
+             ["Human approval for financial, legal, employee, external, regulatory and high-risk decisions", "S §6"],
+             ["An AI Steering Committee that approves use cases and policies and reviews risk", "S §8"]] }
+    ] },
+  { id: "innovate", stage: "Innovate", area: "AI Innovation & Research Services",
+    intro: "An AI research and innovation lab, and a Centre of Excellence.",
+    services: [
+      { title: "AI Research & Innovation Lab", about: "Testing new AI ideas before a full build.",
+        do: [["AI hackathons and innovation challenges", "S §3"],
+             ["One pipeline: idea, proof of concept, pilot, full deployment", "S §3"]] },
+      { title: "Centre of Excellence", about: "Coordinates AI strategy, training, governance, use-case evaluation and implementation support.",
+        do: [["Coordinates AI strategy, training, governance, use-case evaluation, implementation support and documentation", "S §8"],
+             ["Maintains reusable templates, prompts, SOPs and standards", "S §8"],
+             ["Institutionalises capability rather than leaving it dependent on individuals", "S §8"]] }
+    ] }
+];
+
+const LEVELS = [
+  { n: 1, name: "AI as a tool", src: "F", text: "Individuals use AI for everyday tasks: drafting reports, summarising documents, preparing presentations and creating MIS. Productivity improves, but work itself has not yet changed.",
+    role: "Department-level canvassing to find quick wins through hackathons, with foundational training so every team member can use AI safely and confidently.", service: [2, 0] },
+  { n: 2, name: "AI as a process", src: "F", text: "Workflows are redesigned with AI built in, not bolted on. Feasibility studies, tender reviews, approval tracking, MIS, AI-enabled portals and client reporting are re-engineered as AI-enabled processes.",
+    role: "Process mapping with each department, workflow redesign, and role-based training, so teams don't just receive new workflows: they own them.", service: [1, 0] },
+  { n: 3, name: "AI as a team member", src: "F", text: "Every person works alongside an AI copilot that strengthens their judgement, whether preparing a proposal, diagnosing a machine fault, planning stock or following up on collections.",
+    role: "Continuous upskilling through structured programmes such as the AI Edge Series, refreshers, hackathons and communities of practice. Adoption at this level is a people milestone, not a technology one.", service: [2, 0] },
+  { n: 4, name: "AI as an operating system", src: "F", text: "AI connects sales, quotations, procurement, inventory, delivery, after-sales service, finance and client reporting into one intelligent set of workflows. Knowledge stops living in silos and starts compounding.",
+    role: "Integration architecture, data strategy and governance, with AI literacy embedded into onboarding, appraisal and everyday management.", service: [0, 1] },
+  { n: 5, name: "AI as a competitive advantage", src: "F", roleSrc: "S §12", text: "The organisation learns from every project, delivers faster and scales without proportional headcount growth. The advantage lives in redesigned processes and an AI-capable workforce, not in a software licence.",
+    role: "Institutionalising AI through governance, a Centre of Excellence, formal policies and measurable adoption.", service: [4, 1] }
+];
+
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+/* ======================================================================
+   Nine's face: a glossy sphere with a visor, glowing eyes and a light-bar
+   mouth. Eyes follow the pointer, blink, and change with Nine's mood.
+   ====================================================================== */
+const Faces = (() => {
+  const SMILE = [-1.6, -.8, -.2, 0, -.2, -.8, -1.6];
+  const HTML = `<div class="nf" data-mood="idle"><div class="nf-float">
+      <div class="nf-aura"></div><div class="nf-orbit"><i></i></div>
+      <div class="nf-antenna"><i></i></div><span class="nf-ear nf-ear-l"></span><span class="nf-ear nf-ear-r"></span>
+      <div class="nf-body"><div class="nf-visor"><div class="nf-face">
+        <span class="nf-eye nf-l"></span><span class="nf-eye nf-r"></span>
+        <span class="nf-mouth">${SMILE.map(c => `<i style="--c:${c}cqw"></i>`).join("")}</span>
+      </div></div></div>
+      <span class="nf-ring"></span><span class="nf-ring r2"></span><span class="nf-ring r3"></span>
+    </div><div class="nf-shadow"></div></div>`;
+  const all = [];
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let px = innerWidth * .7, py = innerHeight * .4, lastMove = -1e9;
+
+  // a bare face for Photo Nine's display screen: eyes and mouth only
+  const SCREEN = `<div class="nf nf-screen" data-mood="idle"><div class="nf-face">
+        <span class="nf-eye nf-l"></span><span class="nf-eye nf-r"></span>
+        <span class="nf-mouth">${SMILE.map(c => `<i style="--c:${c}cqw"></i>`).join("")}</span>
+      </div></div>`;
+  function mount(el, kind) {
+    el.innerHTML = kind === "screen" ? SCREEN : HTML;
+    const f = el.querySelector(".nf");
+    f._lx = 0; f._ly = 0; f._energy = 0; f._bars = [...f.querySelectorAll(".nf-mouth i")];
+    all.push(f); blinkLater(f);
+    return f;
+  }
+  function blink(f) { f.classList.add("is-blink"); setTimeout(() => f.classList.remove("is-blink"), 120); }
+  function blinkLater(f) {
+    setTimeout(() => {
+      if (f.dataset.mood !== "happy" && f.dataset.mood !== "sleep") { blink(f); if (Math.random() < .25) setTimeout(() => blink(f), 260); }
+      blinkLater(f);
+    }, 2000 + Math.random() * 4200);
+  }
+  addEventListener("pointermove", e => { px = e.clientX; py = e.clientY; lastMove = performance.now(); }, { passive: true });
+  addEventListener("touchstart", e => { const t = e.touches[0]; if (t) { px = t.clientX; py = t.clientY; lastMove = performance.now(); } }, { passive: true });
+
+  let lastBars = 0;
+  function frame(t) {
+    const W = innerWidth, H = innerHeight;
+    all.forEach(f => {
+      const r = f.getBoundingClientRect();
+      if (!r.width || r.bottom < -50 || r.top > H + 50) return;
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      let tx = px, ty = py;
+      if (f._lookAt && f._lookAt.isConnected) { const b = f._lookAt.getBoundingClientRect(); tx = b.left + b.width / 2; ty = b.top + b.height / 2; }
+      else if (t - lastMove > 3500 && !reduce) { tx = cx + Math.sin(t / 1900 + r.left) * W * .35; ty = cy + Math.cos(t / 2600) * H * .18; }
+      let lx = Math.max(-1, Math.min(1, (tx - cx) / (W * .4))), ly = Math.max(-1, Math.min(1, (ty - cy) / (H * .45)));
+      if (f._force) { lx = f._force.x; ly = f._force.y; }
+      f._lx += (lx - f._lx) * .1; f._ly += (ly - f._ly) * .1;
+      f.style.setProperty("--lx", f._lx.toFixed(3)); f.style.setProperty("--ly", f._ly.toFixed(3));
+      f.style.setProperty("--ry", (f._lx * 16).toFixed(2) + "deg"); f.style.setProperty("--rx", (-f._ly * 12).toFixed(2) + "deg");
+      if (f._talk && t - lastBars > 75) {
+        f._energy = Math.max(.25, f._energy * .82);
+        f._bars.forEach((b, i) => {
+          const centre = 1 - Math.abs(i - 3) / 4;
+          b.style.setProperty("--m", (1.2 + Math.random() * (1.5 + 5 * f._energy) * (.45 + centre)).toFixed(2) + "cqw");
+        });
+      }
+    });
+    if (t - lastBars > 75) lastBars = t;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  return {
+    mount, all,
+    mood(f, m) { (f ? [f] : all).forEach(x => { x.dataset.mood = m; }); },
+    lookAt(f, el) { (f ? [f] : all).forEach(x => { x._lookAt = el || null; }); },
+    talk(f, on) {
+      f._talk = on; f.classList.toggle("is-talking", on);
+      if (!on) f._bars.forEach(b => b.style.removeProperty("--m"));
+      else f._energy = 1;
+    },
+    bump(f) { f._energy = 1; },
+    force(f, v) { f._force = v || null; },
+    blink
+  };
+})();
+
+/* ======================================================================
+   Nine's body: an original robot with arms and legs that can pose.
+   ====================================================================== */
+const Bodies = (() => {
+  const HAND = `<svg class="nb-hand" viewBox="0 0 22 30" aria-hidden="true"><path class="nb-skin" d="M5 1h12c1.5 0 2.5 1 2.5 2.5V18c0 6-3.6 10.5-8.5 10.5S2.5 24 2.5 18V3.5C2.5 2 3.5 1 5 1Z"/><path class="nb-skin" d="M18.6 8.5c2.8 1.1 3.8 4.6 2.3 8-.6 1.4-2.3 1.5-2.6.1"/><path class="nb-knuckle" d="M7 19.5v6M11 20.5v7M15 19.5v6"/></svg>`;
+  const LEG = `<div class="nb-thigh"><div class="nb-shin"><div class="nb-foot"></div></div></div>`;
+  const ARM = `<div class="nb-up"><div class="nb-fore">${HAND}</div></div>`;
+  const JACKET = `<svg class="nb-jacket" viewBox="0 0 66 84" preserveAspectRatio="none" aria-hidden="true">
+      <polygon class="nb-shirt" points="21,0 45,0 33,35"/>
+      <polygon class="nb-collar" points="21,0 28,0 31.5,8 24.5,9.5"/><polygon class="nb-collar" points="45,0 38,0 34.5,8 41.5,9.5"/>
+      <polygon class="nb-tie-k" points="30.6,7 35.4,7 34.6,11 31.4,11"/><polygon class="nb-tie" points="31.4,11 34.6,11 36.6,29 33,34 29.4,29"/>
+      <path class="nb-lapel" d="M21 0 L31.5 35 L27.5 37 L13 15 L18.5 12.5 Z"/><path class="nb-lapel" d="M45 0 L34.5 35 L38.5 37 L53 15 L47.5 12.5 Z"/>
+      <circle class="nb-pin" cx="19" cy="20" r="1.7"/>
+      <path class="nb-pocket" d="M45 28.5 H56"/><polygon class="nb-square" points="47.5,25 54.5,25 53.5,28.5 48.5,28.5"/>
+      <path class="nb-seam" d="M33 35 V70 M10 84 Q24 78 33 70 Q42 78 56 84"/>
+      <circle class="nb-btn" cx="33" cy="48" r="1.5"/><circle class="nb-btn" cx="33" cy="61" r="1.5"/>
+    </svg>`;
+  const HTML = `<div class="nb" data-pose="stand" data-act=""><div class="nb-shadow"></div><div class="nb-seat"></div><div class="nb-fig">
+      <div class="nb-leg nb-leg-l">${LEG}</div><div class="nb-leg nb-leg-r">${LEG}</div>
+      <div class="nb-arm nb-arm-l">${ARM}</div><div class="nb-neck"></div>
+      <div class="nb-torso">${JACKET}</div><div class="nb-arm nb-arm-r">${ARM}</div>
+      <div class="nb-head"><span class="nb-face"></span></div>
+      <div class="nb-zzz"><i>z</i><i>z</i><i>Z</i></div><div class="nb-balls"><i></i><i></i><i></i></div>
+    </div><div class="nb-say"></div></div>`;
+  function mount(slot) {
+    slot.innerHTML = HTML;
+    const el = slot.querySelector(".nb"), face = Faces.mount(slot.querySelector(".nb-face")), bubble = el.querySelector(".nb-say");
+    let actT = 0, sayT = 0;
+    return {
+      el, face,
+      get pose() { return el.dataset.pose; },
+      setPose(p) { el.dataset.pose = p; if (p === "sleep") Faces.mood(face, "sleep"); else if (face.dataset.mood === "sleep") Faces.mood(face, "idle"); },
+      act(a, ms) { clearTimeout(actT); el.dataset.act = a || ""; if (ms) actT = setTimeout(() => { if (el.dataset.act === a) el.dataset.act = ""; }, ms); },
+      say(text, ms = 2800) { bubble.textContent = text; bubble.classList.add("is-on"); clearTimeout(sayT); sayT = setTimeout(() => bubble.classList.remove("is-on"), ms); }
+    };
+  }
+  return { mount };
+})();
+/* ======================================================================
+   Photo Nine: a photographic body with our own display head.
+   Same interface as Bodies (pose, act, say, face), so the chat and the
+   autopilot drive both. The head is a separate layer; the face is live.
+   ====================================================================== */
+const Photo = (() => {
+  const SRC = "assets/nine/photo/";
+  // from export_web.py (nine.json): screen corners as fractions of the head image
+  const QUAD = { tl: [.0454, .0601], tr: [.7727, .0449], br: [.7715, .5638], bl: [.0408, .5631] };
+  const SW = 400, SH = 272;
+  // the site's actions mapped to what a photo with a moving head can do
+  const MOVES = { wave: "greet", celebrate: "greet", chase: "greet", jump: "hop", hiccup: "hop", kick: "hop", dance: "sway", juggle: "sway",
+    spin: "shake", sneeze: "jerk", trip: "jerk", bow: "nod", tap: "nod", nod: "nod", stretch: "roll", yawn: "roll", think: "think",
+    listen: "listen", talk: "talk", shrug: "shrug", watch: "down", look: "", point: "" };
+  // the 360 turn, rendered with Wan 2.2 and cut out with BiRefNet (set to null if the frames are missing)
+  const TURN = { frames: 81, fps: 24, src: "assets/nine/turn/f{i}.webp" };
+  const reduceTurn = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const turnImgs = [];
+  function loadTurn() {
+    if (!TURN || turnImgs.length) return;
+    for (let i = 0; i < TURN.frames; i++) { const im = new Image(); im.decoding = "async"; im.src = TURN.src.replace("{i}", String(i).padStart(3, "0")); turnImgs.push(im); }
+  }
+  const turnReady = () => TURN && turnImgs.length === TURN.frames && turnImgs.every(im => im.complete && im.naturalWidth);
+  addEventListener("load", () => setTimeout(loadTurn, 1200));
+  const all = [];
+  function quadMatrix(pts) {
+    const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = pts;
+    const dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2, sx = x0 - x1 + x2 - x3, sy = y0 - y1 + y2 - y3;
+    const det = dx1 * dy2 - dx2 * dy1, g = (sx * dy2 - dx2 * sy) / det, h = (dx1 * sy - sx * dy1) / det;
+    const a = x1 - x0 + g * x1, b = x3 - x0 + h * x3, d = y1 - y0 + g * y1, e = y3 - y0 + h * y3;
+    const n = v => +v.toFixed(8);
+    return `matrix3d(${n(a / SW)},${n(d / SW)},0,${n(g / SW)},${n(b / SH)},${n(e / SH)},0,${n(h / SH)},0,0,1,0,${n(x0)},${n(y0)},0,1)`;
+  }
+  function mount(slot) {
+    slot.innerHTML = `<div class="np" data-pose="stand" data-act="" data-move=""><div class="np-clip"><div class="np-stage">
+        <img class="np-body" src="${SRC}body.webp" alt="" draggable="false">
+        <div class="np-head"><div class="np-neck"><div class="np-act">
+          <img src="${SRC}head.webp" alt="" draggable="false"><div class="np-screen"></div>
+        </div></div></div>
+        <canvas class="np-turn" aria-hidden="true"></canvas>
+        <div class="nb-zzz"><i>z</i><i>z</i><i>Z</i></div>
+      </div></div><div class="nb-say"></div></div>`;
+    const el = slot.querySelector(".np"), head = el.querySelector(".np-head"), screen = el.querySelector(".np-screen");
+    const face = Faces.mount(screen, "screen"), bubble = el.querySelector(".nb-say");
+    const fit = () => {
+      const w = head.offsetWidth, h = head.offsetHeight; if (!w) return;
+      screen.style.transform = quadMatrix(["tl", "tr", "br", "bl"].map(k => [QUAD[k][0] * w, QUAD[k][1] * h]));
+    };
+    new ResizeObserver(fit).observe(head); fit();
+    let actT = 0, sayT = 0;
+    const c = {
+      el, face,
+      get pose() { return el.dataset.pose; },
+      setPose(p) {
+        el.dataset.pose = p;
+        if (p !== "stand") el.dataset.move = "";
+        if (p === "sleep") Faces.mood(face, "sleep"); else if (face.dataset.mood === "sleep") Faces.mood(face, "idle");
+      },
+      act(a, ms) {
+        if (a === "spin" && el.dataset.pose === "stand" && c.turn && c.turn()) return;
+        clearTimeout(actT); el.dataset.act = a || ""; el.dataset.move = el.dataset.pose === "stand" ? (MOVES[a] ?? "") : "";
+        if (ms) actT = setTimeout(() => { if (el.dataset.act === a) { el.dataset.act = ""; el.dataset.move = ""; } }, ms);
+      },
+      say(text, ms = 2800) { bubble.textContent = text; bubble.classList.add("is-on"); clearTimeout(sayT); sayT = setTimeout(() => bubble.classList.remove("is-on"), ms); }
+    };
+    // ---- the 360 turn ----
+    const cv = el.querySelector(".np-turn"), ctx = cv.getContext("2d");
+    let raf = 0, idx = 0, drag = null, moved = false;
+    const N = () => TURN ? TURN.frames : 0;
+    function draw(i) {
+      const n = N(); idx = ((Math.round(i) % n) + n) % n;
+      const im = turnImgs[idx];
+      if (im && im.complete && im.naturalWidth) {
+        if (cv.width !== im.naturalWidth) { cv.width = im.naturalWidth; cv.height = im.naturalHeight; }
+        ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(im, 0, 0);
+      }
+    }
+    const front = () => idx < 3 || idx > N() - 4;
+    function settle() { cancelAnimationFrame(raf); if (front()) { el.classList.remove("is-turning"); return; } play(idx); }
+    function play(from = 0) {
+      cancelAnimationFrame(raf);
+      const n = N(), t0 = performance.now() - from / TURN.fps * 1000;
+      el.dataset.move = ""; el.classList.add("is-turning");
+      const step = t => {
+        const i = Math.min(n - 1, (t - t0) / 1000 * TURN.fps);
+        draw(i);
+        if (i < n - 1) raf = requestAnimationFrame(step); else setTimeout(() => { if (!drag) el.classList.remove("is-turning"); }, 80);
+      };
+      raf = requestAnimationFrame(step);
+      return (n - from) / TURN.fps * 1000;
+    }
+    c.turn = () => (turnReady() && !drag && !reduceTurn ? play(0) : 0);
+    const clip = el.querySelector(".np-clip");
+    clip.addEventListener("pointerdown", e => {
+      if (!turnReady() || reduceTurn) return;
+      drag = { x: e.clientX, from: el.classList.contains("is-turning") ? idx : 0 }; moved = false;
+    });
+    addEventListener("pointermove", e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      if (!moved && Math.abs(dx) < 6) return;
+      if (!moved) { moved = true; cancelAnimationFrame(raf); el.classList.add("is-turning", "is-dragging"); el.dataset.move = ""; }
+      draw(drag.from - dx / clip.offsetWidth * N() * .9);      // one width of drag is about one full turn
+    }, { passive: true });
+    addEventListener("pointerup", () => {
+      if (!drag) return;
+      drag = null; el.classList.remove("is-dragging");
+      if (moved) settle();
+    });
+    // a drag is not a click: don't open the chat after spinning her
+    el.addEventListener("click", e => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+    if (TURN) el.classList.add("can-turn");
+    all.push(c);
+    return c;
+  }
+  // the head follows where the face is looking
+  (function follow() {
+    all.forEach(c => { c.el.style.setProperty("--lx", (c.face._lx || 0).toFixed(3)); c.el.style.setProperty("--ly", (c.face._ly || 0).toFixed(3)); });
+    requestAnimationFrame(follow);
+  })();
+  return { mount };
+})();
+const heroNine = Photo.mount(document.getElementById("heroBody"));
+const asBody = Photo.mount(document.getElementById("asBody"));
+const asFace = asBody.face;
+
+/* Nine reacts to the page: it smiles at "Talk to Nine" buttons and looks at them. */
+const pageFaces = () => Faces.all.filter(f => !f.closest("#as") && (f.closest(".nb, .np") || {}).dataset?.pose !== "sleep");
+document.querySelectorAll("[data-talk]").forEach(b => {
+  b.addEventListener("pointerenter", () => pageFaces().forEach(f => { Faces.mood(f, "happy"); Faces.lookAt(f, b.closest(".nm-nine") ? null : b); }));
+  b.addEventListener("pointerleave", () => pageFaces().forEach(f => { Faces.mood(f, "idle"); Faces.lookAt(f, null); }));
+});
+
+/* ---------- Maturity ladder ---------- */
+const ladder = document.getElementById("ladder"), levelPanel = document.getElementById("levelPanel");
+ladder.innerHTML = LEVELS.map((l, i) => `
+  <button class="nm-rung" type="button" role="tab" id="rung${l.n}" aria-controls="levelPanel" aria-selected="${i === 0}" style="--h:${36 + i * 16}%; --n:${l.n}" data-n="${l.n}">
+    <small>Level ${l.n}</small><strong>${esc(cap(l.name))}</strong>
+  </button>`).join("");
+function showLevel(n) {
+  const l = LEVELS[n - 1];
+  ladder.querySelectorAll(".nm-rung").forEach(b => b.setAttribute("aria-selected", String(+b.dataset.n === n)));
+  levelPanel.innerHTML = `<h3>Level ${l.n}: ${esc(cap(l.name))}</h3>
+    <div><h4>What it looks like</h4><p data-src="${l.src}">${esc(l.text)}</p></div>
+    <div><h4>Where we come in</h4><p data-src="${l.roleSrc || l.src}">${esc(l.role)}</p></div>`;
+}
+ladder.addEventListener("click", e => { const b = e.target.closest(".nm-rung"); if (b) showLevel(+b.dataset.n); });
+ladder.addEventListener("keydown", e => {
+  const c = +document.activeElement.dataset.n; if (!c) return;
+  const n = ["ArrowRight", "ArrowDown"].includes(e.key) ? Math.min(5, c + 1) : ["ArrowLeft", "ArrowUp"].includes(e.key) ? Math.max(1, c - 1) : 0;
+  if (n) { e.preventDefault(); showLevel(n); document.getElementById("rung" + n).focus(); }
+});
+showLevel(1);
+
+/* ---------- Services: bento overview, stage sections, detail sheet ---------- */
+document.getElementById("bento").innerHTML = STAGES.map((s, i) => `
+  <a class="nm-tile" href="#stage-${s.id}" data-n="${i + 1}">
+    <small>Stage ${i + 1} · ${esc(s.stage)}</small>
+    <h3 data-src="P">${esc(s.area)}</h3>
+    <ul>${s.services.map(v => `<li>${esc(v.title)}</li>`).join("")}</ul>
+  </a>`).join("");
+document.getElementById("stages").innerHTML = STAGES.map((s, i) => `
+  <div class="nm-stage" id="stage-${s.id}">
+    <div class="nm-stage-side">
+      <div class="nm-stage-num">Stage ${i + 1}</div>
+      <h3>${esc(s.area)}</h3>
+      <span class="nm-stage-tag">${esc(s.stage)}</span>
+      <p data-src="P">${esc(s.intro)}</p>
+    </div>
+    <div class="nm-cards">
+      ${s.services.map((v, j) => `
+        <button class="nm-card" type="button" data-s="${i}" data-v="${j}">
+          <h4>${esc(v.title)}</h4><p>${esc(v.about)}</p><span class="nm-card-more">Details</span>
+        </button>`).join("")}
+    </div>
+  </div>`).join("");
+
+const sheet = document.getElementById("sheet");
+let lastFocus = null, current = null;
+function openSheet(si, vi) {
+  const s = STAGES[si], v = s.services[vi];
+  current = v;
+  const srcs = ["P", ...new Set(v.do.map(d => d[1]))];
+  document.getElementById("sheetStage").textContent = `${s.area} · ${s.stage} stage`;
+  document.getElementById("sheetTitle").textContent = v.title;
+  document.getElementById("sheetBody").innerHTML = `
+    <p>${esc(v.about)}</p>
+    ${v.do.length ? `<div class="nm-sheet-block"><h5>What it involves</h5><ul>${v.do.map(([x, src]) => `<li data-src="${src}">${esc(x)}</li>`).join("")}</ul></div>` : ""}
+    <p class="nm-sheet-src">Based on: ${srcs.map(x => ({ P: "Service Portfolio", F: "AI Transformation Framework" }[x] || "AI Adoption Strategy " + x.replace("S ", ""))).join(" · ")}</p>`;
+  lastFocus = document.activeElement;
+  document.body.classList.add("nm-sheet-open");
+  sheet.setAttribute("aria-hidden", "false");
+  document.getElementById("sheetClose").focus();
+}
+function closeSheet() {
+  document.body.classList.remove("nm-sheet-open");
+  sheet.setAttribute("aria-hidden", "true");
+  if (lastFocus) lastFocus.focus();
+}
+document.getElementById("stages").addEventListener("click", e => { const c = e.target.closest(".nm-card"); if (c) openSheet(+c.dataset.s, +c.dataset.v); });
+document.getElementById("sheetClose").addEventListener("click", closeSheet);
+document.getElementById("scrim").addEventListener("click", closeSheet);
+document.getElementById("sheetCta").addEventListener("click", () => { closeSheet(); Nine.open({ service: current }); });
+
+/* ======================================================================
+   Nine: Ninth Mind's assistant. A scripted conversation shown one line at
+   a time. It speaks (speechSynthesis) and listens (SpeechRecognition).
+   ====================================================================== */
+const Nine = (() => {
+  const $ = id => document.getElementById(id);
+  const root = $("as"), nowEl = $("asNow"), prevEl = $("asPrev"), optsEl = $("asOpts"), form = $("asForm"), input = $("asInput"),
+        mic = $("asMic"), statusEl = $("asStatus"), faceLabel = $("asFaceLabel"), backBtn = $("asBack"),
+        soundBtn = $("asSound"), soundLabel = $("asSoundLabel");
+  const synth = window.speechSynthesis || null;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const NO_SR = "Speaking to Nine works in Chrome and Edge. In this browser, please type your answers.";
+
+  let S = {}, step = null, started = false, editing = false, misses = 0, route = "project";
+  let gen = 0, queue = Promise.resolve(), history = [], lastAnswer = null, openerFocus = null, moodNow = "idle";
+  let cur = { options: null, free: true, placeholder: "" };
+  let sound = (() => { try { return localStorage.getItem("nm-voice") !== "off"; } catch (e) { return true; } })();
+  let voiceMode = false, listening = false, rec = null, recCancelled = false;
+
+  const ALL = STAGES.flatMap((s, si) => s.services.map((v, vi) => ({ ...v, si, vi, area: s.area })));
+  const svc = (si, vi) => ALL.find(x => x.si === si && x.vi === vi);
+  const byTitle = v => ALL.find(x => x.title === v.title);
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const first = () => (S.name || "").split(/\s+/)[0];
+  const isOpen = () => root.classList.contains("is-open");
+
+  /* ---- understanding free text ---- */
+  const KEYWORDS = [
+    [/strateg|roadmap|readiness|where to start|get started with ai|opportunit|use case|priorit/i, 0, 0],
+    [/\bdata\b|database|infrastructure|cloud|server|pipeline|storage|classif/i, 0, 1],
+    [/vendor|procure|purchas|buy|which tool|choose|select|tender|supplier|licen[cs]e/i, 0, 2],
+    [/grant|fund|donor|financing|impact/i, 0, 3],
+    [/automat|process|workflow|integrat|manual|repetitive|efficien|erp|crm|transform|agent|invoice|reconcil|sop|report|mis\b/i, 1, 0],
+    [/offline|private|gpt|chatbot|chat bot|assistant|model|machine learning|\bml\b|llm|on-?prem|confidential|sensitive|knowledge/i, 1, 1],
+    [/product|saas|\bapp\b|platform|software|portal|launch|build a/i, 1, 2],
+    [/train|workshop|upskill|staff|skills|team|employee|capacity|learn|hackathon|edge series|literacy/i, 2, 0],
+    [/certif|course|qualif/i, 2, 1],
+    [/universit|college|school|institut|mou|student|academ|education/i, 2, 2],
+    [/audit|assur|review|validat|monitor|audit trail/i, 3, 0],
+    [/govern|ethic|polic|complian|regulat|law|legal|data protection|responsib|risk/i, 3, 1],
+    [/research|prototyp|innovat|experiment|proof of concept|\bpoc\b|pilot|explore/i, 4, 0],
+    [/centre of excellence|center of excellence|\bcoe\b|best practice|standard|champion|steering/i, 4, 1]
+  ];
+  function match(text) {
+    const score = new Map();
+    KEYWORDS.forEach(([re, si, vi]) => { if (re.test(text)) { const k = si + ":" + vi; score.set(k, (score.get(k) || 0) + 1); } });
+    return [...score.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => svc(...k.split(":").map(Number)));
+  }
+  const norm = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  const STOP = new Set(["the", "and", "our", "with", "for", "you", "your", "are", "just", "that", "this", "want", "would", "like", "about", "some", "level", "let", "its", "can", "please"]);
+  const NUM = { one: 1, first: 1, two: 2, second: 2, three: 3, third: 3, four: 4, fourth: 4, five: 5, fifth: 5, six: 6, sixth: 6 };
+  function matchOption(text, list, free) {
+    const t = norm(text); if (!t) return null;
+    const exact = list.find(o => norm(o[0]) === t); if (exact) return exact;
+    const words = t.split(" ");
+    const num = words.map(w => NUM[w] || (/^[1-6]$/.test(w) ? +w : 0)).find(Boolean);
+    if (num) {
+      const lv = list.find(o => new RegExp(`^level ${num}\\b`, "i").test(o[0]));
+      if (lv) return lv;
+      if (!free && words.length <= 4 && num <= list.length) return list[num - 1];
+    }
+    if (words.length <= 5 && /^(no|nope|nothing|that s (all|everything)|all good)\b/.test(t)) { const n = list.find(o => /^no\b/i.test(o[0])); if (n) return n; }
+    if (!free && /^(yes|yeah|yep|sure|ok|okay|go ahead|send it|please do)\b/.test(t)) return list[0];
+    const tw = words.filter(w => w.length > 2 && !STOP.has(w));
+    let best = null, score = 0;
+    list.forEach(o => {
+      const lw = norm(o[0]).split(" ").filter(w => w.length > 2 && !STOP.has(w));
+      if (!lw.length) return;
+      const hit = lw.filter(w => tw.some(x => x === w || (x.length > 4 && w.startsWith(x.slice(0, 5))) || (w.length > 4 && x.startsWith(w.slice(0, 5))))).length;
+      const s = hit / lw.length;
+      if (s > score) { score = s; best = o; }
+    });
+    return score >= (free ? .6 : .34) ? best : null;
+  }
+
+  /* ---- Nine's face and voice ---- */
+  function setState(s) {
+    root.dataset.state = s;
+    faceLabel.textContent = s === "listening" ? "Listening…" : s === "thinking" ? "Thinking…" : "";
+    Faces.mood(asFace, s === "thinking" || s === "listening" ? s : moodNow);
+    if (asBody.pose === "stand") asBody.act(s === "thinking" ? "think" : s === "listening" ? "listen" : s === "speaking" ? (moodNow === "happy" ? "wave" : "talk") : "");
+  }
+  let voice = null;
+  function pickVoice() {
+    if (voice || !synth) return voice;
+    const vs = synth.getVoices(); if (!vs.length) return null;
+    const prefs = [/Natural.*(Sonia|Libby|Ava|Aria|Jenny|Emma)/i, /Google UK English Female/i, /(Sonia|Libby|Hazel|Serena|Samantha|Aria|Jenny|Zira)/i, /Google US English/i];
+    for (const p of prefs) { const v = vs.find(x => p.test(x.name) && /^en/i.test(x.lang)); if (v) return (voice = v); }
+    return (voice = vs.find(x => /^en/i.test(x.lang)) || null);
+  }
+  if (synth && synth.addEventListener) synth.addEventListener("voiceschanged", () => { voice = null; });
+  function speak(text) {
+    if (!sound || !synth || !text || !isOpen()) return Promise.resolve();
+    return new Promise(res => {
+      let finished = false; const end = () => { if (!finished) { finished = true; res(); } };
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text.replace(/·/g, ","));
+      const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; }
+      u.rate = 1.03;
+      u.onboundary = () => Faces.bump(asFace);
+      u.onend = end; u.onerror = end;
+      synth.speak(u);
+      setTimeout(end, 2000 + text.length * 95);
+    });
+  }
+
+  /* ---- showing a line ---- */
+  function typeOut(text, g) {
+    nowEl.classList.remove("is-fade");
+    if (reduce) { nowEl.textContent = text; return Promise.resolve(); }
+    nowEl.textContent = "";
+    return new Promise(res => {
+      let i = 0;
+      const tick = () => {
+        if (g !== gen) return res();
+        i = Math.min(text.length, i + 2);
+        nowEl.textContent = text.slice(0, i);
+        i < text.length ? setTimeout(tick, 20) : res();
+      };
+      tick();
+    });
+  }
+  function hideAnswer() { optsEl.innerHTML = ""; form.classList.add("nm-as-hidden"); stopWait(); }
+  function showAnswer(o) {
+    cur = { options: o.options || null, free: o.free ?? !o.options, placeholder: o.placeholder || "Type or say your answer" };
+    optsEl.innerHTML = "";
+    (cur.options || []).forEach(([label, value], i) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "nm-as-opt"; b.style.animationDelay = (i * 60) + "ms";
+      b.innerHTML = `<span>${esc(label)}</span><svg class="nm-arr" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+      b.onclick = () => { voiceMode = false; lastAnswer = label; hideAnswer(); Faces.lookAt(asFace, null); handle(value ?? label); };
+      b.onpointerenter = () => Faces.lookAt(asFace, b);
+      b.onpointerleave = () => Faces.lookAt(asFace, null);
+      optsEl.appendChild(b);
+    });
+    form.classList.remove("nm-as-hidden");
+    input.value = ""; input.placeholder = cur.placeholder;
+    input.inputMode = step === "email" ? "email" : "text";
+    backBtn.disabled = history.length < 2;
+    if (!voiceMode && isOpen() && matchMedia("(pointer: fine)").matches) input.focus({ preventScroll: true });
+    startWait();
+  }
+  function say(msg, o = {}) {
+    const g = gen;
+    queue = queue.then(() => new Promise(done => {
+      if (g !== gen) return done();
+      hideAnswer(); rouse(); setState("thinking");
+      setTimeout(() => {
+        if (g !== gen) return done();
+        moodNow = o.mood || "idle";
+        const isHtml = typeof msg === "object";
+        if (lastAnswer) { prevEl.textContent = lastAnswer; prevEl.classList.add("is-user"); lastAnswer = null; }
+        else { const t = nowEl.textContent.replace(/\s+/g, " ").trim(); prevEl.textContent = t.length > 150 ? t.slice(0, 147) + "…" : t; prevEl.classList.remove("is-user"); }
+        setState("speaking"); Faces.talk(asFace, true);
+        if (o.gesture) asBody.act(o.gesture, 2200);
+        let typed;
+        if (isHtml) { nowEl.innerHTML = msg.html; nowEl.classList.remove("is-fade"); void nowEl.offsetWidth; nowEl.classList.add("is-fade"); typed = Promise.resolve(); }
+        else typed = typeOut(msg, g);
+        const spoken = speak(isHtml ? msg.speak : msg);
+        typed.then(() => { if (g === gen && o.ask) showAnswer(o); if (!sound || !synth) Faces.talk(asFace, false); });
+        Promise.all([typed, spoken]).then(() => {
+          Faces.talk(asFace, false);
+          if (g !== gen) return done();
+          if (!listening) setState("idle");
+          if (o.ask && o.options && !listening && innerWidth > 820 && asBody.pose === "stand") asBody.act("pointl", 1500);
+          if (o.ask && voiceMode && step !== "finished") listen();
+          done();
+        });
+      }, reduce ? 0 : 380 + Math.random() * 380);
+    }));
+    return queue;
+  }
+  const ask = (text, o = {}) => say(text, { ...o, ask: true });
+
+  /* When the visitor takes a while to answer: tap foot, then sit, then fall asleep. */
+  let waitT = [], dozing = false, lastMoveNudge = 0;
+  function stopWait() { waitT.forEach(clearTimeout); waitT = []; }
+  function startWait() {
+    stopWait();
+    if (!isOpen()) return;
+    waitT.push(setTimeout(() => { if (!listening && isOpen() && asBody.pose === "stand") asBody.act("tap"); }, 12000));
+    waitT.push(setTimeout(() => { if (!listening && isOpen()) { asBody.act(""); asBody.setPose("sit"); dozing = true; faceLabel.textContent = "Take your time. I'll wait."; } }, 25000));
+    waitT.push(setTimeout(() => { if (!listening && isOpen()) { asBody.setPose("sleep"); dozing = true; faceLabel.textContent = "Zzz… type or tap anything to wake Nine."; } }, 50000));
+  }
+  function rouse() {
+    if (dozing) {
+      dozing = false; asBody.setPose("stand"); asBody.act("stretch", 1300); faceLabel.textContent = "";
+      Faces.mood(asFace, "happy"); setTimeout(() => { if (root.dataset.state === "idle") Faces.mood(asFace, moodNow); }, 1300);
+    } else if (asBody.el.dataset.act === "tap") asBody.act("");
+  }
+  function nudge() { if (!isOpen()) return; rouse(); if (!form.classList.contains("nm-as-hidden")) startWait(); }
+  ["pointerdown", "keydown"].forEach(ev => root.addEventListener(ev, nudge));
+  root.addEventListener("pointermove", () => { if (asBody.pose === "sleep" && performance.now() - lastMoveNudge > 400) { lastMoveNudge = performance.now(); nudge(); } });
+  function remember(fn) { history.push(fn); backBtn.disabled = history.length < 2; }
+  function cancelAll() {
+    gen++; queue = Promise.resolve();
+    if (synth) synth.cancel();
+    Faces.talk(asFace, false);
+    if (listening && rec) { recCancelled = true; try { rec.abort(); } catch (e) {} }
+    setState("idle");
+  }
+
+  /* ---- the conversation ---- */
+  const MENU = [["Start an AI project", "m:project"], ["Find our AI maturity level", "m:level"], ["Train my team", "m:train"], ["Explore the services", "m:explore"], ["Leave a quick message", "m:quick"]];
+  const AREAS = [["Strategy & advice", "stage:0"], ["Building AI systems", "stage:1"], ["Training our people", "stage:2"], ["Audit & governance", "stage:3"], ["Research & the Centre of Excellence", "stage:4"], ["Not sure yet", "unsure"]];
+  const levelOpt = l => [`Level ${l.n} · ${cap(l.name)}`, "L:" + l.n];
+
+  function menu(greet) {
+    step = "menu"; route = "project"; remember(() => menu(false));
+    if (greet) say("Hi, I'm Nine, Ninth Mind's assistant.", { mood: "happy" });
+    ask("I can help you plan an AI project, work out where your organisation sits on the AI maturity ladder, or walk you through our services. Type, tap, or just talk to me. Where shall we start?", { options: MENU, free: true });
+  }
+  function askName() { step = "name"; remember(askName); ask("First, what's your name?", { placeholder: "Your name" }); }
+  function askOrg() { step = "org"; remember(askOrg); ask("Which organisation are you with?", { options: [["I'm asking for myself", "-"]], free: true, placeholder: "Organisation name" }); }
+  function askNeed() {
+    step = "need"; remember(askNeed);
+    ask(`What would you like AI to help ${S.org || "you"} with? Describe it in your own words, or choose an area.`, { options: AREAS, free: true, placeholder: "e.g. we process invoices by hand" });
+  }
+  function offerServices(list, lead) {
+    step = "service"; remember(() => offerServices(list, lead));
+    ask(lead, { options: [...list.map(v => [v.title, `svc:${v.si}:${v.vi}`]), ["Something else", "other"]], free: true });
+  }
+  function offerStage(si, lead) { offerServices(STAGES[si].services.map((v, vi) => svc(si, vi)), lead || `Within ${STAGES[si].area}, which of these is closest?`); }
+  function chooseService(v) { S.service = v; S.noted = true; say(`${v.title} is part of our ${v.area}. ${v.about}`); next(); }
+  function askSituation() { step = "situation"; remember(askSituation); ask("Where are you with this today?", { options: [["Just exploring the idea"], ["We have a plan and need help delivering it"], ["We already use AI and want to do more"]] }); }
+  function askTiming() { step = "timing"; remember(askTiming); ask("When would you like to start?", { options: [["As soon as possible"], ["In the next few months"], ["Later on"], ["Just researching for now"]] }); }
+  function askEmail() { step = "email"; remember(askEmail); ask(`What email should our team use to reach you${first() ? ", " + first() : ""}?`, { placeholder: "name@organisation.com" }); }
+  function askNotes() { step = "notes"; remember(askNotes); ask("Is there anything else the team should know?", { options: [["No, that's everything", "-"]], free: true, placeholder: "Anything else (optional)" }); }
+  function askMessage() { step = "message"; remember(askMessage); ask("What would you like to tell the team?", { placeholder: "Your message" }); }
+
+  function next() {
+    if (editing) return summary();
+    if (route === "quick") {
+      if (!S.name) return askName();
+      if (!S.email) return askEmail();
+      if (S.message == null) return askMessage();
+      return summary();
+    }
+    if (!S.name) return askName();
+    if (S.org == null) return askOrg();
+    if (!S.service && !S.needDone) return route === "train" ? offerStage(2, "Which kind of training are you looking for?") : askNeed();
+    if (!S.situation) return askSituation();
+    if (!S.timing) return askTiming();
+    if (!S.email) return askEmail();
+    if (S.notes == null) return askNotes();
+    return summary();
+  }
+
+  function levelNow() {
+    step = "level-now"; remember(levelNow);
+    say("Let's work backwards, starting with where you are now.");
+    ask("Which of these sounds most like your organisation today?", { options: [...LEVELS.map(levelOpt), ["I'm not sure", "unsure"]] });
+  }
+  function levelGoal() { step = "level-goal"; remember(levelGoal); ask("And where should it be in 12 months?", { options: LEVELS.filter(l => l.n > S.levelNow).map(levelOpt) }); }
+  function levelGap() {
+    step = "level-next"; remember(levelGap);
+    const a = LEVELS[S.levelNow - 1], b = LEVELS[S.levelGoal - 1];
+    if (a !== b) say(`So that's a move from level ${a.n}, ${a.name}, to level ${b.n}, ${b.name}.`);
+    say(b.text);
+    say(`Where we come in: ${b.role}`);
+    ask("Would you like our team to help you plan it?", { options: [["Yes, let's plan it", "plan"], ["Back to the start", "home"]] });
+  }
+  function explore() { step = "explore-area"; remember(explore); ask("We work in five areas, one for each stage. Which would you like to hear about?", { options: [...AREAS.slice(0, 5), ["Back to the start", "home"]] }); }
+  function exploreStage(si) {
+    step = "explore-svc"; remember(() => exploreStage(si));
+    const s = STAGES[si];
+    say(`${s.area}: ${s.intro}`);
+    ask("Which service would you like to hear about?", { options: [...s.services.map((v, vi) => [v.title, `svc:${si}:${vi}`]), ["Another area", "areas"]] });
+  }
+  function exploreService(v) {
+    step = "explore-detail"; S.exploring = v; remember(() => exploreService(v));
+    say(`${v.title}. ${v.about}`);
+    if (v.do.length) say(`It includes: ${v.do.slice(0, 2).map(d => d[0].charAt(0).toLowerCase() + d[0].slice(1)).join("; and ")}.`);
+    ask("Would you like to talk to the team about it?", { options: [["Yes, let's talk about it", "talk"], ["Hear about another area", "areas"]] });
+  }
+  function summary() {
+    editing = false; step = "confirm"; remember(summary);
+    const row = (k, v) => v ? `<dt>${k}</dt><dd>${esc(v)}</dd>` : "";
+    const lv = n => n ? `Level ${n} · ${cap(LEVELS[n - 1].name)}` : "";
+    const rows = route === "quick"
+      ? row("Name", S.name) + row("Email", S.email) + row("Message", S.message)
+      : row("Name", S.name) + row("Organisation", S.org) + row("Interested in", S.service ? S.service.title : "Not sure yet") + row("Today", lv(S.levelNow)) +
+        row("In 12 months", S.levelGoal !== S.levelNow ? lv(S.levelGoal) : "") + row("What you need", S.need) + row("Where you are", S.situation) +
+        row("Timing", S.timing) + row("Email", S.email) + row("Notes", S.notes);
+    say({ html: `Here's what I'll send to the team.<dl>${rows}</dl>`, speak: "Here's what I'll send to the team. Shall I send it?" },
+        { ask: true, options: [["Send it to the team", "send"], ["Change something", "edit"]] });
+  }
+  function editMenu() {
+    step = "edit"; remember(editMenu);
+    const opts = route === "quick"
+      ? [["Name", "e:name"], ["Email", "e:email"], ["Message", "e:message"]]
+      : [["Name", "e:name"], ["Organisation", "e:org"], ["What I need", "e:need"], ["Email", "e:email"], ["Notes", "e:notes"]];
+    ask("What would you like to change?", { options: opts });
+  }
+  function finish() {
+    step = "finished";
+    say(`Thank you, ${first()}. I've sent this to the team, and someone will contact you at ${S.email}.`, { mood: "happy", gesture: "celebrate" });
+    say({ html: `You can also reach our Managing Director, Anup Tabe, at <a href="mailto:anup.tabe@ninthmind.ai">anup.tabe@ninthmind.ai</a>.`, speak: "You can also reach our Managing Director, Anup Tabe, by email." }, { mood: "happy" });
+    ask("Is there anything else I can help with?", { options: [["Back to the website", "close"], ["Start a new conversation", "reset"]] });
+  }
+
+  function handle(t) {
+    if (asBody.pose === "stand") asBody.act("nod", 900);   // Nine acknowledges every answer
+    switch (step) {
+      case "menu":
+        if (t === "m:project") { route = "project"; return next(); }
+        if (t === "m:level") return levelNow();
+        if (t === "m:train") { route = "train"; return next(); }
+        if (t === "m:explore") return explore();
+        if (t === "m:quick") { route = "quick"; say("Of course."); return next(); }
+        route = "project"; step = "need"; return handle(t);
+      case "name": {
+        const n = t.replace(/^(hi|hello|hey)[,!.\s]*/i, "").replace(/^(i am|i'm|my name is|it's|this is|call me)\s+/i, "").replace(/[.!]+$/, "").trim();
+        if (!n) return ask("Sorry, I didn't catch that. What's your name?", { placeholder: "Your name" });
+        S.name = n.replace(/\b\w/g, c => c.toUpperCase());
+        if (!editing) say(`Nice to meet you, ${first()}.`, { mood: "happy" });
+        return next();
+      }
+      case "org":
+        S.org = /^(-|just me|myself|me|none|personal|no organi[sz]ation)$/i.test(t) ? "" : t;
+        if (!editing) say(pick(["Thanks.", "Good to know.", "Thank you."]));
+        return next();
+      case "need": {
+        if (t.startsWith("stage:")) return offerStage(+t.slice(6));
+        if (t === "unsure") { say("That's fine. Working it out is what the first conversation is for. I'll note strategy and readiness as a starting point."); return chooseService(svc(0, 0)); }
+        S.need = t;
+        if (/government|public sector|ministry|municipal|council|e-?gov|citizen|sovereign/i.test(t)) say("That's one of our future plans, so the team will want to hear about it.");
+        const found = match(t);
+        if (found.length) return offerServices(found, found.length === 1 ? "From what you've described, this looks like the closest fit:" : "From what you've described, these look like the closest fit:");
+        if (++misses > 1) { S.needDone = true; say("Thanks. I'll pass that on to the team as you've written it."); return next(); }
+        step = "need"; return ask("Thanks. Which of these areas is it closest to?", { options: AREAS, free: true });
+      }
+      case "service":
+        if (t.startsWith("svc:")) { const [, si, vi] = t.split(":").map(Number); return chooseService(svc(si, vi)); }
+        if (t === "other") { step = "need"; return ask("Which area is it closer to? Or tell me a bit more.", { options: AREAS, free: true }); }
+        step = "need"; return handle(t);
+      case "situation": S.situation = t; say(pick(["Understood.", "Thanks.", "Got it."])); return next();
+      case "timing": S.timing = t; return next();
+      case "email": {
+        let e = t.trim();
+        if (!e.includes("@")) e = e.toLowerCase().replace(/\s+at\s+/g, "@").replace(/\s+dot\s+/g, ".");
+        e = e.replace(/\s+/g, "").replace(/\.$/, "");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)) return ask("That doesn't look like a complete email address. Could you check it?", { placeholder: "name@organisation.com", gesture: "shrug" });
+        S.email = e; return next();
+      }
+      case "notes": S.notes = /^(-|no|nope|nothing( else)?|no,? that'?s (all|everything)|that'?s (all|everything))\.?$/i.test(t) ? "" : t; return next();
+      case "message": S.message = t; return next();
+      case "confirm":
+        if (t === "send") return finish();
+        if (t === "edit") return editMenu();
+        return;
+      case "edit": {
+        editing = true;
+        const f = t.slice(2);
+        if (f === "name") return askName();
+        if (f === "org") return askOrg();
+        if (f === "need") { S.service = null; S.need = ""; S.needDone = false; misses = 0; return route === "train" ? offerStage(2) : askNeed(); }
+        if (f === "email") return askEmail();
+        if (f === "notes") return askNotes();
+        if (f === "message") return askMessage();
+        return;
+      }
+      case "finished":
+        if (t === "close") return close();
+        if (t === "reset") return reset();
+        return;
+      case "explore-area":
+        if (t.startsWith("stage:")) return exploreStage(+t.slice(6));
+        if (t === "home") return menu(false);
+        return;
+      case "explore-svc":
+        if (t.startsWith("svc:")) { const [, si, vi] = t.split(":").map(Number); return exploreService(svc(si, vi)); }
+        if (t === "areas") return explore();
+        return;
+      case "explore-detail":
+        if (t === "talk") { route = "project"; S.service = S.exploring; S.noted = true; say("Good. I just need a few details for the team.", { mood: "happy" }); return next(); }
+        if (t === "areas") return explore();
+        return;
+      case "level-now":
+        if (t === "unsure") {
+          step = "level-now";
+          say("A quick guide: at level 1, individuals use AI for everyday tasks. At level 2, workflows are redesigned with AI built in. The higher levels connect the whole business.");
+          return ask("Which sounds closest?", { options: LEVELS.map(levelOpt) });
+        }
+        S.levelNow = +t.slice(2);
+        if (S.levelNow === 5) { S.levelGoal = 5; say("Then you're at the top of the ladder. The work now is keeping the advantage."); return levelGap(); }
+        return levelGoal();
+      case "level-goal": S.levelGoal = +t.slice(2); return levelGap();
+      case "level-next":
+        if (t === "plan") { route = "project"; S.service = svc(...LEVELS[S.levelGoal - 1].service); S.noted = true; say("Good. I just need a few details for the team.", { mood: "happy" }); return next(); }
+        if (t === "home") return menu(false);
+        return;
+    }
+  }
+
+  function submitText(raw, byVoice) {
+    const t = String(raw || "").trim(); if (!t || step === null) return;
+    voiceMode = !!byVoice;
+    input.value = ""; Faces.lookAt(asFace, null);
+    if (cur.options) {
+      const o = matchOption(t, cur.options, cur.free);
+      if (o) { lastAnswer = t; hideAnswer(); return handle(o[1] ?? o[0]); }
+      if (!cur.free) { lastAnswer = t; return ask("Sorry, I didn't catch which one you meant. Choose one of these, or say it another way.", { options: cur.options, gesture: "shrug" }); }
+    }
+    lastAnswer = t; hideAnswer(); handle(t);
+  }
+
+  /* ---- listening ---- */
+  function listen() {
+    if (!SR) { statusEl.textContent = NO_SR; voiceMode = false; return; }
+    if (listening || !isOpen()) return;
+    if (synth) synth.cancel();
+    rec = new SR();
+    rec.lang = navigator.language || "en-GB"; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+    let finalText = ""; recCancelled = false;
+    rec.onstart = () => { listening = true; mic.classList.add("is-on"); mic.setAttribute("aria-pressed", "true"); setState("listening"); input.placeholder = "Listening…"; statusEl.textContent = ""; };
+    rec.onresult = e => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript; }
+      input.value = (finalText + " " + interim).trim();
+      Faces.bump(asFace);
+    };
+    rec.onerror = e => {
+      const msg = {
+        "not-allowed": "Microphone access is blocked. Allow it in your browser's address bar, or type your answer.",
+        "service-not-allowed": "This browser won't allow voice input here. Please type your answer.",
+        "no-speech": "I didn't hear anything. Tap the microphone to try again.",
+        "audio-capture": "I couldn't find a microphone. Please type your answer.",
+        "network": "Voice input needs an internet connection. Please type your answer."
+      }[e.error];
+      if (msg) statusEl.textContent = msg;
+      if (e.error !== "aborted") voiceMode = false;
+    };
+    rec.onend = () => {
+      listening = false; mic.classList.remove("is-on"); mic.setAttribute("aria-pressed", "false");
+      if (root.dataset.state === "listening") setState("idle");
+      input.placeholder = cur.placeholder;
+      const t = (finalText || input.value).trim();
+      if (!recCancelled && t) submitText(t, true);
+    };
+    try { rec.start(); } catch (e) { listening = false; }
+  }
+  mic.addEventListener("click", () => {
+    if (!SR) { statusEl.textContent = NO_SR; return; }
+    if (listening) { try { rec.stop(); } catch (e) {} return; }
+    voiceMode = true; listen();
+  });
+  form.addEventListener("submit", e => { e.preventDefault(); if (listening) { recCancelled = true; try { rec.abort(); } catch (x) {} } submitText(input.value, false); });
+  input.addEventListener("focus", () => Faces.lookAt(asFace, input));
+  input.addEventListener("input", () => { Faces.lookAt(asFace, input); if (Math.random() < .3) Faces.blink(asFace); });
+  input.addEventListener("blur", () => Faces.lookAt(asFace, null));
+
+  /* ---- controls ---- */
+  function syncSound() {
+    soundBtn.setAttribute("aria-pressed", String(sound));
+    soundLabel.textContent = sound ? "Nine speaks out loud" : "Nine is muted";
+    soundBtn.setAttribute("aria-label", sound ? "Mute Nine" : "Let Nine speak out loud");
+  }
+  soundBtn.addEventListener("click", () => {
+    sound = !sound; try { localStorage.setItem("nm-voice", sound ? "on" : "off"); } catch (e) {}
+    if (!sound && synth) synth.cancel();
+    syncSound();
+  });
+  if (!synth) soundBtn.classList.add("nm-as-hidden");
+  syncSound();
+  backBtn.addEventListener("click", () => {
+    if (history.length < 2) return;
+    cancelAll(); editing = false; lastAnswer = null;
+    history.pop(); const fn = history.pop(); fn();
+  });
+  $("asClose").addEventListener("click", () => close());
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && isOpen()) close(); });
+
+  function open(opts = {}) {
+    openerFocus = document.activeElement;
+    root.classList.add("is-open"); root.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    if (opts.voice) { if (SR) voiceMode = true; else statusEl.textContent = NO_SR; }
+    const v = opts.service ? byTitle(opts.service) : null;
+    if (!started) {
+      started = true;
+      Faces.mood(asFace, "surprised");
+      if (v) { route = "project"; S.service = v; S.noted = true; say("Hi, I'm Nine, Ninth Mind's assistant.", { mood: "happy" }); say(`I see you were reading about ${v.title}. I'll make sure the right person on our team hears about it.`); next(); }
+      else if (opts.flow === "level") { say("Hi, I'm Nine, Ninth Mind's assistant.", { mood: "happy" }); levelNow(); }
+      else menu(true);
+    } else if (v && !["confirm", "finished", "edit"].includes(step)) {
+      cancelAll(); S.service = v; S.noted = true; if (route === "quick") route = "project";
+      say(`I see you've been looking at ${v.title}. I'll note that as your main interest.`); next();
+    } else if (opts.flow === "level" && !String(step).startsWith("level")) {
+      cancelAll(); levelNow();
+    } else if (voiceMode && !listening && step !== "finished" && !form.classList.contains("nm-as-hidden")) listen();
+    setTimeout(() => $("asClose").focus({ preventScroll: true }), 50);
+    if (!form.classList.contains("nm-as-hidden")) startWait();
+    document.dispatchEvent(new CustomEvent("nine:toggle"));
+  }
+  function close() {
+    root.classList.remove("is-open"); root.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    if (synth) synth.cancel();
+    if (listening && rec) { recCancelled = true; try { rec.abort(); } catch (e) {} }
+    voiceMode = false; Faces.talk(asFace, false); stopWait(); dozing = false; asBody.setPose("stand"); setState("idle");
+    document.dispatchEvent(new CustomEvent("nine:toggle"));
+    if (openerFocus && openerFocus.focus) openerFocus.focus({ preventScroll: true });
+  }
+  function reset() {
+    cancelAll(); S = {}; history = []; editing = false; misses = 0; route = "project"; lastAnswer = null;
+    prevEl.textContent = ""; nowEl.textContent = "";
+    menu(true);
+  }
+  return { open, close, hear: t => submitText(t, true), get step() { return step; } };
+})();
+
+document.querySelectorAll("[data-talk]").forEach(b => b.addEventListener("click", e => {
+  e.preventDefault();
+  Nine.open({ voice: b.hasAttribute("data-voice"), flow: b.getAttribute("data-talk") || undefined });
+}));
+
+
+/* ======================================================================
+   Nine gets about: random actions, sitting and sleeping when nobody is
+   around, and (for the walker) strolling along the bottom of the page.
+   ====================================================================== */
+function autopilot(c, opt) {
+  const pickOne = a => a[Math.floor(Math.random() * a.length)];
+  const LINES = {
+    wake: ["Oh! Hello again.", "Just resting my eyes.", "I'm awake, I'm awake!"], sit: ["I'll wait here.", "Taking a little break."],
+    hover: ["Want to talk?", "Click me to chat.", "Need a hand?"],
+    hiccup: ["Hic!", "Hic! Excuse me."], sneeze: ["Achoo!", "Achoo! Dusty data."], trip: ["Oops! I'm fine.", "Nobody saw that."],
+    juggle: ["Juggling five service areas…"], yawn: ["Yaaawn…"], spin: ["Wheee!"], celebrate: ["Woo!"], think: ["Hmm…"],
+    watch: ["Is it time to talk AI yet?"], chase: ["Got you!"], peek: ["Peekaboo!"], moon: ["Smooth."],
+    // Lines quoted from the AI Transformation Framework (F)
+    quote: ["AI is not the answer. AI is the process.", "Tools can be purchased in a day. Capability cannot.", "Where are you today, and where should you be in 12 months?", "Everyone is buying AI. Very few are becoming AI-first."]
+  };
+  let lastActive = performance.now(), napping = false, x = innerWidth + 40, walkT = 0, ptrX = innerWidth / 2;
+  addEventListener("pointermove", e => { ptrX = e.clientX; }, { passive: true });
+  const line = k => { if (opt.talks && LINES[k]) c.say(pickOne(LINES[k]), k === "quote" ? 4400 : 2400); };
+  const api = { entered: false };
+  const weighted = list => { let s = list.reduce((a, l) => a + l[2], 0) * Math.random(); for (const l of list) { s -= l[2]; if (s <= 0) return l; } return list[0]; };
+  const happyFor = ms => { Faces.mood(c.face, "happy"); setTimeout(() => { if (c.pose === "stand") Faces.mood(c.face, "idle"); }, ms); };
+  function wake() {
+    napping = false; c.setPose("stand"); c.act("stretch", 1500); happyFor(1500);
+    if (opt.talks) c.say(pickOne(LINES.wake));
+  }
+  function activity() { lastActive = performance.now(); if (napping && opt.isActive()) wake(); }
+  ["pointermove", "scroll", "keydown", "touchstart"].forEach(ev => addEventListener(ev, activity, { passive: true }));
+  function place(px, dur) { if (!opt.host) return; opt.host.style.transition = dur ? `transform ${dur}s linear` : "none"; opt.host.style.transform = `translateX(${Math.round(px)}px)`; x = px; }
+  function walkTo(tx, done, speed = 110, act = "walk") {
+    const dist = Math.abs(tx - x);
+    if (dist < 24) { if (done) done(); return 0; }
+    const dir = tx > x ? 1 : -1, dur = dist / speed;
+    c.act(act); Faces.force(c.face, { x: dir * .9, y: .2 });
+    place(tx, dur);
+    clearTimeout(walkT);
+    walkT = setTimeout(() => { if (c.el.dataset.act === act) c.act(""); Faces.force(c.face, null); if (done) done(); }, dur * 1000);
+    return dur * 1000;
+  }
+  const randX = () => { const w = c.el.offsetWidth || 80, lo = innerWidth < 600 ? 64 : 140; return lo + Math.random() * Math.max(0, innerWidth - w - lo - 24); };
+  function look() { Faces.force(c.face, { x: -1, y: 0 }); setTimeout(() => Faces.force(c.face, { x: 1, y: -.3 }), 900); setTimeout(() => Faces.force(c.face, null), 1900); }
+  const ACTIONS = [
+    ["wave", 2200, 1], ["stretch", 1700, .8], ["think", 2600, .8], ["look", 2000, 1.2], ["jump", 800, .6], ["tap", 2000, .4],
+    ["dance", 3600, .8], ["bow", 1600, .5], ["shrug", 1800, .6], ["celebrate", 1500, .5], ["point", 1800, .6], ["watch", 2200, .6],
+    ["kick", 800, .5], ["spin", 1000, .6], ["hiccup", 1600, .4], ["sneeze", 1300, .4], ["juggle", 3600, .7],
+    ["yawn", 2000, .4], ["trip", 2700, .3], ["quote", 4400, .7]
+  ];
+  function tick() {
+    let wait = 1500;
+    if (opt.isActive()) {
+      const idle = performance.now() - lastActive;
+      if (idle > 45000) { if (c.pose !== "sleep") { c.act(""); Faces.force(c.face, null); c.setPose("sleep"); napping = true; } wait = 2000; }
+      else if (idle > 20000) { if (c.pose === "stand" && !/walk|run/.test(c.el.dataset.act)) { c.act(""); c.setPose("sit"); napping = true; if (opt.talks) c.say(pickOne(LINES.sit)); } wait = 2000; }
+      else if (c.pose === "stand" && !c.el.dataset.act) {
+        const list = ACTIONS.slice();
+        if (opt.host) list.push(["walk", 0, 5], ["run", 0, 1], ["sit", 6500, .6], ["moon", 0, .5], ["chase", 0, .6], ["peek", 0, .4]);
+        const [a, ms] = weighted(list);
+        let dur = ms;
+        if (a === "walk") dur = walkTo(randX()) || 500;
+        else if (a === "run") dur = walkTo(randX(), null, 240, "run") || 500;
+        else if (a === "moon") {
+          const tx = randX(), dir = tx > x ? 1 : -1;
+          dur = walkTo(tx, () => line("moon"), 70, "moon") || 500;
+          Faces.force(c.face, { x: -dir * .9, y: .1 });
+        }
+        else if (a === "chase") {
+          const w = c.el.offsetWidth || 80;
+          dur = walkTo(Math.max(20, Math.min(innerWidth - w - 20, ptrX - w / 2)), () => { c.act("wave", 1400); happyFor(1400); line("chase"); }, 240, "run") + 1400;
+        }
+        else if (a === "peek") {
+          const w = c.el.offsetWidth || 80, right = x > innerWidth / 2, edge = right ? innerWidth + 10 : -w - 10;
+          const t1 = walkTo(edge, null, 160, "walk");
+          setTimeout(() => {
+            place(right ? innerWidth - w * .45 : -w * .55, .5);
+            Faces.force(c.face, { x: right ? -1 : 1, y: 0 }); happyFor(1800);
+            setTimeout(() => line("peek"), 500);
+            setTimeout(() => { Faces.force(c.face, null); walkTo(randX()); }, 2300);
+          }, t1 + 900);
+          dur = t1 + 900 + 2300 + 2500;
+        }
+        else if (a === "quote") { c.act("think", 1200); line("quote"); }
+        else if (a === "look") look();
+        else if (a === "sit") { c.setPose("sit"); setTimeout(() => { if (!napping && c.pose === "sit") { c.setPose("stand"); c.act("stretch", 1200); } }, ms); }
+        else {
+          c.act(a, ms);
+          if (a === "point") { Faces.force(c.face, { x: 1, y: 0 }); setTimeout(() => Faces.force(c.face, null), ms); }
+          if (a === "watch") { Faces.force(c.face, { x: -.4, y: .9 }); setTimeout(() => Faces.force(c.face, null), ms); }
+        }
+        if (["wave", "jump", "dance", "celebrate", "spin", "juggle"].includes(a)) happyFor(ms);
+        if (["hiccup", "sneeze", "trip", "juggle", "yawn", "spin", "celebrate", "think", "watch"].includes(a) && Math.random() < .8) setTimeout(() => line(a), a === "trip" ? 1200 : 200);
+        wait = dur + 1500 + Math.random() * 3500;
+      }
+    }
+    setTimeout(tick, wait);
+  }
+  c.el.addEventListener("pointerenter", () => {
+    if (napping) { lastActive = performance.now(); wake(); return; }
+    if (/walk|run/.test(c.el.dataset.act)) return;
+    c.act("wave", 1600); happyFor(1600);
+    if (opt.talks) c.say(pickOne(LINES.hover), 1800);
+  });
+  c.el.addEventListener("pointerleave", () => { if (c.pose === "stand") Faces.mood(c.face, "idle"); });
+  setTimeout(tick, 2500);
+  Object.assign(api, { place, walkTo, wake, get x() { return x; } });
+  return api;
+}
+
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const walkerHost = document.createElement("div");
+walkerHost.className = "nm-walker is-hidden"; walkerHost.setAttribute("aria-hidden", "true");
+document.body.appendChild(walkerHost);
+const walker = Bodies.mount(walkerHost);
+walker.el.title = "Talk to Nine";
+walker.el.addEventListener("click", () => Nine.open({}));
+let heroInView = true, walkerOn = false;
+const nineOpen = () => document.getElementById("as").classList.contains("is-open");
+const walkerPilot = autopilot(walker, { host: walkerHost, talks: true, isActive: () => walkerOn });
+autopilot(heroNine, { host: null, talks: true, isActive: () => heroInView && !nineOpen() });
+setTimeout(() => { const b = document.querySelector(".nm-bubble"); if (b) b.classList.add("is-gone"); }, 7000);
+function syncWalker() {
+  const on = !heroInView && !nineOpen() && !reduceMotion;
+  if (on === walkerOn) return;
+  walkerOn = on;
+  walkerHost.classList.toggle("is-hidden", !on);
+  if (on && !walkerPilot.entered) {
+    walkerPilot.entered = true;
+    walkerPilot.place(innerWidth + 10, 0);
+    requestAnimationFrame(() => requestAnimationFrame(() => walkerPilot.walkTo(innerWidth * .7, () => {
+      walker.act("wave", 2200); Faces.mood(walker.face, "happy"); walker.say("Hi! I'm Nine. Click me to talk.", 3400);
+      setTimeout(() => Faces.mood(walker.face, "idle"), 2200);
+    })));
+  }
+}
+const heroSpot = document.querySelector(".nm-hero-nine");
+function checkHero() {
+  const r = heroSpot.getBoundingClientRect();
+  heroInView = r.bottom > r.height * .25 && r.top < innerHeight - r.height * .25;
+  syncWalker();
+}
+let heroRaf = 0;
+addEventListener("scroll", () => { if (!heroRaf) heroRaf = requestAnimationFrame(() => { heroRaf = 0; checkHero(); }); }, { passive: true });
+addEventListener("resize", checkHero);
+new IntersectionObserver(checkHero, { threshold: [0, .25, .5, 1] }).observe(heroSpot);
+checkHero();
+document.addEventListener("nine:toggle", syncWalker);
+addEventListener("resize", () => { if (walkerPilot.x > innerWidth - 60) walkerPilot.place(innerWidth - 120, 0); });
+setTimeout(() => { heroNine.act("wave", 2400); Faces.mood(heroNine.face, "happy"); setTimeout(() => Faces.mood(heroNine.face, "idle"), 2400); }, 900);
+// once she has waved, Nine shows off a full turn (when the 360 frames have loaded)
+setTimeout(() => { if (heroInView && !nineOpen() && heroNine.pose === "stand") heroNine.turn(); }, 6500);
+
+/* ---------- Sources switch ---------- */
+const srcBtn = document.getElementById("srcBtn");
+srcBtn.addEventListener("click", () => {
+  const on = document.documentElement.classList.toggle("show-src");
+  srcBtn.setAttribute("aria-pressed", String(on));
+});
+
+/* ---------- Light / dark mode ---------- */
+function syncThemeLabel() {
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  document.querySelectorAll("[data-theme-toggle]").forEach(b => { b.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode"); b.title = dark ? "Light mode" : "Dark mode"; });
+}
+document.querySelectorAll("[data-theme-toggle]").forEach(b => b.addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  try { localStorage.setItem("nm-theme", next); } catch (e) {}
+  syncThemeLabel();
+}));
+syncThemeLabel();
+
+/* ---------- Header, menu and active link ---------- */
+const header = document.querySelector(".nm-header");
+addEventListener("scroll", () => header.classList.toggle("is-scrolled", scrollY > 8), { passive: true });
+const nav = document.getElementById("nav"), menuBtn = document.getElementById("menuBtn");
+menuBtn.addEventListener("click", () => { const o = nav.classList.toggle("is-open"); menuBtn.setAttribute("aria-expanded", o); });
+nav.addEventListener("click", e => { if (e.target.closest("a")) { nav.classList.remove("is-open"); menuBtn.setAttribute("aria-expanded", "false"); } });
+const links = [...nav.querySelectorAll("a")];
+const spy = new IntersectionObserver(entries => entries.forEach(en => {
+  if (en.isIntersecting) links.forEach(l => l.classList.toggle("is-active", l.getAttribute("href") === "#" + en.target.id));
+}), { rootMargin: "-45% 0px -50% 0px" });
+["approach", "services", "programme", "contact"].forEach(id => spy.observe(document.getElementById(id)));
+document.addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("nm-sheet-open")) closeSheet(); });
+
+document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
