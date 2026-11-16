@@ -3,3 +3,16 @@ index.before-*.html
 *.blend1
 __pycache__/
 .venv/
+
+# app
+node_modules/
+.output/
+dist/
+.tanstack/
+.vinxi/
+.nitro/
+src/routeTree.gen.ts
+.env
+.env.*
+!.env.example
+.data/

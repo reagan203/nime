@@ -32,7 +32,7 @@ There is no frame or backdrop: Nine sits on the page's own background, with a so
 
 ## The screen: faces and pictures
 
-`Faces.show(face, kind, ms, arg)` puts something on Nine's display for `ms` milliseconds (0 keeps it until cleared). The kinds:
+`Faces.show(face, kind, ms, arg)` (in `src/nine/faces.ts`) puts something on Nine's display for `ms` milliseconds (0 keeps it until cleared). The kinds:
 
 | Kind | Looks like | Used for |
 |---|---|---|
@@ -63,25 +63,39 @@ The site asks Nine for actions with `nine.act(name, ms)`, and the same names dri
 | sneeze, trip | Jerk | glitch; dizzy |
 | stretch, yawn | Roll | battery |
 | watch | Looks down | clock |
-| spin | The full 360 turn | dizzy afterwards, sometimes |
+| spin | The full 360 turn | |
 
 Poses: `stand`, `sit` (head lowered, relaxed) and `sleep` (head drooped, screen dimmed, "Zzz").
 
-The **autopilot** (`autopilot()`) picks random actions every few seconds while Nine is on screen, puts random pictures on the screen, sits her down after 20 seconds without activity and puts her to sleep after 45. Any movement wakes her.
+### Client-facing
+
+On the page Nine behaves like a good receptionist, not a mascot. The **autopilot** (`src/nine/autopilot.ts`) has her look around, nod, think, point, now and then quote the company's own lines, show the company logo or a service area on her screen, and, rarely, turn. There is no tripping, sneezing, hiccupping or dancing, and she doesn't go dizzy. After 30 seconds without activity she sits and says "I'm here whenever you need me"; she never falls asleep on the page. Hovering her brings an offer of help ("Can I help you find the right service?").
+
+**Mini Nine offers help that fits the page.** When the visitor has been reading a section for a moment, she offers once, and clicking her starts that conversation:
+
+| Section | Mini Nine says | Clicking her starts |
+|---|---|---|
+| Five levels | Want to find your AI maturity level? | The level questions |
+| Training | Need training for your team? | Training |
+| Services | Not sure which service fits? | A project |
+| The programme, MFI Group | Ask me / Let's talk | A project |
+| Future plans, Contact | I'll tell the team / I can pass a message | A quick message |
+
+Screens added in the rebuild: `mail` (an envelope flying off), `sent`, `ok`, `sad`, `bye` (a waving hand), `shh` (muted), `phone`, `error`. Actions added: `decline` (shake, OK), `goodbye` (wave, Bye!), `send` (nod, envelope), `sorry` (looks down, sad face).
 
 ## Nine reacts to the page
 
 | The visitor… | Nine… |
 |---|---|
-| arrives | waves, says "Morning!", "Afternoon!" or "Evening!" on her screen, then shows off a full turn |
+| arrives | waves, says "Good morning", "Good afternoon" or "Good evening" on her screen, then shows off a full turn |
+| reads a section | mini Nine offers the help that fits (see above) |
 | hovers a service area or card | shows that area's symbol |
 | hovers a maturity level | shows its number |
 | switches light or dark mode | shows a sun or a moon |
 | copies text | shows a tick and says "Copied!" |
-| scrolls very fast | goes dizzy |
-| comes back to the tab | shows "Hi again!" and waves |
-| clicks somewhere empty | looks there, sometimes wide-eyed |
-| rests the pointer on her | shows heart eyes |
+| comes back to the tab | shows "Welcome back" and waves |
+| loses or regains the connection | shows an error and "We're offline. I'll wait.", then a tick |
+| clicks somewhere empty | looks there |
 | drags her sideways | spins her round (see below) |
 
 ## The 360 turn

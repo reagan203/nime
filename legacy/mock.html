@@ -515,13 +515,13 @@
   .nine-art .nb-torso::before, .nine-art .nb-up::before, .nine-art .nb-fore::before, .nine-art .nb-fore::after,
   .nine-art .nb-thigh::before, .nine-art .nb-shin::before, .nine-art .nb-foot::before { content: ""; position: absolute; inset: 0; width: auto; height: auto; margin: 0; clip-path: none; opacity: 1; border-radius: 0; background: center / 100% 100% no-repeat; pointer-events: none; }
   .nine-art .nb-thigh::after, .nine-art .nb-shin::after, .nine-art .nb-foot::after { content: none; }
-  .nine-art .nb-torso::before { background-image: url("assets/nine/torso.png"); }
-  .nine-art .nb-up::before { background-image: url("assets/nine/upper-arm.png"); }
-  .nine-art .nb-fore::before { background-image: url("assets/nine/forearm.png"); }
-  .nine-art .nb-fore::after { inset: auto; left: -.5cqw; top: 38cqw; width: 12cqw; height: 16cqw; background-image: url("assets/nine/hand.png"); }
-  .nine-art .nb-thigh::before { background-image: url("assets/nine/thigh.png"); }
-  .nine-art .nb-shin::before { background-image: url("assets/nine/shin.png"); }
-  .nine-art .nb-foot::before { background-image: url("assets/nine/shoe.png"); }
+  .nine-art .nb-torso::before { background-image: url("../public/assets/nine/torso.png"); }
+  .nine-art .nb-up::before { background-image: url("../public/assets/nine/upper-arm.png"); }
+  .nine-art .nb-fore::before { background-image: url("../public/assets/nine/forearm.png"); }
+  .nine-art .nb-fore::after { inset: auto; left: -.5cqw; top: 38cqw; width: 12cqw; height: 16cqw; background-image: url("../public/assets/nine/hand.png"); }
+  .nine-art .nb-thigh::before { background-image: url("../public/assets/nine/thigh.png"); }
+  .nine-art .nb-shin::before { background-image: url("../public/assets/nine/shin.png"); }
+  .nine-art .nb-foot::before { background-image: url("../public/assets/nine/shoe.png"); }
   .nine-art .nb-arm-r .nb-up::before, .nine-art .nb-arm-r .nb-fore::before, .nine-art .nb-arm-r .nb-fore::after,
   .nine-art .nb-leg-r .nb-thigh::before, .nine-art .nb-leg-r .nb-shin::before, .nine-art .nb-leg-r .nb-foot::before { transform: scaleX(-1); }
 
@@ -922,7 +922,7 @@
 <header class="nm-header" id="top">
   <div class="nm-wrap nm-header-in">
     <a class="nm-logo" href="#top" aria-label="Ninth Mind home">
-      <img class="nm-logo-img" src="assets/ninth-mind-logo.png" alt="Ninth Mind: AI-Powered Business Transformation & Training">
+      <img class="nm-logo-img" src="../public/assets/ninth-mind-logo.png" alt="Ninth Mind: AI-Powered Business Transformation & Training">
     </a>
     <nav class="nm-nav" id="nav" aria-label="Main">
       <a href="#approach">Approach</a>
@@ -1141,7 +1141,7 @@
   <div class="nm-wrap">
     <div class="nm-footer-top">
       <div>
-        <img class="nm-logo-img" src="assets/ninth-mind-logo.png" alt="Ninth Mind: AI-Powered Business Transformation & Training">
+        <img class="nm-logo-img" src="../public/assets/ninth-mind-logo.png" alt="Ninth Mind: AI-Powered Business Transformation & Training">
         <p class="nm-footer-addr">No. 16 Kanjata Road, off James Gichuru Road, Nairobi, Kenya<br><a href="mailto:anup.tabe@ninthmind.ai">anup.tabe@ninthmind.ai</a> · <a href="https://www.ninthmind.ai" target="_blank" rel="noopener">www.ninthmind.ai</a></p>
       </div>
       <div class="nm-footer-cols">
@@ -1198,7 +1198,7 @@
 <!-- Nine: full-screen conversation -->
 <div class="nm-as" id="as" role="dialog" aria-modal="true" aria-label="Nine, Ninth Mind's assistant" aria-hidden="true" data-state="idle">
   <div class="nm-as-top">
-    <img class="nm-logo-img" src="assets/ninth-mind-logo.png" alt="Ninth Mind">
+    <img class="nm-logo-img" src="../public/assets/ninth-mind-logo.png" alt="Ninth Mind">
     <button class="nm-icon-btn" id="asClose" type="button" aria-label="Close Nine">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
     </button>
@@ -1516,7 +1516,7 @@ const Bodies = (() => {
    autopilot drive both. The head is a separate layer; the face is live.
    ====================================================================== */
 const Photo = (() => {
-  const SRC = "assets/nine/photo/";
+  const SRC = "../public/assets/nine/photo/";
   // from export_web.py (nine.json): screen corners as fractions of the head image
   const QUAD = { tl: [.0454, .0601], tr: [.7727, .0449], br: [.7715, .5638], bl: [.0408, .5631] };
   const SW = 400, SH = 272;
@@ -1525,7 +1525,7 @@ const Photo = (() => {
     spin: "shake", sneeze: "jerk", trip: "jerk", bow: "nod", tap: "nod", nod: "nod", stretch: "roll", yawn: "roll", think: "think",
     listen: "listen", talk: "talk", shrug: "shrug", watch: "down", look: "", point: "" };
   // the 360 turn, rendered with Wan 2.2 and cut out with BiRefNet (set to null if the frames are missing)
-  const TURN = { frames: 161, fps: 24, src: "assets/nine/turn/f{i}.webp" };
+  const TURN = { frames: 161, fps: 24, src: "../public/assets/nine/turn/f{i}.webp" };
   const reduceTurn = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const turnImgs = [];
   function loadTurn() {

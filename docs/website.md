@@ -1,6 +1,8 @@
 # The website
 
-`index.html` holds the whole site: styles in one `<style>` block at the top, the page in the middle, and the scripts at the end. There are no libraries, frameworks or build tools.
+The page is `src/routes/index.tsx`, built from the components in `src/components/`. The styles are `src/styles/site.css`, carried over unchanged from the original mock (`legacy/mock.html`), so the class names in the components are the mock's. Content (services, levels, contact details) is data in `src/data/content.ts`. Nine is plain TypeScript in `src/nine/`, started once the page is in the browser (`bootNine()`), because she animates every frame and talks to the speech APIs directly.
+
+Anything with a `data-talk` attribute opens Nine: `data-talk="level"`, `"train"`, `"project"`, `"quick"` or `"explore"` starts that conversation, and `data-voice` starts in voice mode.
 
 ## Sections, top to bottom
 
@@ -14,10 +16,10 @@
 | The programme | `#programme` | Timeline, pipeline, rules, data classes and structures from the strategy document |
 | MFI Group | `#mfi` | How Ninth Mind leads the AI journey within the MFI Group |
 | Future plans | `#planned` | What is planned next |
-| Contact | `#contact` | Talk to Nine, and the Managing Director's card (initials only, no photo) |
+| Contact | `#contact` | Talk to Nine, and the Managing Director's card with his photo (`public/assets/anup-tabe.webp`, initials if it fails to load) |
 | Footer | | Address, email, website |
 
-The services, levels and programme content are JavaScript data (`STAGES`, `LEVELS` and friends near the top of the script), and the page builds the tiles, cards and ladder from them. To change a service, edit its entry in `STAGES`.
+The services and levels are data (`STAGES`, `LEVELS` in `src/data/content.ts`), and the components build the tiles, cards and ladder from them. To change a service, edit its entry in `STAGES`.
 
 ## Sources switch
 

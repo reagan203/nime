@@ -1,33 +1,50 @@
-# Ninth Mind website mock, with Nine
+# Ninth Mind website, with Nine
 
-A single-page HTML mock of the Ninth Mind website (`index.html`, open it in a browser, no build step), with **Nine**, Ninth Mind's assistant: a scripted, voice-enabled chat that collects a visitor's needs for the team.
+The Ninth Mind website, built with **Bun**, **TanStack Start** (React, server rendering, server functions) and **Vite**. It looks exactly like the original single-file mock (kept in [legacy/mock.html](legacy/mock.html)) and adds what a real site needs:
 
-## Nine, the avatar
+- **Nine sends emails.** When a visitor says "send it", the summary goes to the team by email (Resend or any SMTP server), with the conversation attached, and the visitor can ask for a copy.
+- **Nine takes "no" for an answer.** Every question can be skipped or declined, by tapping, typing or saying no, and Nine responds sensibly at each step (see [docs/nine-chat.md](docs/nine-chat.md#when-someone-says-no)).
+- **Nine is client-facing.** On the page she greets, pays attention and offers help that fits the section the visitor is reading. Clicking her starts that conversation.
 
-Nine is a photographic body in a navy suit with an original display head on a mechanical neck. On the page:
+## Run it
 
-- the face on the screen is live HTML (eyes and mouth), mapped onto the glass, and it reacts to the chat (listening, thinking, talking, happy, sleeping);
-- the head is its own layer, so it looks toward the pointer, nods, tilts and dozes; the body breathes;
-- a full 360-degree turn plays now and then, and visitors can **drag Nine to spin her**;
-- she has no frame: she is cut out and sits on the page's own background, in light and dark mode.
+```sh
+bun install
+bun run dev          # http://localhost:3000
+```
 
-## How Nine was made (`pipeline/`)
+Production:
 
-All free and open models, run locally on a 6 GB laptop GPU:
+```sh
+cp .env.example .env # then fill in RESEND_API_KEY or SMTP_*
+bun run build
+bun run start        # serves dist/ with server.ts on $PORT (default 3000)
+```
 
-| Step | Script | Model (licence) |
-|---|---|---|
-| Body photo, fictional person | `gen_portrait.py` | RealVisXL V5.0, SDXL (OpenRAIL++) |
-| Head painted out | `remove_head.py` | RealVisXL V5.0 inpainting |
-| Display head and mechanical neck | `display_head.py` | Blender 5.3, Cycles |
-| Body cut out of the backdrop | `matte.py` | BiRefNet-lite (MIT) |
-| Web layers (body, head, screen corners) | `export_web.py` | |
-| 360 turn video | `wan_clip.py` | Wan 2.2 TI2V-5B (Apache-2.0) |
-| Turn frames cut out for the web | `turn_frames.py` | BiRefNet-lite (MIT) |
-| Full 360 joined from the clips | `join_turn.py` | |
+Without an email service configured, development writes each email to `.data/outbox/` instead of sending it. Production refuses to pretend: it reports the failure to the visitor and offers retry or their own email app. Every lead is also appended to `.data/leads.jsonl`.
+
+## Checks
+
+```sh
+bun run test         # unit tests: understanding answers (yes, no, commands), emails
+bun run typecheck
+BASE_URL=http://localhost:3000 bun tests/e2e/chat.e2e.ts   # full conversations in Chrome or Edge
+```
+
+## Where things are
+
+| Path | What it is |
+|---|---|
+| `src/routes/` | The page (`index.tsx`) and the document shell (`__root.tsx`) |
+| `src/components/` | The page's sections, the service sheet, and the chat's frame |
+| `src/data/content.ts` | Services, maturity levels and contact details, each statement with its source |
+| `src/nine/` | Nine: face, photo body and 360 turn, autopilot, conversation, language understanding |
+| `src/server/` | The `sendLead` server function, validation, rate limit and email delivery |
+| `src/styles/site.css` | The mock's styles, unchanged, plus a short section for new features |
+| `public/assets/` | Nine's images and the 360 turn frames, and the logo |
+| `pipeline/` | How Nine's images were made (run with `public` as the site folder) |
+| `legacy/mock.html` | The original single-file mock, for reference |
+
+How everything was made, and how Nine works, is in [docs/](docs/README.md).
 
 The person in the body photo is AI-generated and fictional. The display head is an original design.
-
-## Documentation
-
-How everything in the site was made is in [docs/](docs/README.md).
