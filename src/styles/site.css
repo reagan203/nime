@@ -1,3 +1,5 @@
+@import "@fontsource-variable/dm-sans/opsz.css";
+@import "@fontsource-variable/montserrat/wght.css";
 /* Ninth Mind site styles. Carried over unchanged from the original single-file mock (legacy/mock.html).
  Colours are tokens on :root, redefined for [data-theme="dark"]. */
 /* ---------- Tokens: the only place colours are defined ---------- */
@@ -48,8 +50,8 @@
   --nb-chest: #2b2d31;
   --r-control: 10px;
   --r-card: 18px;
-  --font: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --display: "Montserrat", "DM Sans", system-ui, sans-serif;
+  --font: "DM Sans Variable", "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Montserrat Variable", "Montserrat", "DM Sans Variable", system-ui, sans-serif;
   --max: 1200px;
   --gutter: clamp(18px, 4vw, 28px);
   color-scheme: light;
@@ -224,12 +226,6 @@ p { margin: 0; }
 .nb-say { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translate(-50%, 6px); white-space: nowrap; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 7px 12px; font: 500 13px var(--font); box-shadow: var(--shadow-lift); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 7; }
 .nb-say.is-on { opacity: 1; transform: translate(-50%, 0); }
 @keyframes nbZ { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(14cqw, -30cqw); } }
-/* mini Nine, at the bottom of the page */
-.nm-walker { position: fixed; left: 0; bottom: 0; z-index: 25; pointer-events: none; transition: opacity .35s; will-change: transform; }
-.nm-walker .nb { --nb-w: 84px; pointer-events: auto; cursor: pointer; }
-.nm-walker.is-hidden { opacity: 0; }
-.nm-walker.is-hidden .nb { pointer-events: none; }
-@media (prefers-reduced-motion: reduce) { .nm-walker { display: none; } }
 .nm-bubble.is-gone { opacity: 0; transform: translateY(6px); transition: opacity .5s, transform .5s; pointer-events: none; }
 
 /* ---------- Statement band ---------- */
@@ -558,16 +554,9 @@ p { margin: 0; }
 @keyframes nfsGlitch { 0% { transform: translate(-6px, 2px); filter: hue-rotate(80deg) saturate(3); } 100% { transform: translate(5px, -3px); filter: hue-rotate(-60deg); } }
 /* she leans her whole body toward the pointer */
 .np-stage { transform: perspective(1400px) translate(calc(var(--lx) * -1.1%), calc(var(--ly) * -.7%)) rotateY(calc(var(--lx) * 5deg)) rotate(calc(var(--lx) * -.6deg)); transform-origin: 50% 100%; }
-/* mini Nine at the bottom of the page: head and shoulders, glides after the pointer */
-.nm-walker .np { width: 120px; pointer-events: auto; cursor: pointer; }
-.nm-walker.is-hidden .np { pointer-events: none; }
-.nm-walker .np-clip { aspect-ratio: .78; }
-.nm-walker .np-stage { width: 118%; left: -9%; }
-.nm-walker .np .nb-say { top: -34px; }
 .np[data-act="walk"] .np-stage, .np[data-act="run"] .np-stage, .np[data-act="moon"] .np-stage { animation: npGlide .5s ease-in-out infinite; }
 .np[data-act="run"] .np-stage { animation-duration: .3s; }
 @keyframes npGlide { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3%; } }
-@media (max-width: 560px) { .nm-walker .np { width: 88px; } }
 /* the 360 turn: rendered video frames drawn on a canvas; drag Nine to spin her */
 .np-turn { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; transition: opacity .18s; }
 .np.is-turning .np-turn { opacity: 1; }
@@ -642,3 +631,51 @@ p { margin: 0; }
 @keyframes nfsFly { 0% { transform: translate(-30px, 10px) scale(.9); opacity: 0; } 20% { opacity: 1; } 70% { transform: translate(40px, -10px); opacity: 1; } 100% { transform: translate(140px, -40px) scale(.6); opacity: 0; } }
 @keyframes nfsWave { from { transform: rotate(-14deg); } to { transform: rotate(12deg); } }
 @keyframes nfsRing { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+
+/* ---------- Speed and older browsers ---------- */
+/* Nine's hero image is in the server-rendered page, so keep its space reserved before she starts (no layout shift) */
+#heroBody { display: block; }
+#heroBody:empty { aspect-ratio: 896 / 1233; }
+/* browsers without color-mix (Safari before 16.2, older Chrome): a plain mix of the accent by level */
+@supports not (background: color-mix(in srgb, red 50%, blue)) {
+  .nm-rung { background: var(--accent); opacity: calc(.45 + var(--n) * .11); }
+  .nm-rung:nth-child(-n+3) { color: var(--rung-text-hi); }
+}
+
+/* ---------- Contact form: send us an email ---------- */
+.nm-panel-form { grid-column: 1 / -1; }
+.nm-panel-form h2 { font-size: clamp(26px, 2.8vw, 34px); }
+.nm-form-lead { margin-top: 10px; color: var(--text-muted); }
+.nm-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; margin-top: 24px; }
+.nm-field { display: grid; gap: 6px; font-size: 14px; color: var(--text-muted); }
+.nm-field-wide { grid-column: 1 / -1; }
+.nm-field input, .nm-field textarea { width: 100%; font: 400 16px/1.5 var(--font); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-control); padding: 11px 14px; transition: border-color .15s, box-shadow .15s; }
+.nm-field textarea { resize: vertical; min-height: 120px; }
+.nm-field input::placeholder, .nm-field textarea::placeholder { color: var(--text-soft); }
+.nm-field input:focus, .nm-field textarea:focus { outline: none; border-color: var(--accent-fg); box-shadow: 0 0 0 3px var(--accent-quiet); }
+.nm-field [aria-invalid="true"] { border-color: #c2412d; }
+.nm-field-err { color: #c2412d; font-size: 13px; }
+[data-theme="dark"] .nm-field [aria-invalid="true"] { border-color: #f08a76; }
+[data-theme="dark"] .nm-field-err { color: #f08a76; }
+.nm-form-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.nm-check { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; color: var(--text); cursor: pointer; }
+.nm-check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.nm-form .nm-btn:disabled { opacity: .7; cursor: progress; }
+.nm-form-status { min-height: 1.4em; font-size: 14px; color: var(--text-muted); margin: 0; }
+.nm-form-status a, .nm-form-done a { color: var(--accent-fg); text-decoration: underline; text-underline-offset: 3px; }
+.nm-form-done { margin-top: 20px; display: grid; gap: 16px; justify-items: start; }
+.nm-form-done p { font-size: 17px; color: var(--ink); }
+@media (max-width: 560px) { .nm-form { grid-template-columns: 1fr; } .nm-form-foot .nm-btn { width: 100%; } }
+
+/* ---------- The team ---------- */
+.nm-panel-team { grid-column: 1 / -1; }
+.nm-panel-team h2 { font-size: clamp(26px, 2.8vw, 34px); }
+.nm-team { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 24px; }
+.nm-member { display: grid; grid-template-columns: 56px 1fr; gap: 16px; align-items: start; }
+.nm-member h3 { font-size: 19px; line-height: 1.25; }
+.nm-member .nm-person-role { font-size: 14px; }
+.nm-member .nm-contacts { margin-top: 14px; gap: 8px; }
+.nm-member .nm-contacts a { font-size: 14px; }
+.nm-avatar-sm { width: 56px; height: 56px; font-size: 19px; box-shadow: 0 0 0 3px var(--surface), 0 0 0 4px var(--accent-light); }
+@media (max-width: 1024px) { .nm-team { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) { .nm-team { grid-template-columns: 1fr; } }

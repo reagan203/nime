@@ -27,11 +27,32 @@ const SCREEN_FOR: Record<string, string> = {
 // the 360 turn, rendered with Wan 2.2 and cut out with BiRefNet
 const TURN = { frames: 161, fps: 24, src: "/assets/nine/turn/f{i}.webp" };
 const turnImgs: HTMLImageElement[] = [];
+/** Loads the 161 turn frames (about 4 MB) a few at a time, so they never compete with the page. */
 export function loadTurn() {
   if (turnImgs.length) return;
-  for (let i = 0; i < TURN.frames; i++) {
-    const im = new Image(); im.decoding = "async"; im.src = TURN.src.replace("{i}", String(i).padStart(3, "0")); turnImgs.push(im);
-  }
+  const srcs = Array.from({ length: TURN.frames }, (_, i) => TURN.src.replace("{i}", String(i).padStart(3, "0")));
+  srcs.forEach(() => turnImgs.push(new Image()));
+  let next = 0;
+  const one = () => {
+    const i = next++; if (i >= srcs.length) return;
+    const im = turnImgs[i]; im.decoding = "async";
+    im.onload = im.onerror = one;
+    im.src = srcs[i];
+  };
+  for (let k = 0; k < 6; k++) one();
+}
+
+/** Nine's photo markup. The page renders the hero's on the server, so the browser fetches her image straight away. */
+export function photoMarkup(priority = false) {
+  const p = priority ? ' fetchpriority="high"' : ' loading="lazy"';
+  return `<div class="np" data-pose="stand" data-act="" data-move=""><div class="np-clip"><div class="np-stage">
+      <img class="np-body" src="${SRC}body.webp" alt="" width="896" height="1233" draggable="false" decoding="async"${p}>
+      <div class="np-head"><div class="np-neck"><div class="np-act">
+        <img src="${SRC}head.webp" alt="" width="594" height="583" draggable="false" decoding="async"${p}><div class="np-screen"></div>
+      </div></div></div>
+      <canvas class="np-turn" aria-hidden="true"></canvas>
+      <div class="nb-zzz"><i>z</i><i>z</i><i>Z</i></div>
+    </div></div><div class="nb-say"></div></div>`;
 }
 const turnReady = () => turnImgs.length === TURN.frames && turnImgs.every(im => im.complete && im.naturalWidth);
 
@@ -61,14 +82,8 @@ let following = false;
 export function mountPhoto(slot: HTMLElement): NineFigure {
   const Faces = getFaces();
   const reduceTurn = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  slot.innerHTML = `<div class="np" data-pose="stand" data-act="" data-move=""><div class="np-clip"><div class="np-stage">
-      <img class="np-body" src="${SRC}body.webp" alt="" draggable="false">
-      <div class="np-head"><div class="np-neck"><div class="np-act">
-        <img src="${SRC}head.webp" alt="" draggable="false"><div class="np-screen"></div>
-      </div></div></div>
-      <canvas class="np-turn" aria-hidden="true"></canvas>
-      <div class="nb-zzz"><i>z</i><i>z</i><i>Z</i></div>
-    </div></div><div class="nb-say"></div></div>`;
+  // keep the server-rendered markup when it's there (the hero), so the image isn't fetched or painted twice
+  if (!slot.querySelector(":scope > .np")) slot.innerHTML = photoMarkup();
   const el = slot.querySelector(".np") as HTMLElement, head = el.querySelector(".np-head") as HTMLElement;
   const screen = el.querySelector(".np-screen") as HTMLElement;
   const face = Faces.mount(screen), bubble = el.querySelector(".nb-say") as HTMLElement;

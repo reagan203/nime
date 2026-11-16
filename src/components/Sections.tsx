@@ -1,7 +1,11 @@
 /* The page's sections, top to bottom. Text and sources (data-src) are unchanged from the mock. */
 import { useState, type KeyboardEvent } from "react";
 import { LEVELS, cap } from "~/data/content";
+import { track } from "~/analytics/track";
 import { ArrowIcon, MicIcon } from "./icons";
+import { photoMarkup } from "~/nine/photo";
+
+const HERO_NINE = photoMarkup(true);
 
 export function Hero() {
   return (
@@ -17,7 +21,7 @@ export function Hero() {
         </div>
         <div className="nm-hero-nine">
           <div className="nm-bubble"><strong>Hi, I'm Nine.</strong>Ninth Mind's assistant. Tap me, or just say hello.</div>
-          <button className="nm-nine" type="button" data-talk="" aria-label="Talk to Nine, Ninth Mind's assistant"><span id="heroBody" /></button>
+          <button className="nm-nine" type="button" data-talk="" aria-label="Talk to Nine, Ninth Mind's assistant"><span id="heroBody" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: HERO_NINE }} /></button>
         </div>
       </div>
     </section>
@@ -52,7 +56,7 @@ export function Levels() {
         <div className="nm-ladder" id="ladder" role="tablist" aria-label="AI maturity levels" onKeyDown={onKey}>
           {LEVELS.map((lv, i) => (
             <button key={lv.n} className="nm-rung" type="button" role="tab" id={`rung${lv.n}`} aria-controls="levelPanel" aria-selected={lv.n === n}
-              tabIndex={lv.n === n ? 0 : -1} style={{ "--h": `${36 + i * 16}%`, "--n": lv.n } as React.CSSProperties} data-n={lv.n} onClick={() => setN(lv.n)}>
+              tabIndex={lv.n === n ? 0 : -1} style={{ "--h": `${36 + i * 16}%`, "--n": lv.n } as React.CSSProperties} data-n={lv.n} onClick={() => { setN(lv.n); track("level_view", String(lv.n)); }}>
               <small>Level {lv.n}</small><strong>{cap(lv.name)}</strong>
             </button>
           ))}

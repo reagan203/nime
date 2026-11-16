@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { CONTACT } from "~/data/content";
+import { ContactForm } from "./ContactForm";
+import { Team } from "./Team";
 import { DocIcon, GlobeIcon, LinkedInIcon, MailIcon, MicIcon, MobileIcon, PinIcon, WhatsAppIcon } from "./icons";
 
 const MAPS = "https://www.google.com/maps/search/?api=1&query=16+Kanjata+Road+Nairobi+Kenya";
@@ -10,7 +12,7 @@ export function Contact() {
       <div className="nm-wrap">
         <div className="nm-section-head">
           <h2>Get in touch</h2>
-          <p>Talk to Nine, or contact our Managing Director directly.</p>
+          <p>Talk to Nine, send us an email, or contact our Managing Director directly.</p>
         </div>
         <div className="nm-contact">
           <div className="nm-panel nm-panel-nine">
@@ -46,6 +48,8 @@ export function Contact() {
               </div>
             </div>
           </div>
+          <Team />
+          <ContactForm />
         </div>
       </div>
     </section>
@@ -58,8 +62,8 @@ export function Footer() {
       <div className="nm-wrap">
         <div className="nm-footer-top">
           <div>
-            <img className="nm-logo-img" src="/assets/ninth-mind-logo.png" alt="Ninth Mind: AI-Powered Business Transformation & Training" />
-            <p className="nm-footer-addr">{CONTACT.office}<br /><a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a> · <a href={CONTACT.web} target="_blank" rel="noopener">www.ninthmind.ai</a></p>
+            <img className="nm-logo-img" src="/assets/ninth-mind-logo.webp" width={296} height={96} loading="lazy" decoding="async" alt="Ninth Mind: AI-Powered Business Transformation & Training" />
+            <address className="nm-footer-addr" style={{ fontStyle: "normal" }}>{CONTACT.office}<br /><a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a> · <a href={CONTACT.web} target="_blank" rel="noopener">www.ninthmind.ai</a></address>
           </div>
           <div className="nm-footer-cols">
             <div>
@@ -76,11 +80,12 @@ export function Footer() {
               <a href="#programme">How we work</a>
               <a href="#mfi">Our work in the MFI Group</a>
               <a href="#planned">Future plans</a>
+              <a href="#email-us">Send us an email</a>
               <button type="button" data-talk="">Talk to Nine</button>
             </div>
           </div>
         </div>
-        <div className="nm-footer-bottom"><span>© {new Date().getFullYear()} Ninth Mind Limited</span><span>AI-Powered Business Transformation &amp; Training</span></div>
+        <div className="nm-footer-bottom"><span>© {new Date().getFullYear()} Ninth Mind Limited</span><span>AI-Powered Business Transformation &amp; Training · A Group MFI company</span></div>
       </div>
     </footer>
   );

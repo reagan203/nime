@@ -6,12 +6,13 @@ import { Services } from "~/components/Services";
 import { Contact, Footer, Sources } from "~/components/Contact";
 import { NineChat } from "~/components/NineChat";
 import { bootNine } from "~/nine/boot";
+import { startTracking } from "~/analytics/track";
 
 export const Route = createFileRoute("/")({ component: Home });
 
 function Home() {
   // Nine is imperative (animation frames, speech, a 360 turn on a canvas), so she starts once the page is in the browser
-  useEffect(() => { bootNine(); }, []);
+  useEffect(() => { bootNine(); startTracking(); }, []);
   return (
     <>
       <Header />

@@ -113,3 +113,12 @@ export const CONTACT = {
   linkedin: "https://www.linkedin.com/in/caanuptabe",
   photo: "/assets/anup-tabe.webp",
 };
+
+/** The team, from their Ninth Mind business cards. */
+export interface Member { name: string; role: string; email: string; phone: string; phoneLabel: string }
+export const TEAM: Member[] = [
+  { name: "Fidel Katee", role: "AI Integrations Software Engineer", email: "fidel.katee@ninthmind.ai", phone: "+254708739368", phoneLabel: "+254 708 739 368" },
+  { name: "Reagan Mwangi", role: "AI Integrations Software Engineer", email: "reagan.mwangi@ninthmind.ai", phone: "+254769016743", phoneLabel: "+254 769 016 743" },
+  { name: "Varun Nakar", role: "AI Integrations Software Engineer", email: "varun.nakar@ninthmind.ai", phone: "+254785926260", phoneLabel: "+254 785 926 260" },
+];
+export const initials = (name: string) => name.split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();

@@ -38,7 +38,7 @@ export function Header() {
     <header className={`nm-header${scrolled ? " is-scrolled" : ""}`} id="top">
       <div className="nm-wrap nm-header-in">
         <a className="nm-logo" href="#top" aria-label="Ninth Mind home">
-          <img className="nm-logo-img" src="/assets/ninth-mind-logo.png" alt="Ninth Mind: AI-Powered Business Transformation & Training" />
+          <img className="nm-logo-img" src="/assets/ninth-mind-logo.webp" width={296} height={96} alt="Ninth Mind: AI-Powered Business Transformation & Training" />
         </a>
         <nav className={`nm-nav${open ? " is-open" : ""}`} id="nav" aria-label="Main" ref={navRef} onClick={e => { if ((e.target as Element).closest("a")) setOpen(false); }}>
           {NAV.map(([href, text]) => <a key={href} href={href} className={active === href ? "is-active" : undefined}>{text}</a>)}

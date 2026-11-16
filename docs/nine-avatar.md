@@ -1,10 +1,10 @@
 # Nine on the page
 
-Nine appears three times, all from the same component (`Photo.mount` in `index.html`):
+Nine appears twice, both from the same code (`mountPhoto` in `src/nine/photo.ts`):
 
 - **Hero Nine**, beside the headline;
 - **Chat Nine**, in the full-screen conversation;
-- **Mini Nine**, head and shoulders, who appears at the bottom of the screen once the hero scrolls away, glides after the pointer and opens the chat when clicked.
+- (Mini Nine, who used to follow visitors along the bottom of the page, has been removed: Nine stays at the top.)
 
 ## The layers
 
@@ -27,7 +27,6 @@ There is no frame or backdrop: Nine sits on the page's own background, with a so
 
 - The eyes and head of every Nine track the pointer (`Faces` animation loop), and the head turns, tilts and leans toward it. When the pointer has been still for a few seconds, Nine looks around on her own.
 - The whole figure leans a little toward the pointer, in perspective, so she feels three-dimensional.
-- Mini Nine glides along the bottom of the screen to wherever the pointer rests, and winks when she gets there.
 - A click on an empty part of the page makes Nine look at that spot.
 
 ## The screen: faces and pictures
@@ -71,16 +70,6 @@ Poses: `stand`, `sit` (head lowered, relaxed) and `sleep` (head drooped, screen 
 
 On the page Nine behaves like a good receptionist, not a mascot. The **autopilot** (`src/nine/autopilot.ts`) has her look around, nod, think, point, now and then quote the company's own lines, show the company logo or a service area on her screen, and, rarely, turn. There is no tripping, sneezing, hiccupping or dancing, and she doesn't go dizzy. After 30 seconds without activity she sits and says "I'm here whenever you need me"; she never falls asleep on the page. Hovering her brings an offer of help ("Can I help you find the right service?").
 
-**Mini Nine offers help that fits the page.** When the visitor has been reading a section for a moment, she offers once, and clicking her starts that conversation:
-
-| Section | Mini Nine says | Clicking her starts |
-|---|---|---|
-| Five levels | Want to find your AI maturity level? | The level questions |
-| Training | Need training for your team? | Training |
-| Services | Not sure which service fits? | A project |
-| The programme, MFI Group | Ask me / Let's talk | A project |
-| Future plans, Contact | I'll tell the team / I can pass a message | A quick message |
-
 Screens added in the rebuild: `mail` (an envelope flying off), `sent`, `ok`, `sad`, `bye` (a waving hand), `shh` (muted), `phone`, `error`. Actions added: `decline` (shake, OK), `goodbye` (wave, Bye!), `send` (nod, envelope), `sorry` (looks down, sad face).
 
 ## Nine reacts to the page
@@ -88,7 +77,6 @@ Screens added in the rebuild: `mail` (an envelope flying off), `sent`, `ok`, `sa
 | The visitor… | Nine… |
 |---|---|
 | arrives | waves, says "Good morning", "Good afternoon" or "Good evening" on her screen, then shows off a full turn |
-| reads a section | mini Nine offers the help that fits (see above) |
 | hovers a service area or card | shows that area's symbol |
 | hovers a maturity level | shows its number |
 | switches light or dark mode | shows a sun or a moon |

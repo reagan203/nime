@@ -12,6 +12,7 @@ import {
   type Command, type Option, type ServiceRef,
 } from "./understand";
 import { sendLead } from "~/server/lead";
+import { track } from "~/analytics/track";
 import type { LeadInput, SendResult } from "~/server/lead-schema";
 
 export interface OpenOptions { voice?: boolean; flow?: string; service?: string }
@@ -400,6 +401,7 @@ export function createChat(body: NineFigure): Chat {
     });
   }
   function finish(res: SendResult) {
+    track("nine_enquiry", route);
     step = "finished"; sentId = res.id || "";
     Faces.show(face, "sent", 1500); setTimeout(() => Faces.show(face, "heart", 2400), 1500);
     const name = first() ? `, ${first()}` : "";
@@ -445,6 +447,7 @@ export function createChat(body: NineFigure): Chat {
     if (!no) declines = 0;
     switch (step) {
       case "menu":
+        if (t.startsWith("m:")) track("nine_flow", t.slice(2));
         if (no) return declinedMenu();
         if (t === "m:project") { route = "project"; return next(); }
         if (t === "m:level") { route = "level"; return levelNow(); }
@@ -726,6 +729,7 @@ export function createChat(body: NineFigure): Chat {
     explore: () => { route = "explore"; explore(); },
   };
   function open(opts: OpenOptions = {}) {
+    track("nine_open", opts.flow || "");
     openerFocus = document.activeElement;
     root.classList.add("is-open"); root.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";

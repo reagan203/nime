@@ -26,7 +26,8 @@ async function type(page: Page, text: string) { await answerBox(page); await pag
 async function tap(page: Page, label: string) { await answerBox(page); await page.click(`.nm-as-opt:has-text("${label}")`); }
 
 const browser = await chromium.launch({ executablePath: browserPath, headless: true });
-const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+// a normal Chrome user agent: the analytics ignore "HeadlessChrome" as a bot
+const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36" });
 await ctx.addInitScript(() => { try { localStorage.setItem("nm-voice", "off"); localStorage.setItem("nm-theme", "light"); } catch {} });
 const page = await ctx.newPage();
 const errors: string[] = [];
@@ -90,14 +91,35 @@ ok(await nineSays(page, "If now isn't the right moment"), "three refusals in a r
 await tap(page, "Talk to a person instead");
 ok(await nineSays(page, "reach our Managing Director"), "offers the team's direct contacts");
 
-// client-facing: mini Nine offers help that fits the section, and clicking her starts it
-await page.click("#asClose");
-await page.evaluate(() => document.getElementById("approach")!.scrollIntoView({ behavior: "instant" as ScrollBehavior }));
-const offered = await page.waitForFunction(() => /maturity level/.test(document.querySelector(".nm-walker .nb-say.is-on")?.textContent || ""), null, { timeout: 15000 }).then(() => true, () => false);
-ok(offered, "on the maturity section, mini Nine offers to find your level");
-if (OUT) await page.screenshot({ path: `${OUT}/new-offer.png` });
-await page.click(".nm-walker .np-clip", { force: true });
-ok(await nineSays(page, "sounds most like your organisation today"), "clicking mini Nine starts the level conversation");
+// Nine lives only at the top: no mini Nine following the visitor down the page
+await page.click("#asClose").catch(() => {});
+ok(await page.locator(".nm-walker").count() === 0, "no mini Nine at the bottom of the page");
+ok(await page.locator(".nm-member").count() === 3, "the team's contact cards are on the page");
+
+// the contact form: visitors can email the team directly
+await page.click("#asClose").catch(() => {});
+await page.locator("#email-us").scrollIntoViewIfNeeded();
+await page.click("#email-us button[type=submit]");
+ok(await page.locator("#email-us .nm-field-err").count() >= 3, "the email form explains what's missing");
+await page.fill("#cf-name", "Grace Achieng");
+await page.fill("#cf-email", "grace@example.com");
+await page.fill("#cf-org", "Example Bank");
+await page.fill("#cf-message", "We'd like a readiness assessment for our operations team.");
+await page.waitForTimeout(3100);                                // the server ignores forms sent in under 3 seconds
+await page.click("#email-us button[type=submit]");
+const sentForm = await page.waitForSelector("#email-us .nm-form-done", { timeout: 15000 }).then(() => true, () => false);
+ok(sentForm && /with the team \(reference NM-/.test((await page.textContent("#email-us")) || ""), "the email form sends, with a reference");
+
+// analytics: the visit is recorded and shows in the report (the preview needs REPORT_KEY in production)
+await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+await page.close({ runBeforeUnload: true });
+const report = await ctx.newPage();
+await new Promise(r => setTimeout(r, 800));
+await report.goto(BASE + "/api/report?days=1" + (process.env.REPORT_KEY ? "&key=" + process.env.REPORT_KEY : ""));
+const text = (await report.textContent("body")) || "";
+ok(/Visitors/.test(text) && !/No visits were recorded/.test(text), "the website report counts the visit");
+ok(/Where people spend their time/.test(text) && /Services|Hero/.test(text), "the report shows where time was spent");
+if (OUT) { await report.setViewportSize({ width: 760, height: 2400 }); await report.screenshot({ path: `${OUT}/report.png`, fullPage: true }); }
 
 ok(errors.length === 0, `no errors in the browser console${errors.length ? ": " + errors.join(" | ") : ""}`);
 await browser.close();

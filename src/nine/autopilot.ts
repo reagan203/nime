@@ -8,14 +8,8 @@
 import { getFaces } from "./faces";
 import type { NineFigure } from "./photo";
 
-interface Options { host: HTMLElement | null; talks: boolean; isActive: () => boolean }
-export interface Pilot {
-  entered: boolean;
-  place(px: number, dur: number): void;
-  walkTo(tx: number, done?: (() => void) | null, speed?: number, act?: string): number;
-  wake(): void;
-  readonly x: number;
-}
+interface Options { talks: boolean; isActive: () => boolean }
+export interface Pilot { wake(): void }
 
 const pickOne = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
 const LINES: Record<string, string[]> = {
@@ -33,7 +27,7 @@ const ACTIONS: [string, number, number][] = [
 
 export function autopilot(c: NineFigure, opt: Options): Pilot {
   const Faces = getFaces();
-  let lastActive = performance.now(), waiting = false, x = innerWidth + 40, walkT = 0;
+  let lastActive = performance.now(), waiting = false;
   const line = (k: string) => { if (opt.talks && LINES[k]) c.say(pickOne(LINES[k]), k === "quote" ? 4400 : 2600); };
   const weighted = (list: [string, number, number][]) => {
     let s = list.reduce((a, l) => a + l[2], 0) * Math.random();
@@ -47,21 +41,6 @@ export function autopilot(c: NineFigure, opt: Options): Pilot {
   }
   function activity() { lastActive = performance.now(); if (waiting && opt.isActive()) wake(); }
   (["pointermove", "scroll", "keydown", "touchstart"] as const).forEach(ev => window.addEventListener(ev, activity, { passive: true }));
-  function place(px: number, dur: number) {
-    if (!opt.host) return;
-    opt.host.style.transition = dur ? `transform ${dur}s ease-in-out` : "none";
-    opt.host.style.transform = `translateX(${Math.round(px)}px)`; x = px;
-  }
-  function walkTo(tx: number, done?: (() => void) | null, speed = 160, act = "walk") {
-    const dist = Math.abs(tx - x);
-    if (dist < 24) { if (done) done(); return 0; }
-    const dir = tx > x ? 1 : -1, dur = dist / speed;
-    c.act(act); Faces.force(c.face, { x: dir * 0.9, y: 0.2 });
-    place(tx, dur);
-    clearTimeout(walkT);
-    walkT = window.setTimeout(() => { if (c.el.dataset.act === act) c.act(""); Faces.force(c.face, null); if (done) done(); }, dur * 1000);
-    return dur * 1000;
-  }
   function look() { Faces.force(c.face, { x: -1, y: 0 }); setTimeout(() => Faces.force(c.face, { x: 1, y: -0.3 }), 900); setTimeout(() => Faces.force(c.face, null), 1900); }
 
   function tick() {
@@ -70,7 +49,7 @@ export function autopilot(c: NineFigure, opt: Options): Pilot {
       const idle = performance.now() - lastActive;
       if (idle > 30000) {
         // nobody around: sit back and wait politely, with an offer of help
-        if (c.pose === "stand" && !/walk/.test(c.el.dataset.act || "")) { c.act(""); Faces.force(c.face, null); c.setPose("sit"); waiting = true; line("wait"); }
+        if (c.pose === "stand") { c.act(""); Faces.force(c.face, null); c.setPose("sit"); waiting = true; line("wait"); }
         wait = 2000;
       } else if (c.pose === "stand" && !c.el.dataset.act) {
         const [a, ms] = weighted(ACTIONS);
@@ -89,11 +68,10 @@ export function autopilot(c: NineFigure, opt: Options): Pilot {
   }
   c.el.addEventListener("pointerenter", () => {
     if (waiting) { lastActive = performance.now(); wake(); return; }
-    if (/walk/.test(c.el.dataset.act || "")) return;
     c.act("wave", 1600); happyFor(1600);
     if (opt.talks) c.say(pickOne(LINES.hover), 2200);
   });
   c.el.addEventListener("pointerleave", () => { if (c.pose === "stand") Faces.mood(c.face, "idle"); });
   setTimeout(tick, 2500);
-  return { entered: false, place, walkTo, wake, get x() { return x; } };
+  return { wake };
 }

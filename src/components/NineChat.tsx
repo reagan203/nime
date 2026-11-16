@@ -6,7 +6,7 @@ export function NineChat() {
   return (
     <div className="nm-as" id="as" role="dialog" aria-modal="true" aria-label="Nine, Ninth Mind's assistant" aria-hidden="true" data-state="idle">
       <div className="nm-as-top">
-        <img className="nm-logo-img" src="/assets/ninth-mind-logo.png" alt="Ninth Mind" />
+        <img className="nm-logo-img" src="/assets/ninth-mind-logo.webp" width={296} height={96} alt="Ninth Mind" />
         <button className="nm-icon-btn" id="asClose" type="button" aria-label="Close Nine"><CloseIcon /></button>
       </div>
       <div className="nm-as-main">

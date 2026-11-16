@@ -19,7 +19,7 @@ export interface MailerEnv {
 
 const LEVEL_NAMES = ["AI as a tool", "AI as a process", "AI as a team member", "AI as an operating system", "AI as a competitive advantage"];
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-const ROUTES: Record<Lead["route"], string> = { project: "AI project", train: "Training", level: "Maturity level", explore: "Services", quick: "Quick message" };
+const ROUTES: Record<Lead["route"], string> = { project: "AI project", train: "Training", level: "Maturity level", explore: "Services", quick: "Quick message", form: "Email from the website" };
 
 export function leadRows(l: Lead): [string, string][] {
   const lv = (n: number | null) => (n ? `Level ${n} · ${LEVEL_NAMES[n - 1]}` : "");
@@ -43,12 +43,14 @@ export function leadRows(l: Lead): [string, string][] {
 export function teamEmail(l: Lead, id: string, to: string): Email {
   const rows = leadRows(l);
   const who = l.name || "A visitor";
-  const subject = `Nine: ${ROUTES[l.route]} from ${who}${l.org ? `, ${l.org}` : ""}`;
+  const form = l.route === "form";
+  const subject = `${form ? "Website" : "Nine"}: ${ROUTES[l.route]} from ${who}${l.org ? `, ${l.org}` : ""}`;
+  const how = form ? "sent a message through the website's contact form" : "talked to Nine on the website";
   const contact = l.email || l.phone ? "" : "\nThe visitor chose not to leave contact details, so this is for information only.\n";
   const transcript = l.transcript.map(t => `${t.who === "nine" ? "Nine" : "Visitor"}: ${t.text}`).join("\n");
-  const text = `${who} talked to Nine on the website.\n${contact}\n${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\nReference: ${id}\n\n--- Conversation ---\n${transcript}\n`;
+  const text = `${who} ${how}.\n${contact}\n${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\nReference: ${id}\n${transcript ? `\n--- Conversation ---\n${transcript}\n` : ""}`;
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#2b2d31;max-width:620px">
-<p style="font-size:16px">${esc(who)} talked to Nine on the website.</p>
+<p style="font-size:16px">${esc(who)} ${how}.</p>
 ${contact ? `<p style="color:#5c636d">${esc(contact.trim())}</p>` : ""}
 <table style="border-collapse:collapse;font-size:15px">${rows.map(([k, v]) => `<tr><td style="padding:6px 18px 6px 0;color:#5c636d;vertical-align:top;white-space:nowrap">${esc(k)}</td><td style="padding:6px 0">${esc(v).replace(/\n/g, "<br>")}</td></tr>`).join("")}</table>
 <p style="color:#868d97;font-size:13px">Reference: ${esc(id)}</p>
@@ -60,10 +62,10 @@ ${transcript ? `<details><summary style="cursor:pointer;color:#0a6fb8">The conve
 export function visitorEmail(l: Lead, id: string, replyTo: string): Email {
   const rows = leadRows(l).filter(([k]) => k !== "Email");
   const hi = l.name ? `Hi ${l.name.split(/\s+/)[0]},` : "Hello,";
-  const text = `${hi}\n\nThank you for talking to Nine. This is a copy of what was sent to the Ninth Mind team. Someone will be in touch soon.\n\n${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\nYou can reply to this email to add anything.\n\nNinth Mind Limited\nNo. 16 Kanjata Road, off James Gichuru Road, Nairobi, Kenya\nwww.ninthmind.ai\n\nReference: ${id}\n`;
+  const text = `${hi}\n\n${l.route === "form" ? "Thank you for your message" : "Thank you for talking to Nine"}. This is a copy of what was sent to the Ninth Mind team. Someone will be in touch soon.\n\n${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\nYou can reply to this email to add anything.\n\nNinth Mind Limited\nNo. 16 Kanjata Road, off James Gichuru Road, Nairobi, Kenya\nwww.ninthmind.ai\n\nReference: ${id}\n`;
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#2b2d31;max-width:620px">
 <p>${esc(hi)}</p>
-<p>Thank you for talking to Nine. This is a copy of what was sent to the Ninth Mind team. Someone will be in touch soon.</p>
+<p>${l.route === "form" ? "Thank you for your message" : "Thank you for talking to Nine"}. This is a copy of what was sent to the Ninth Mind team. Someone will be in touch soon.</p>
 <table style="border-collapse:collapse;font-size:15px">${rows.map(([k, v]) => `<tr><td style="padding:6px 18px 6px 0;color:#5c636d;vertical-align:top;white-space:nowrap">${esc(k)}</td><td style="padding:6px 0">${esc(v).replace(/\n/g, "<br>")}</td></tr>`).join("")}</table>
 <p>You can reply to this email to add anything.</p>
 <p style="color:#5c636d;font-size:14px">Ninth Mind Limited · No. 16 Kanjata Road, off James Gichuru Road, Nairobi, Kenya · <a href="https://www.ninthmind.ai" style="color:#0a6fb8">www.ninthmind.ai</a></p>

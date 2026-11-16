@@ -1,5 +1,5 @@
-/* Starts every Nine on the page (hero, chat, mini Nine), her autopilot, and her
-   reactions to the page. Called once from an effect in <NineProvider>. */
+/* Starts Nine on the page (in the hero and in the chat), her autopilot, and her
+   reactions to the page. Called once from an effect on the home page. */
 import { getFaces } from "./faces";
 import { loadTurn, mountPhoto, type NineFigure } from "./photo";
 import { autopilot } from "./autopilot";
@@ -22,9 +22,14 @@ export function bootNine(): NineApi {
   const chat: Chat = createChat(asBody);
   const nineOpen = () => chat.isOpen();
 
-  // the 360 turn frames load after the page has loaded
-  if (document.readyState === "complete") setTimeout(loadTurn, 1200);
-  else window.addEventListener("load", () => setTimeout(loadTurn, 1200));
+  // the 360 turn frames (about 4 MB) load once the page is idle, and not at all
+  // on data saver, slow connections or reduced motion: Nine works fine without them
+  const conn = (navigator as any).connection;
+  const lean = reduceMotion || conn?.saveData || /(^|-)2g|3g/.test(conn?.effectiveType || "");
+  if (!lean) {
+    const later = () => ("requestIdleCallback" in window ? (window as any).requestIdleCallback(loadTurn, { timeout: 4000 }) : setTimeout(loadTurn, 2500));
+    if (document.readyState === "complete") later(); else window.addEventListener("load", later, { once: true });
+  }
 
   /* Nine smiles at "Talk to Nine" buttons and looks at them; any [data-talk] opens her. */
   const pageFaces = () => Faces.all.filter(f => !f.closest("#as") && (f.closest(".np") as HTMLElement | null)?.dataset.pose !== "sleep");
@@ -45,83 +50,22 @@ export function bootNine(): NineApi {
     chat.open({ voice: b.hasAttribute("data-voice"), flow: b.getAttribute("data-talk") || undefined });
   });
 
-  /* ---- mini Nine at the bottom of the page ---- */
-  const walkerHost = document.createElement("div");
-  walkerHost.className = "nm-walker is-hidden"; walkerHost.setAttribute("aria-hidden", "true");
-  document.body.appendChild(walkerHost);
-  const walker = mountPhoto(walkerHost);
-  walker.el.title = "Talk to Nine";
-  /* Mini Nine offers help that fits the section the visitor is reading;
-     clicking her starts that conversation. */
-  const OFFERS: Record<string, { say: string; flow?: string; screen: string }> = {
-    approach: { say: "Want to find your AI maturity level? I'll walk you through it.", flow: "level", screen: "chart" },
-    training: { say: "Need training for your team? I can set that up.", flow: "train", screen: "cap" },
-    services: { say: "Not sure which service fits? Tell me what you need.", flow: "project", screen: "services" },
-    programme: { say: "Curious how a programme would run for you? Ask me.", flow: "project", screen: "idea" },
-    mfi: { say: "Want this approach in your organisation? Let's talk.", flow: "project", screen: "logo" },
-    planned: { say: "Interested in what's planned? I'll tell the team.", flow: "quick", screen: "idea" },
-    contact: { say: "I can pass a message to our team right now.", flow: "quick", screen: "check" },
-  };
-  let section = "", offered = new Set<string>(), offerT = 0;
-  const sectionSpy = new IntersectionObserver(entries => entries.forEach(en => {
-    if (!en.isIntersecting) return;
-    section = en.target.id;
-    clearTimeout(offerT);
-    // offer once per section, after the visitor has been reading it for a moment
-    offerT = window.setTimeout(() => {
-      const o = OFFERS[section];
-      if (!o || offered.has(section) || !walkerOn || walker.pose !== "stand") return;
-      offered.add(section);
-      walker.act("wave", 1600); Faces.show(walker.face, o.screen, 2600); walker.say(o.say, 5200);
-    }, 2500);
-  }), { rootMargin: "-40% 0px -50% 0px" });
-  Object.keys(OFFERS).forEach(id => { const el = document.getElementById(id); if (el) sectionSpy.observe(el); });
-  walker.el.addEventListener("click", () => chat.open({ flow: OFFERS[section]?.flow }));
-  let heroInView = true, walkerOn = false;
-  const walkerPilot = autopilot(walker, { host: walkerHost, talks: true, isActive: () => walkerOn });
-  autopilot(heroNine, { host: null, talks: true, isActive: () => heroInView && !nineOpen() });
+  /* Nine lives in the hero at the top of the page (and in the chat when it's open). */
+  let heroInView = true;
+  autopilot(heroNine, { talks: true, isActive: () => heroInView && !nineOpen() });
   setTimeout(() => document.querySelector(".nm-bubble")?.classList.add("is-gone"), 7000);
-  function syncWalker() {
-    const on = !heroInView && !nineOpen() && !reduceMotion;
-    if (on === walkerOn) return;
-    walkerOn = on;
-    walkerHost.classList.toggle("is-hidden", !on);
-    if (on && !walkerPilot.entered) {
-      walkerPilot.entered = true;
-      walkerPilot.place(innerWidth + 10, 0);
-      requestAnimationFrame(() => requestAnimationFrame(() => walkerPilot.walkTo(innerWidth * 0.7, () => {
-        walker.act("wave", 2200); Faces.mood(walker.face, "happy"); walker.say("Hi! I'm Nine. Click me to talk.", 3400);
-        setTimeout(() => Faces.mood(walker.face, "idle"), 2200);
-      })));
-    }
-  }
   const heroSpot = document.querySelector(".nm-hero-nine") as HTMLElement;
-  function checkHero() {
+  const checkHero = () => {
     const r = heroSpot.getBoundingClientRect();
     heroInView = r.bottom > r.height * 0.25 && r.top < innerHeight - r.height * 0.25;
-    syncWalker();
-  }
-  let heroRaf = 0;
-  window.addEventListener("scroll", () => { if (!heroRaf) heroRaf = requestAnimationFrame(() => { heroRaf = 0; checkHero(); }); }, { passive: true });
-  window.addEventListener("resize", checkHero);
+  };
   new IntersectionObserver(checkHero, { threshold: [0, 0.25, 0.5, 1] }).observe(heroSpot);
   checkHero();
-  document.addEventListener("nine:toggle", syncWalker);
-  window.addEventListener("resize", () => { if (walkerPilot.x > innerWidth - 60) walkerPilot.place(innerWidth - 120, 0); });
   setTimeout(() => { heroNine.act("wave", 2400); Faces.mood(heroNine.face, "happy"); setTimeout(() => Faces.mood(heroNine.face, "idle"), 2400); }, 900);
 
-  /* Mini Nine glides along the bottom toward wherever the pointer rests. */
-  let ptrX = innerWidth / 2, ptrStill = 0;
-  window.addEventListener("pointermove", e => { ptrX = e.clientX; ptrStill = performance.now(); }, { passive: true });
-  setInterval(() => {
-    if (!walkerOn || walker.pose !== "stand" || walker.el.dataset.act || walker.el.classList.contains("is-turning")) return;
-    const w = walker.el.offsetWidth || 120, target = Math.max(16, Math.min(innerWidth - w - 16, ptrX - w / 2));
-    if (performance.now() - ptrStill > 500 && Math.abs(target - walkerPilot.x) > 160) walkerPilot.walkTo(target, null, 220);
-  }, 700);
-
   /* ---- Nine reacts to the page ---- */
-  const photoNines: NineFigure[] = [heroNine, walker, asBody];
-  const visibleNine = () => (nineOpen() ? asBody : heroInView ? heroNine : walker);
+  const photoNines: NineFigure[] = [heroNine, asBody];
+  const visibleNine = () => (nineOpen() ? asBody : heroNine);
   const flash = (kind: string, ms: number, arg?: unknown) => Faces.show(visibleNine().face, kind, ms, arg);
   setTimeout(() => { const h = new Date().getHours(); flash("text", 2600, h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"); }, 3400);
   document.addEventListener("nine:theme", e => {

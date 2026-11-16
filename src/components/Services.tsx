@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { STAGES } from "~/data/content";
 import { withNine } from "~/nine/boot";
+import { track } from "~/analytics/track";
 import { CloseIcon } from "./icons";
 
 const SRC_NAMES: Record<string, string> = { P: "Service Portfolio", F: "AI Transformation Framework" };
@@ -10,7 +11,7 @@ export function Services() {
   const lastFocus = useRef<HTMLElement | null>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
 
-  const show = (si: number, vi: number) => { lastFocus.current = document.activeElement as HTMLElement; setOpen({ si, vi }); };
+  const show = (si: number, vi: number) => { track("service_view", STAGES[si].services[vi].title); lastFocus.current = document.activeElement as HTMLElement; setOpen({ si, vi }); };
   const hide = () => { setOpen(null); lastFocus.current?.focus(); };
 
   useEffect(() => {

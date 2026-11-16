@@ -4,7 +4,7 @@ const text = (max: number) => z.string().trim().max(max).optional().default("");
 
 /** What Nine sends when a visitor says "send it". Shared by the client and the server. */
 export const LeadSchema = z.object({
-  route: z.enum(["project", "train", "level", "explore", "quick"]),
+  route: z.enum(["project", "train", "level", "explore", "quick", "form"]),
   name: text(80),
   org: text(120),
   service: text(120),
