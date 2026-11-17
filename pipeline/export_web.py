@@ -10,7 +10,7 @@ base = os.path.dirname(os.path.abspath(__file__))
 out = os.path.join(sys.argv[1], "assets", "nine", "photo")
 os.makedirs(out, exist_ok=True)
 
-body = Image.open(os.path.join(base, "matte", "body_7104_headless.png")).convert("RGBA")   # cut out by BiRefNet
+body = Image.open(os.environ.get("NINE_BODY") or os.path.join(base, "matte", "body_7104_headless.png")).convert("RGBA")   # cut out by BiRefNet
 HEAD_DIR = os.environ.get("NINE_HEAD_DIR") or os.path.join(base, "head")
 head = Image.open(os.path.join(HEAD_DIR, "display_head.png")).convert("RGBA")
 info = json.load(open(os.path.join(HEAD_DIR, "display_head.json")))
@@ -71,6 +71,8 @@ data = {
                              "points": [[rel(p) for p in row] for row in info["screen_grid"]["points"]]} if "screen_grid" in info else None},
 }
 json.dump(data, open(os.path.join(out, "nine.json"), "w"), indent=2)
+# the same data as a script, so the page can read it even when opened from disk (file://, no fetch)
+open(os.path.join(out, "nine.js"), "w").write("window.NINE_GEOM = " + json.dumps(data) + ";" + chr(10))
 print(json.dumps(data))
 for f in ("body.webp", "head.webp"):
     print(f, os.path.getsize(os.path.join(out, f)) // 1024, "KB")

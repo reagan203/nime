@@ -59,7 +59,7 @@ def despill(im, alpha, green_cut=40):
     rgb[..., 1] = np.minimum(g, np.maximum(r, b) + 6)
     return Image.fromarray(np.dstack([rgb, alpha * 255]).clip(0, 255).astype(np.uint8), "RGBA")
 
-def export_web(frames, alphas, out_dir, fps, extra=None, quality=86):
+def export_web(frames, alphas, out_dir, fps, extra=None, quality=86, js_var=None):
     os.makedirs(out_dir, exist_ok=True)
     for f in os.listdir(out_dir):
         if f.endswith(".webp"): os.remove(os.path.join(out_dir, f))
@@ -67,4 +67,6 @@ def export_web(frames, alphas, out_dir, fps, extra=None, quality=86):
         despill(im, a).save(os.path.join(out_dir, f"f{i:03d}.webp"), quality=quality, method=5)
     manifest = {"frames": len(frames), "fps": fps, "src": "f{i}.webp", **(extra or {})}
     json.dump(manifest, open(os.path.join(out_dir, "manifest.json"), "w"), indent=2)
+    if js_var:   # the same, as a script the page can load from disk (file:// has no fetch)
+        open(os.path.join(out_dir, "manifest.js"), "w").write(f"window.{js_var} = " + json.dumps(manifest) + ";" + chr(10))
     return manifest

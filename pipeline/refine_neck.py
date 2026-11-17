@@ -36,6 +36,17 @@ res = pipe(prompt="macro photo of a woman's neck and collarbone skin, natural po
 res = Image.composite(res, crop, mask).resize((x1 - x0, y1 - y0), Image.LANCZOS)
 feather = Image.new("L", (x1 - x0, y1 - y0), 0)
 ImageDraw.Draw(feather).rectangle((10, 10, x1 - x0 - 10, y1 - y0 - 10), fill=255)
+# the repaint comes out smoother than the photo: add back skin grain with the photo's own strength
+orig = np.asarray(img.crop((x0, y0, x1, y1)), dtype=np.float32); r = np.asarray(res, dtype=np.float32)
+hp = lambda x: x - np.asarray(Image.fromarray(x.clip(0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.5)), dtype=np.float32)
+cs = np.asarray(Image.fromarray((skin * 255).astype(np.uint8)).resize((x1 - x0, y1 - y0)), dtype=np.float32)[..., None] / 255
+want, have = hp(orig)[cs[..., 0] > .5].std(), hp(r)[cs[..., 0] > .5].std()
+if want > have:
+    g = np.random.default_rng(7).normal(0, 1, r.shape[:2])[..., None]
+    g = np.asarray(Image.fromarray(((g * 40) + 128).clip(0, 255).astype(np.uint8)[..., 0]).filter(ImageFilter.GaussianBlur(.6)), dtype=np.float32)[..., None] - 128
+    g = g / (g.std() + 1e-6) * np.sqrt(want ** 2 - have ** 2) * np.array([1.0, .9, .8])
+    res = Image.fromarray((r + g * cs).clip(0, 255).astype(np.uint8))
+    print(f"grain added: photo {want:.1f}, repaint {have:.1f}", flush=True)
 img.paste(res, (x0, y0), feather.filter(ImageFilter.GaussianBlur(6)))
 img.save(out)
 print("saved", out, flush=True)

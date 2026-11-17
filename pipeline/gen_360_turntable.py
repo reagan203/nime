@@ -9,8 +9,7 @@ Model facts that shape this script (checked 2026-11-17):
     Two ways to run it:
       - Kaggle (T4 16 GB, ~29 GB RAM) or any 16-24 GB GPU, with GGUF Q4_K_M experts (~9-10 GB each):
         --gguf-high/--gguf-low, --offload model.  This is the recommended route.
-      - Locally with the same GGUF files and --offload sequential: it should fit, but it will be very
-        slow (several hours a clip) and is untested.
+      - Locally with the same GGUF files and --offload group (sequential offload breaks on GGUF weights).
   * Loop closure: diffusers' WanImageToVideoPipeline accepts `last_image`. With --close-loop the still
     is given as both the first and the last frame, so the model must come back to where it started:
     one seamless 360 with no join. Without it, the script finds the frame that best matches frame 0
@@ -32,11 +31,13 @@ ap.add_argument("--still", required=True, help="Nine composited on a flat green 
 ap.add_argument("--base", default="Wan-AI/Wan2.2-I2V-A14B-Diffusers", help="diffusers repo or local folder (VAE, text encoder, configs)")
 ap.add_argument("--gguf-high", help="GGUF file of the high-noise expert (transformer)")
 ap.add_argument("--gguf-low", help="GGUF file of the low-noise expert (transformer_2)")
+ap.add_argument("--text-encoder", help="folder holding text_encoder/ (umT5-XXL); defaults to --base. The TI2V-5B download has the same encoder")
 ap.add_argument("--lora-dir", required=True)
 ap.add_argument("--lora-high", default="[WAN2.2]360Rotation_Redmond_high_noise.safetensors")
 ap.add_argument("--lora-low", default="[WAN2.2]360Rotation_Redmond_low_noise.safetensors")
 ap.add_argument("--lora-scale", type=float, default=0.9)
-ap.add_argument("--offload", choices=["sequential", "model", "none"], default="model")
+ap.add_argument("--offload", choices=["group", "sequential", "model", "none"], default="model",
+                help="group: layer by layer (works with GGUF, fits 6 GB); sequential does not work with GGUF")
 ap.add_argument("--width", type=int, default=512); ap.add_argument("--height", type=int, default=704)
 ap.add_argument("--frames", type=int, default=81, help="4k+1; 81 = 5 s at 16 fps")
 ap.add_argument("--fps", type=int, default=16)
@@ -87,26 +88,42 @@ if not hasattr(_wan_i2v, "ftfy"):        # ftfy may be missing; the prompts are 
 
 t0 = time.time()
 dtype = torch.bfloat16 if torch.cuda.is_available() and torch.cuda.get_device_capability()[0] >= 8 else torch.float16  # T4 has no bf16
+
+# 1. prompt embeddings first, with ONLY the 11 GB text encoder in memory (32 GB RAM cannot hold it and both experts)
+import hashlib
+cache = os.path.join(a.out, f"prompt_{hashlib.sha1((PROMPT + NEGATIVE).encode()).hexdigest()[:10]}.pt")
+if os.path.exists(cache):
+    pe, ne = torch.load(cache)                                         # encoded before: skip the 4-minute CPU pass
+else:
+    from transformers import UMT5EncoderModel
+    te = UMT5EncoderModel.from_pretrained(a.text_encoder or a.base, subfolder="text_encoder", torch_dtype=dtype)
+    tmp = WanImageToVideoPipeline.from_pretrained(a.base, text_encoder=te, transformer=None, transformer_2=None, vae=None, torch_dtype=dtype)
+    with torch.no_grad():
+        pe, ne = tmp.encode_prompt(prompt=PROMPT, negative_prompt=NEGATIVE, do_classifier_free_guidance=True, device="cpu")
+    del tmp, te; gc.collect()
+    os.makedirs(a.out, exist_ok=True); torch.save((pe, ne), cache)
+print(f"prompt encoded in {time.time() - t0:.0f}s", flush=True)
+
+# 2. the two experts (GGUF or bf16), the VAE and the LoRA
 kw = {}
 if a.gguf_high:
     from diffusers import GGUFQuantizationConfig
     q = GGUFQuantizationConfig(compute_dtype=dtype)
     kw["transformer"] = WanTransformer3DModel.from_single_file(a.gguf_high, quantization_config=q, config=a.base, subfolder="transformer", torch_dtype=dtype)
     kw["transformer_2"] = WanTransformer3DModel.from_single_file(a.gguf_low, quantization_config=q, config=a.base, subfolder="transformer_2", torch_dtype=dtype)
-pipe = WanImageToVideoPipeline.from_pretrained(a.base, torch_dtype=dtype, **kw)
-
-# the LoRA: one file per expert
+pipe = WanImageToVideoPipeline.from_pretrained(a.base, text_encoder=None, torch_dtype=dtype, **kw)
 pipe.load_lora_weights(a.lora_dir, weight_name=a.lora_high, adapter_name="rot_high")
 pipe.load_lora_weights(a.lora_dir, weight_name=a.lora_low, adapter_name="rot_low", load_into_transformer_2=True)
 pipe.set_adapters(["rot_high", "rot_low"], adapter_weights=[a.lora_scale, a.lora_scale])
-print(f"loaded in {time.time() - t0:.0f}s", flush=True)
+print(f"model and LoRA loaded in {time.time() - t0:.0f}s", flush=True)
 
-# encode the prompt once on the CPU, then drop the 11 GB text encoder
-with torch.no_grad():
-    pe, ne = pipe.encode_prompt(prompt=PROMPT, negative_prompt=NEGATIVE, do_classifier_free_guidance=True, device="cpu")
-pipe.text_encoder = None; gc.collect()
-
-if a.offload == "sequential": pipe.enable_sequential_cpu_offload()
+if a.offload == "group":
+    # each transformer block is moved to the GPU only while it runs; GGUF weights move as they are
+    from diffusers.hooks import apply_group_offloading
+    for m in (pipe.transformer, pipe.transformer_2):
+        apply_group_offloading(m, onload_device=torch.device("cuda"), offload_device=torch.device("cpu"), offload_type="block_level", num_blocks_per_group=1)
+    pipe.vae.to("cuda")
+elif a.offload == "sequential": pipe.enable_sequential_cpu_offload()
 elif a.offload == "model": pipe.enable_model_cpu_offload()
 else: pipe.to("cuda")
 if hasattr(pipe.vae, "enable_tiling"): pipe.vae.enable_tiling()
@@ -142,6 +159,6 @@ if a.matte:
     import matting
     alphas = matting.smooth_alphas(loop, matting.raw_alphas(loop, a.matte), loop=True)
     if a.site_out:
-        m = matting.export_web(loop, alphas, a.site_out, a.fps, extra={"kind": "turntable", "loop": True})
+        m = matting.export_web(loop, alphas, a.site_out, a.fps, extra={"kind": "turntable", "loop": True}, js_var="NINE_TURN")
         print("web frames:", m, flush=True)
 print(f"done in {time.time() - t0:.0f}s", flush=True)

@@ -806,10 +806,10 @@
   /* ---------- Photo Nine: a photographic body with a display head (assets/nine/photo) ----------
      The head is its own layer, so it can look, nod and tilt; the face is live HTML mapped onto the screen. */
   .np { position: relative; width: 100%; container-type: inline-size; --lx: 0; --ly: 0; }
-  .np-clip { position: relative; aspect-ratio: 896 / 1233; isolation: isolate;
+  .np-clip { position: relative; aspect-ratio: var(--frame-ar, 896 / 1233); isolation: isolate;
     -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 99%); mask-image: linear-gradient(to bottom, #000 80%, transparent 99%); }
   .np-clip::before { content: ""; position: absolute; left: 8%; right: 8%; top: 6%; height: 62%; border-radius: 50%; background: radial-gradient(closest-side, rgba(54, 182, 234, .16), transparent); filter: blur(10px); z-index: -1; }
-  .np-stage { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 896 / 1233; transform: translate(calc(var(--lx) * -1.1%), calc(var(--ly) * -.7%)); transition: transform .4s ease-out; }
+  .np-stage { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: var(--frame-ar, 896 / 1233); transform: translate(calc(var(--lx) * -1.1%), calc(var(--ly) * -.7%)); transition: transform .4s ease-out; }
   .np-body { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; transform-origin: 50% 100%; animation: npBreath 4.8s ease-in-out infinite; }
   .np-head { position: absolute; left: 14.844%; top: 1.946%; width: 66.295%; height: 47.283%; transform-origin: 43.65% 96.87%; animation: npHeadBreath 4.8s ease-in-out infinite; }
   .np-neck, .np-act { position: absolute; inset: 0; transform-origin: 43.65% 96.87%; }
@@ -861,6 +861,16 @@
   .np[data-act="run"] .np-stage { animation-duration: .3s; }
   @keyframes npGlide { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3%; } }
   @media (max-width: 560px) { .nm-walker .np { width: 88px; } }
+  /* v3 screen UI: ambient glow behind the face, LED dot-matrix mouth, glowing eyes */
+  .nf-screen::before { content: ""; position: absolute; inset: -6% -4%; background: radial-gradient(ellipse 55% 60% at 50% 45%, rgba(80, 190, 255, .16), transparent 70%); pointer-events: none; }
+  .nf-screen .nf-eye { box-shadow: 0 0 1.4cqw #b8ecff, 0 0 5cqw rgba(54, 182, 234, .9), 0 0 12cqw rgba(54, 182, 234, .35); }
+  .nf-screen .nf-led { gap: .9cqw; height: 20%; bottom: 11%; }
+  .nf-screen .nf-led i { width: 1.9cqw; min-height: 1.9cqw; height: var(--m, 1.9cqw); border-radius: 0; box-shadow: none;
+    background: radial-gradient(circle at 50% 50%, #d9f6ff 0 42%, rgba(120, 210, 255, .35) 52%, transparent 62%) 0 0 / 1.9cqw 1.9cqw repeat-y;
+    filter: drop-shadow(0 0 .9cqw #5fd0f7); }
+  /* the clothes laid back over the hoses, so they disappear under the collar */
+  .np-collar { position: absolute; display: block; user-select: none; pointer-events: none; transform-origin: 50% 100%; animation: npBreath 4.8s ease-in-out infinite; }
+  .np.is-turning .np-collar { opacity: 0; }
   /* the 360 turn: rendered video frames drawn on a canvas; drag Nine to spin her */
   .np-turn { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; transition: opacity .18s; }
   .np.is-turning .np-turn { opacity: 1; }
@@ -1238,6 +1248,8 @@
   </div>
 </div>
 
+<script src="assets/nine/photo/nine.js"></script>
+<script src="assets/nine/turn/manifest.js"></script>
 <script>
 /* Nine's body artwork. Set to true once the commissioned PNGs are in assets/nine/ (see nine-artwork-brief.md). */
 const NINE_ART = false;
@@ -1357,9 +1369,10 @@ const Faces = (() => {
   let px = innerWidth * .7, py = innerHeight * .4, lastMove = -1e9;
 
   // a bare face for Photo Nine's display screen: eyes and mouth only
+  const LED_SMILE = [-3.2, -2.2, -1.4, -.8, -.35, -.1, 0, -.1, -.35, -.8, -1.4, -2.2, -3.2];
   const SCREEN = `<div class="nf nf-screen" data-mood="idle"><div class="nf-face">
         <span class="nf-eye nf-l"></span><span class="nf-eye nf-r"></span>
-        <span class="nf-mouth">${SMILE.map(c => `<i style="--c:${c}cqw"></i>`).join("")}</span>
+        <span class="nf-mouth nf-led">${LED_SMILE.map(c => `<i style="--c:${c}cqw"></i>`).join("")}</span>
         <div class="nf-show"></div>
       </div></div>`;
   /* ---- what the display can show besides the face (drawn in a 400 x 272 box) ---- */
@@ -1446,7 +1459,7 @@ const Faces = (() => {
       if (f._talk && t - lastBars > 75) {
         f._energy = Math.max(.25, f._energy * .82);
         f._bars.forEach((b, i) => {
-          const centre = 1 - Math.abs(i - 3) / 4;
+          const mid = (f._bars.length - 1) / 2, centre = 1 - Math.abs(i - mid) / (mid + 1);
           b.style.setProperty("--m", (1.2 + Math.random() * (1.5 + 5 * f._energy) * (.45 + centre)).toFixed(2) + "cqw");
         });
       }
@@ -1518,14 +1531,19 @@ const Bodies = (() => {
 const Photo = (() => {
   const SRC = "assets/nine/photo/";
   // from export_web.py (nine.json): screen corners as fractions of the head image
-  const QUAD = { tl: [.0454, .0601], tr: [.7727, .0449], br: [.7715, .5638], bl: [.0408, .5631] };
+  const G = window.NINE_GEOM || { frame: [896, 1233], head: { x: 133, y: 24, w: 594, h: 583, pivot: [.4365, .9687],
+    screen: { tl: [.0454, .0601], tr: [.7727, .0449], br: [.7715, .5638], bl: [.0408, .5631] } } };
+  const QUAD = G.head.screen;
+  const pct = (v, of) => (v / of * 100).toFixed(3) + "%";
   const SW = 400, SH = 272;
   // the site's actions mapped to what a photo with a moving head can do
   const MOVES = { wave: "greet", celebrate: "greet", chase: "greet", jump: "hop", hiccup: "hop", kick: "hop", dance: "sway", juggle: "sway",
     spin: "shake", sneeze: "jerk", trip: "jerk", bow: "nod", tap: "nod", nod: "nod", stretch: "roll", yawn: "roll", think: "think",
     listen: "listen", talk: "talk", shrug: "shrug", watch: "down", look: "", point: "" };
   // the 360 turn, rendered with Wan 2.2 and cut out with BiRefNet (set to null if the frames are missing)
-  const TURN = { frames: 161, fps: 24, src: "assets/nine/turn/f{i}.webp" };
+  // frame count and speed come from the turntable export (assets/nine/turn/manifest.js); the fallback is the v2 turn
+  const TURN = window.NINE_TURN ? { frames: window.NINE_TURN.frames, fps: window.NINE_TURN.fps, src: "assets/nine/turn/" + window.NINE_TURN.src }
+                                : { frames: 161, fps: 24, src: "assets/nine/turn/f{i}.webp" };
   const reduceTurn = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const turnImgs = [];
   function loadTurn() {
@@ -1552,10 +1570,18 @@ const Photo = (() => {
           <img src="${SRC}head.webp" alt="" draggable="false"><div class="np-screen"></div>
         </div></div></div>
         <canvas class="np-turn" aria-hidden="true"></canvas>
+        ${G.collar ? `<img class="np-collar" src="${SRC}collar.webp" alt="" draggable="false">` : ""}
         <div class="nb-zzz"><i>z</i><i>z</i><i>Z</i></div>
       </div></div><div class="nb-say"></div></div>`;
     const el = slot.querySelector(".np"), head = el.querySelector(".np-head"), screen = el.querySelector(".np-screen");
     const face = Faces.mount(screen, "screen"), bubble = el.querySelector(".nb-say");
+    // place the layers from the export's numbers (frame size, head box and pivot, collar box)
+    const [FW, FH] = G.frame, hd = G.head, piv = `${(hd.pivot[0] * 100).toFixed(2)}% ${(hd.pivot[1] * 100).toFixed(2)}%`;
+    el.style.setProperty("--frame-ar", `${FW} / ${FH}`);
+    Object.assign(head.style, { left: pct(hd.x, FW), top: pct(hd.y, FH), width: pct(hd.w, FW), height: pct(hd.h, FH), transformOrigin: piv });
+    head.querySelectorAll(".np-neck, .np-act").forEach(n => { n.style.transformOrigin = piv; });
+    const col = el.querySelector(".np-collar");
+    if (col) Object.assign(col.style, { left: pct(G.collar.x, FW), top: pct(G.collar.y, FH), width: pct(G.collar.w, FW), height: pct(G.collar.h, FH) });
     const fit = () => {
       const w = head.offsetWidth, h = head.offsetHeight; if (!w) return;
       screen.style.transform = quadMatrix(["tl", "tr", "br", "bl"].map(k => [QUAD[k][0] * w, QUAD[k][1] * h]));

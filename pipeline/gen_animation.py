@@ -21,14 +21,12 @@ Pipeline (each stage writes to --work, so stages can be re-run on their own):
                own rendering of the head drifts (--head-lock)
   5. export    transparent WebP frames + manifest.json for the site (same format as the turntable)
 
-Their scripts take paths by editing the script ("change the input path"). Rather than guess variable
-names, run `--inspect` once: it lists the path-like assignments in their inference scripts. Put the
-variable names in adapter.json ({"ref": "...", "drive": "...", "out": "..."}) and this wrapper rewrites
-them in a temporary copy of the script on every run.
+One-to-All pins old libraries (torch 2.5.1, diffusers 0.33, transformers 4.40), so it runs in its own
+environment (.venv-o2a, Python 3.10) through o2a_runner.py, which reuses their pose extraction and chunked
+generation and swaps in a low-memory pipeline (prompt encoded once on the CPU, then the encoder is dropped).
 
 Usage:
-  python gen_animation.py --repo One-to-All-Animation --inspect
-  python gen_animation.py --repo One-to-All-Animation --adapter adapter.json --ref final/nine_green.png \
+  python gen_animation.py --repo One-to-All-Animation --ref final/nine_green.png \
       --drive drives/wave.mp4 --work clips/anim_wave --matte <BiRefNet dir> --site-out <site>/assets/nine/wave
 On Kaggle: clone the repo, pip install -r requirements.txt, upload final/nine_green.png and the driving
 video as a dataset, run the same command with --matte pointing at BiRefNet_lite downloaded there.
@@ -42,8 +40,10 @@ import argparse, json, os, re, shutil, subprocess, sys, tempfile
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--repo", required=True, help="local clone of ssj9596/One-to-All-Animation")
-ap.add_argument("--inspect", action="store_true", help="list path assignments in the repo's scripts, then stop")
-ap.add_argument("--adapter", help="adapter.json mapping our inputs to the repo script's variables")
+ap.add_argument("--o2a-python", help="python of One-to-All's environment (default: .venv-o2a next to this script)")
+ap.add_argument("--ckpt", help="One-to-All checkpoint folder (default: the 1.3b_1 download in the HF cache)")
+ap.add_argument("--offload", choices=["none", "model", "sequential"], default="none", help="if the 1.3B model does not fit the GPU")
+ap.add_argument("--prompt", help="override the description passed to the model")
 ap.add_argument("--ref", help="Nine still on green (final/nine_green.png)")
 ap.add_argument("--drive", help="driving video (a person walking or gesturing)")
 ap.add_argument("--work", default="clips/anim")
@@ -57,19 +57,6 @@ ap.add_argument("--site-out")
 ap.add_argument("--stages", default="prepare,animate,matte,head,export")
 a = ap.parse_args()
 VSRC = os.path.join(a.repo, "video-generation")
-SCRIPTS = {"pre": os.path.join(VSRC, "infer_preprocess.py"), "infer": os.path.join(VSRC, "inference_1.3b.py")}
-
-# ------------------------------------------------------------------ inspect
-if a.inspect:
-    pat = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_\.\[\]'\"]*)\s*=\s*['\"]([^'\"]*\.(?:png|jpg|jpeg|mp4|mov|webm|json)|[^'\"]*/)['\"]", re.M)
-    for name, path in SCRIPTS.items():
-        if not os.path.exists(path): print(f"{name}: not found at {path}"); continue
-        src = open(path, encoding="utf-8").read()
-        print(f"--- {path}")
-        for m in pat.finditer(src): print(f"  {m.group(1)} = {m.group(2)!r}")
-        for m in re.finditer(r"add_argument\(\s*['\"](--[\w-]+)['\"]", src): print(f"  argparse option {m.group(1)}")
-    print("\nPut the variable (or --option) names for the reference image, driving video and output folder in adapter.json.")
-    sys.exit(0)
 
 W, H = (int(v) for v in a.size.split("x"))
 if a.local: W, H = min(W, 384), min(H, 672)               # smaller frames for 6 GB
@@ -103,34 +90,20 @@ if "prepare" in stages:
     canvas.save(P("ref.png"))
     print(f"prepared {len(frames)} driving frames at {a.fps} fps, {W}x{H}", flush=True)
 
-# ------------------------------------------------------------------ 2. animate (One-to-All, as a subprocess)
-def patched(script, mapping, values):
-    """copy the repo script with our paths written into its variables (names from adapter.json)"""
-    src = open(script, encoding="utf-8").read()
-    for key, var in mapping.items():
-        if key not in values or not var: continue
-        if var.startswith("--"):
-            continue                                                  # argparse option: passed on the command line
-        src, n = re.subn(rf"^(\s*{re.escape(var)}\s*=\s*).*$", lambda m: m.group(1) + repr(values[key]), src, count=1, flags=re.M)
-        if not n: raise SystemExit(f"adapter: variable {var!r} not found in {script}")
-    tmp = tempfile.NamedTemporaryFile("w", suffix=".py", delete=False, dir=os.path.dirname(script), encoding="utf-8")
-    tmp.write(src); tmp.close(); return tmp.name
+# ------------------------------------------------------------------ 2. animate (One-to-All in its own environment)
 if "animate" in stages:
-    if not a.adapter: raise SystemExit("--adapter is required for the animate stage (run --inspect first)")
-    ad = json.load(open(a.adapter))
-    values = {"ref": os.path.abspath(P("ref.png")), "drive": os.path.abspath(P("drive.mp4")), "out": os.path.abspath(P("raw")) + os.sep}
-    os.makedirs(P("raw"), exist_ok=True)
+    here = os.path.dirname(os.path.abspath(__file__))
+    py = a.o2a_python or os.path.join(here, ".venv-o2a", "Scripts" if os.name == "nt" else "bin", "python.exe" if os.name == "nt" else "python")
+    ckpt = a.ckpt
+    if not ckpt:
+        from huggingface_hub import snapshot_download
+        ckpt = snapshot_download("MochunniaN1/One-to-All-1.3b_1")
+    cmd = [py, os.path.join(here, "o2a_runner.py"), "--ref", os.path.abspath(P("ref.png")), "--drive", os.path.abspath(P("drive.mp4")),
+           "--ckpt", ckpt, "--out", os.path.abspath(P("raw")), "--max-short", str(min(W, H)), "--offload", a.offload]
+    if a.prompt: cmd += ["--prompt", a.prompt]
     env = dict(os.environ, PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True")
-    if a.local: env["NINE_LOW_VRAM"] = "1"                            # read by the patch in adapter.json, if you add one
-    for stage in ("pre", "infer"):
-        mapping = ad.get(stage, {})
-        script = patched(SCRIPTS[stage], mapping, values)
-        cli = [f"{opt}={values[k]}" for k, opt in mapping.items() if opt and opt.startswith("--") and k in values]
-        try:
-            print("running", os.path.basename(SCRIPTS[stage]), cli, flush=True)
-            subprocess.run([sys.executable, os.path.basename(script), *cli], cwd=VSRC, env=env, check=True)
-        finally:
-            os.remove(script)
+    print("running One-to-All:", " ".join(cmd), flush=True)
+    subprocess.run(cmd, cwd=VSRC, env=env, check=True)
 
 # ------------------------------------------------------------------ 3-5. matte, head track, export
 def load_raw():
