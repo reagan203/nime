@@ -1250,6 +1250,7 @@
 
 <script src="assets/nine/photo/nine.js"></script>
 <script src="assets/nine/turn/manifest.js"></script>
+<script src="assets/nine/anim/manifest.js"></script>
 <script>
 /* Nine's body artwork. Set to true once the commissioned PNGs are in assets/nine/ (see nine-artwork-brief.md). */
 const NINE_ART = false;
@@ -1552,6 +1553,14 @@ const Photo = (() => {
   }
   const turnReady = () => TURN && turnImgs.length === TURN.frames && turnImgs.every(im => im.complete && im.naturalWidth);
   addEventListener("load", () => setTimeout(loadTurn, 1200));
+  // action clips listed by gen_animation.py (assets/nine/anim/manifest.js): wave, talk, walk...
+  const CLIPS = window.NINE_CLIPS || {};
+  function loadClip(name) {
+    const k = CLIPS[name]; if (!k || k.imgs) return;
+    k.imgs = Array.from({ length: k.frames }, (_, i) => { const im = new Image(); im.decoding = "async"; im.src = `assets/nine/anim/${k.dir}/` + k.src.replace("{i}", String(i).padStart(3, "0")); return im; });
+  }
+  const clipReady = name => { const k = CLIPS[name]; return !!(k && k.imgs && k.imgs.every(im => im.complete && im.naturalWidth)); };
+  addEventListener("load", () => setTimeout(() => Object.keys(CLIPS).forEach(loadClip), 4000));
   // actions that also put something on the display
   const SCREEN_FOR = { dance: "music", watch: "clock", celebrate: "star", juggle: "services", hiccup: "glitch", sneeze: "glitch", trip: "dizzy", shrug: "question", stretch: "battery", bow: "heart", tap: "dots", kick: "wow", jump: "wow" };
   const all = [];
@@ -1598,6 +1607,7 @@ const Photo = (() => {
       },
       act(a, ms) {
         if (a === "spin" && el.dataset.pose === "stand" && c.turn && c.turn()) return;
+        if (CLIPS[a] && c.clip && c.clip(a)) { if (SCREEN_FOR[a]) Faces.show(face, SCREEN_FOR[a], ms || 2200); return; }
         if (SCREEN_FOR[a]) Faces.show(face, SCREEN_FOR[a], ms || 2200);
         clearTimeout(actT); el.dataset.act = a || ""; el.dataset.move = el.dataset.pose === "stand" ? (MOVES[a] ?? "") : "";
         if (ms) actT = setTimeout(() => { if (el.dataset.act === a) { el.dataset.act = ""; el.dataset.move = ""; } }, ms);
@@ -1631,6 +1641,24 @@ const Photo = (() => {
       return (n - from) / TURN.fps * 1000;
     }
     c.turn = () => (turnReady() && !drag && !reduceTurn ? play(0) : 0);
+    // ---- action clips (One-to-All motion transfer): played once on the same canvas, then back to the still ----
+    c.clip = name => {
+      const k = CLIPS[name];
+      if (!k || reduceTurn || drag || el.dataset.pose !== "stand" || el.classList.contains("is-turning")) return 0;
+      loadClip(name);
+      if (!clipReady(name)) return 0;
+      const [sx, sy, sw, sh] = k.stage || [0, 0, k.imgs[0].naturalWidth, k.imgs[0].naturalHeight];
+      cancelAnimationFrame(raf); el.dataset.move = ""; el.classList.add("is-turning");
+      cv.width = Math.round(sw); cv.height = Math.round(sh);
+      const t0 = performance.now(), n = k.frames;
+      const step = t => {
+        const i = Math.min(n - 1, Math.floor((t - t0) / 1000 * k.fps));
+        ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(k.imgs[i], sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+        if (i < n - 1 && !drag) raf = requestAnimationFrame(step); else el.classList.remove("is-turning");
+      };
+      raf = requestAnimationFrame(step);
+      return n / k.fps * 1000;
+    };
     const clip = el.querySelector(".np-clip");
     clip.addEventListener("pointerdown", e => {
       if (!turnReady() || reduceTurn) return;

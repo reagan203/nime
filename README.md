@@ -22,9 +22,13 @@ All free and open models, run locally on a 6 GB laptop GPU:
 | Display head and mechanical neck | `display_head.py` | Blender 5.3, Cycles |
 | Body cut out of the backdrop | `matte.py` | BiRefNet-lite (MIT) |
 | Web layers (body, head, screen corners) | `export_web.py` | |
-| 360 turn video | `legacy/wan_clip.py` | Wan 2.2 TI2V-5B (Apache-2.0) |
-| Turn frames cut out for the web | `legacy/turn_frames.py` | BiRefNet-lite (MIT) |
-| Full 360 joined from the clips | `legacy/join_turn.py` | |
+| Neck skin detail | `refine_neck.py` | RealVisXL V5.0 inpainting |
+| 360 turntable from one still | `gen_360_turntable.py` | Wan 2.2 I2V-A14B, GGUF Q4_K_S (Apache-2.0) + 360 Rotation LoRA (CC0) |
+| Frames cut out for the web | `matting.py` | BiRefNet-lite (MIT) |
+| Driving videos (no real person) | `make_drive.py` | Blender 5.3, rigged MakeHuman figure (CC0) |
+| Gestures with moving clothes | `gen_animation.py` + `o2a_runner.py` | One-to-All Animation 1.3B (code Apache-2.0) |
+
+The first turn (two Wan 2.2 TI2V-5B clips joined) is kept in `pipeline/legacy/`. Details: [docs/pipeline-v3.md](docs/pipeline-v3.md).
 
 The person in the body photo is AI-generated and fictional. The display head is an original design.
 

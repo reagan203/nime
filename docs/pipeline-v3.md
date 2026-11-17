@@ -30,7 +30,7 @@ nime/ (this repository)
 ├── assets/nine/
 │   ├── photo/        body.webp · head.webp · collar.webp (new) · nine.json (adds screen_grid, collar)
 │   ├── turn/         f000.webp … · manifest.json (new: frames, fps, loop)
-│   └── anim/<name>/  f000.webp … · manifest.json · track.json (neck position per frame)
+│   └── anim/         manifest.js (lists every clip) · <motion>/ f000.webp … · manifest.json · track.json
 ├── pipeline/
 │   ├── gen_portrait.py        1  body photo (v2 prompts)
 │   ├── remove_head.py         2  paint the head out
@@ -40,18 +40,22 @@ nime/ (this repository)
 │   ├── export_web.py          6  web layers + collar layer + screen grid; stills for video
 │   ├── matting.py             NEW: shared BiRefNet + temporal smoothing + despill + web export
 │   ├── gen_360_turntable.py   7  NEW: one-still 360 with the Wan 2.2 A14B LoRA
+│   ├── make_drive.py          8a NEW: driving videos from the rigged Blender figure (no real person)
 │   ├── gen_animation.py       8  NEW: motion transfer with One-to-All 1.3B
+│   ├── o2a_runner.py          8b NEW: runs One-to-All on 6 GB, in its own environment
 │   └── legacy/                the v2 turn: wan_clip.py · turn_frames.py · join_turn.py
 └── docs/
 
 nine-portrait/ (local working folder, not in git: models and large outputs)
 ├── .venv/                     Python 3.12, PyTorch cu128, diffusers 0.43, transformers, BiRefNet deps
+├── .venv-o2a/                 Python 3.10, PyTorch 2.5.1 cu124, diffusers 0.33: One-to-All's pinned stack
+├── One-to-All-Animation/      their repo, with pretrained_models/ (pose ONNX, Wan2.1-1.3B parts)
 ├── options/  matte/  head_v3/  final/  clips/
 ├── loras/360/                 the two LoRA files
 └── drives/                    driving videos for animation
 ```
 
-Running order: `gen_portrait` → `remove_head` → `refine_neck` → `matte` → `display_head` → `export_web` → `gen_360_turntable` (Kaggle) → `gen_animation` (Kaggle).
+Running order: `gen_portrait` → `remove_head` → `refine_neck` → `matte` → `display_head` → `export_web` → `gen_360_turntable` → `make_drive` → `gen_animation`. All of them run on this PC (6 GB GPU); Kaggle remains the faster option.
 
 ## 2. `display_head.py` v3
 
@@ -87,7 +91,7 @@ What it does, in order:
 1. **Load the model.** Wan2.2-I2V-A14B, with each expert loaded either from a GGUF file (`WanTransformer3DModel.from_single_file` with `GGUFQuantizationConfig`) or in bf16.
 2. **Load the LoRA.** The high-noise LoRA goes into `transformer` and the low-noise one into `transformer_2` (`load_into_transformer_2=True`), each at 0.9.
 3. **Encode the prompt once on the processor, then drop the 11 GB text encoder.** The prompt starts with the trigger "360 Rotation".
-4. **Offload:** sequential, model or none.
+4. **Offload:** `group` (the default on 6 GB), sequential, model or none. Sequential offload does not work with GGUF weights (diffusers raises `KeyError: None` in its GGUF tensor class); group offloading streams one transformer block at a time and does.
 5. **Generate.** 81 frames at 16 fps, 512 × 704, from the green-screen still. With `--close-loop`, the still is also the last frame.
 6. **Make it loop.**
    - With `--close-loop`: drop the repeated last frame.
@@ -97,38 +101,50 @@ What it does, in order:
    - but only where the picture barely moved, so moving edges stay sharp.
    - Then green clean-up, and WebP frames with a `manifest.json`.
 
-`--dry-run` checks every input and prints the plan without loading anything. On Kaggle, use GGUF Q4_K_M experts (about 9–10 GB each) with `--offload model`. A T4 has no bf16, so the script falls back to fp16 automatically.
+`--dry-run` checks every input and prints the plan without loading anything.
+
+**Run on this PC (RTX 3050, 6 GB).** Q4_K_S experts from QuantStack's GGUF repo, the A14B text encoder borrowed from TI2V-5B (the same file), group offloading, 384 × 528, 81 frames, 20 steps: about 2.5 minutes per step, 63 minutes in all. The result turns through front, side, back (the vents show) and side, and comes back to the front without a seam. It is on the site as `assets/nine/turn/` (80 frames at 16 fps). On Kaggle, use GGUF Q4_K_M experts (about 9–10 GB each) with `--offload model`. A T4 has no bf16, so the script falls back to fp16 automatically.
 
 ## 5. `gen_animation.py` architecture
 
 ```text
-driving video ──► prepare (16 fps, 480×832, centred) ──┐
-Nine on green ──► prepare (padded to 480×832, green) ──┤
+make_drive.py (Blender) ──► drives/drive_<motion>.mp4      a rigged CC0 MakeHuman figure, no real person
                                                        ▼
-                     One-to-All 1.3B (its own repo, run as a subprocess)
-                     infer_preprocess.py (pose)  →  inference_1.3b.py
+prepare: 16 fps, cover-crop to 384×672, padded to 4k+1 frames (81)
+         Nine on green, fitted and bottom-centred on a 384×672 green canvas
                                                        ▼
-                     matte: BiRefNet + temporal smoothing + despill   (matting.py)
+One-to-All 1.3B, in its own environment (.venv-o2a), as three processes (o2a_runner.py):
+   pre     pose extraction (their infer_preprocess.py)                        ~90 s
+   prompt  umT5 text encoder alone on the CPU; embeddings saved to disk        once per prompt
+   gen     transformer + controlnet + reference extractor, group-offloaded     ~90 s per step × 30
                                                        ▼
-                     head track: neck centre and shoulder tilt per frame → track.json
+matte: BiRefNet + temporal smoothing + despill   (matting.py)
                                                        ▼
-                     export: f000.webp … + manifest.json + track.json → assets/nine/anim/<name>/
+head track: neck centre and shoulder tilt per frame → track.json
+                                                       ▼
+export: f000.webp … + manifest.json (with the still's box) → assets/nine/anim/<motion>/
+        and assets/nine/anim/manifest.js, which lists every clip for the website
 ```
 
-- **Why One-to-All 1.3B.** It is alignment-free: Nine and the driving person needn't match in framing or build. It is small enough for a free Kaggle T4 (the authors quote about 11 minutes for 10 s at 832 × 480). Its code is Apache-2.0.
-- **How it runs their code.** Their scripts take paths by editing the file. `--inspect` lists the path variables and options it finds in them, you name them once in `adapter.json`, and the wrapper writes our paths into a temporary copy on every run.
-- **Head lock.** The model also redraws the display head, and that is where drift shows. `--head-lock` writes the neck position and shoulder tilt for every frame, measured from the matte (no pose model needed). The website can then pin the crisp Blender head and its live face to the moving body, the same way the head layer already sits on the still.
-- **Cloth.** The folds come from the reference still. One-to-All carries the clothes from the reference and deforms them with the pose, so the v2 portrait with real fabric weight is what gives natural folds in motion.
-- **6 GB.** `--local` drops to 384 × 672 and sets a flag for a low-VRAM patch. Expect to run it on Kaggle.
+- **Why One-to-All 1.3B.** It is alignment-free: Nine and the driving person needn't match in framing or build. Its code is Apache-2.0. The default checkpoint is `MochunniaN1/One-to-All-1.3b_2`, the one their inference configs are written for.
+- **Driving videos without a person.** `make_drive.py` poses the rigged MakeHuman woman from `nine.blend` (our own CC0 build) and renders plain Workbench frames: `wave`, `talk` and `walk`, plus an `axes` sheet that shows which local axis bends which bone in this rig. Only the motion reaches the model.
+- **Its own environment.** One-to-All pins torch 2.5.1, diffusers 0.33 and transformers 4.40, so it runs in `.venv-o2a` (Python 3.10). DeepSpeed is imported only by their training helpers and does not install on Windows; the runner puts a stub in its place while their modules load.
+- **Why three processes.** Their pose models (ONNX) hold about 5 GB of GPU memory until their process exits. Their build also loads the 11 GB text encoder next to the model, and with 32 GB of RAM that swapped to disk for 38 minutes. Each stage now runs alone.
+- **Fitting 6 GB.** The model is 4.7 GB on the GPU. With the activations of an 81-frame chunk it overflowed the card, and Windows silently moved 5.7 GB into shared system memory: 35 minutes per step. Group offloading keeps one block on the GPU at a time (0.3 GB at rest) and brings a step down to about 90 seconds. Two details: the controlnet and reference extractor are built in float32, so the model is cast to bf16 before offloading; and their controlnet blocks run interleaved with the main blocks, so prefetching (`use_stream`) loads the wrong block and must stay off.
+- **Frame count.** Their chunking assumes 4k+1 frames (81 per chunk). An 80-frame clip fails with a tensor size mismatch (22176 against 21168), so prepare holds the last frame until the count fits.
+- **Head lock.** The model also redraws the display head, and that is where drift shows. `--head-lock` writes the neck position and shoulder tilt for every frame, measured from the matte (no pose model needed), so the site could pin the crisp Blender head to the moving body.
+- **Cloth.** The folds come from the reference still. One-to-All carries the clothes from the reference and deforms them with the pose, so the jacket and shirt swing and crease as she moves.
+- **On the website.** `manifest.js` sets `window.NINE_CLIPS`. When Nine is asked to `wave` or `talk` and that clip has loaded, she plays it once on the turn canvas, mapped through the still's box so it starts and ends on the photo, then goes back to the live still. Without a clip she falls back to the CSS moves.
 
 ## What was tested here, and what was not
 
 | | Status |
 |---|---|
-| `display_head.py` v3 | Rendered on this PC; composite checked by eye on a dark background |
-| `export_web.py` collar layer and screen grid | Run on this PC with the v3 head; the site still uses the v2 assets |
-| `gen_portrait.py` / `refine_neck.py` prompts | Token counts checked (all under 77); not generated yet |
-| `matting.py` | Run on 12 frames of the old turn |
-| `gen_360_turntable.py` | `--dry-run` only: the LoRA and A14B files are not downloaded |
-| `gen_animation.py` | Neck tracker run on old frames; the One-to-All stage needs its repo and a driving video |
-| Website: strips along the screen grid, collar layer, LED-matrix mouth, reading `manifest.json` | Not done yet |
+| `display_head.py` v3 | Rendered on this PC; on the site |
+| `export_web.py` collar layer and screen grid | Run on this PC with the v3 head; on the site |
+| `gen_portrait.py` / `refine_neck.py` | Neck pass run at strength 0.55 with grain matching; on the site |
+| `matting.py` | Used for the turntable (80 frames) |
+| `gen_360_turntable.py` | Run on this PC: Q4_K_S GGUF, group offload, 63 minutes; on the site |
+| `make_drive.py` | wave, talk and walk clips rendered (80 frames each at 16 fps) |
+| `gen_animation.py` + `o2a_runner.py` | Pose and prompt stages run; generation runs at about 90 s per step on this PC (wave first) |
+| Website: action-clip player, collar layer, LED-matrix mouth, reading the manifests | Done; the clips appear as each one is generated |

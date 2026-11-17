@@ -1,0 +1,1 @@
+window.NINE_CLIPS = {};

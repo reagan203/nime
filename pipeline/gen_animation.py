@@ -41,8 +41,9 @@ import argparse, json, os, re, shutil, subprocess, sys, tempfile
 ap = argparse.ArgumentParser()
 ap.add_argument("--repo", required=True, help="local clone of ssj9596/One-to-All-Animation")
 ap.add_argument("--o2a-python", help="python of One-to-All's environment (default: .venv-o2a next to this script)")
-ap.add_argument("--ckpt", help="One-to-All checkpoint folder (default: the 1.3b_1 download in the HF cache)")
-ap.add_argument("--offload", choices=["none", "model", "sequential"], default="none", help="if the 1.3B model does not fit the GPU")
+ap.add_argument("--ckpt", help="One-to-All checkpoint folder (default: One-to-All-1.3b_2 from the HF cache)")
+ap.add_argument("--offload", choices=["none", "group", "model", "sequential"], default="group", help="group fits a 6 GB GPU; none needs ~12 GB")
+ap.add_argument("--steps", type=int, default=30)
 ap.add_argument("--prompt", help="override the description passed to the model")
 ap.add_argument("--ref", help="Nine still on green (final/nine_green.png)")
 ap.add_argument("--drive", help="driving video (a person walking or gesturing)")
@@ -81,6 +82,9 @@ if "prepare" in stages:
             im = im.resize((round(im.width * s), round(im.height * s)), Image.LANCZOS)
             l, t = (im.width - W) // 2, (im.height - H) // 2
             frames.append(np.asarray(im.crop((l, t, l + W, t + H))))
+    # the model works in chunks of 4k+1 frames (81 at most): hold the last frame until the count fits
+    while len(frames) < 81 and (len(frames) - 1) % 4: frames.append(frames[-1])
+    if len(frames) < 81: frames += [frames[-1]] * (81 - len(frames))
     iio.imwrite(P("drive.mp4"), np.stack(frames), fps=a.fps, plugin="pyav", codec="libx264")
     ref = Image.open(a.ref).convert("RGB")
     s = min(W / ref.width, H / ref.height)
@@ -97,13 +101,16 @@ if "animate" in stages:
     ckpt = a.ckpt
     if not ckpt:
         from huggingface_hub import snapshot_download
-        ckpt = snapshot_download("MochunniaN1/One-to-All-1.3b_1")
-    cmd = [py, os.path.join(here, "o2a_runner.py"), "--ref", os.path.abspath(P("ref.png")), "--drive", os.path.abspath(P("drive.mp4")),
-           "--ckpt", ckpt, "--out", os.path.abspath(P("raw")), "--max-short", str(min(W, H)), "--offload", a.offload]
-    if a.prompt: cmd += ["--prompt", a.prompt]
-    env = dict(os.environ, PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True")
-    print("running One-to-All:", " ".join(cmd), flush=True)
-    subprocess.run(cmd, cwd=VSRC, env=env, check=True)
+        ckpt = snapshot_download("MochunniaN1/One-to-All-1.3b_2")   # their inference configs match _2, not _1
+    base_cmd = [py, os.path.join(here, "o2a_runner.py"), "--ref", os.path.abspath(P("ref.png")), "--drive", os.path.abspath(P("drive.mp4")),
+                "--ckpt", ckpt, "--out", os.path.abspath(P("raw")), "--max-short", str(min(W, H)), "--offload", a.offload, "--steps", str(a.steps)]
+    if a.prompt: base_cmd += ["--prompt", a.prompt]
+    env = dict(os.environ, PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True", PYTHONIOENCODING="utf-8")   # their logs print Chinese text
+    # three processes: the pose models hold GPU memory until their process exits, and the text encoder
+    # must not share RAM with the 1.3B model (see o2a_runner.py)
+    for stage in ("pre", "prompt", "gen"):
+        print(f"One-to-All stage {stage}", flush=True)
+        subprocess.run(base_cmd + ["--stage", stage], cwd=VSRC, env=env, check=True)
 
 # ------------------------------------------------------------------ 3-5. matte, head track, export
 def load_raw():
