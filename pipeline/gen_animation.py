@@ -1,0 +1,173 @@
+"""Nine moves: gestures and walking, by motion transfer from a driving video.
+
+Model: One-to-All Animation 1.3B (ssj9596/One-to-All-Animation; code Apache-2.0; built on Wan2.1-1.3B).
+  * It is "alignment-free": the reference (Nine) and the driving person do not need the same framing
+    or body proportions, which matters because Nine is a waist-up still.
+  * Its authors run the 1.3B model on a free Kaggle T4 (16 GB): about 11 minutes for 10 s at 832x480.
+    Nobody publishes a 6 GB figure, so the default target here is Kaggle/Colab; --local tries the RTX 3050
+    with the text encoder dropped after encoding and sequential offload, at 480x832 or smaller.
+  * Check the licence on the model card of the CHECKPOINTS before the website goes live: the README
+    licenses the code (Apache-2.0) and does not state the weights' licence.
+  * Wan2.2-Animate-14B (Apache-2.0) is the stronger model, but its transformer alone is ~69 GB in bf16:
+    it needs a 40-80 GB GPU. Not used here.
+
+Pipeline (each stage writes to --work, so stages can be re-run on their own):
+  1. prepare   driving video -> 16 fps, trimmed, resized, person centred           (ffmpeg via imageio)
+               reference     -> Nine on green, padded to the model's aspect          (PIL)
+  2. animate   One-to-All preprocess (pose extraction) + inference, run as a subprocess in its repo
+  3. matte     BiRefNet per frame + motion-aware temporal smoothing + green despill (matting.py)
+  4. head      track the neck (shoulder midpoint and tilt) in every output frame and save track.json, so the
+               website can pin the crisp Blender head and the live face to the moving body if the model's
+               own rendering of the head drifts (--head-lock)
+  5. export    transparent WebP frames + manifest.json for the site (same format as the turntable)
+
+Their scripts take paths by editing the script ("change the input path"). Rather than guess variable
+names, run `--inspect` once: it lists the path-like assignments in their inference scripts. Put the
+variable names in adapter.json ({"ref": "...", "drive": "...", "out": "..."}) and this wrapper rewrites
+them in a temporary copy of the script on every run.
+
+Usage:
+  python gen_animation.py --repo One-to-All-Animation --inspect
+  python gen_animation.py --repo One-to-All-Animation --adapter adapter.json --ref final/nine_green.png \
+      --drive drives/wave.mp4 --work clips/anim_wave --matte <BiRefNet dir> --site-out <site>/assets/nine/wave
+On Kaggle: clone the repo, pip install -r requirements.txt, upload final/nine_green.png and the driving
+video as a dataset, run the same command with --matte pointing at BiRefNet_lite downloaded there.
+
+Driving video: use footage you have the rights to (film a colleague, or a CC0 clip). Only the motion is
+transferred; the person's face and clothes are not.
+For walking, generate a full-length still first (gen_portrait.py with a full-body framing): from a
+waist-up still the model has to invent legs and trousers, and they will not match from clip to clip.
+"""
+import argparse, json, os, re, shutil, subprocess, sys, tempfile
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--repo", required=True, help="local clone of ssj9596/One-to-All-Animation")
+ap.add_argument("--inspect", action="store_true", help="list path assignments in the repo's scripts, then stop")
+ap.add_argument("--adapter", help="adapter.json mapping our inputs to the repo script's variables")
+ap.add_argument("--ref", help="Nine still on green (final/nine_green.png)")
+ap.add_argument("--drive", help="driving video (a person walking or gesturing)")
+ap.add_argument("--work", default="clips/anim")
+ap.add_argument("--seconds", type=float, default=5.0)
+ap.add_argument("--fps", type=int, default=16)
+ap.add_argument("--size", default="480x832", help="WxH; portrait")
+ap.add_argument("--local", action="store_true", help="try the 6 GB GPU (smaller size, offload); default assumes a 16 GB GPU")
+ap.add_argument("--matte", help="BiRefNet_lite folder")
+ap.add_argument("--head-lock", action="store_true", help="also write track.json for pinning the Blender head on the site")
+ap.add_argument("--site-out")
+ap.add_argument("--stages", default="prepare,animate,matte,head,export")
+a = ap.parse_args()
+VSRC = os.path.join(a.repo, "video-generation")
+SCRIPTS = {"pre": os.path.join(VSRC, "infer_preprocess.py"), "infer": os.path.join(VSRC, "inference_1.3b.py")}
+
+# ------------------------------------------------------------------ inspect
+if a.inspect:
+    pat = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_\.\[\]'\"]*)\s*=\s*['\"]([^'\"]*\.(?:png|jpg|jpeg|mp4|mov|webm|json)|[^'\"]*/)['\"]", re.M)
+    for name, path in SCRIPTS.items():
+        if not os.path.exists(path): print(f"{name}: not found at {path}"); continue
+        src = open(path, encoding="utf-8").read()
+        print(f"--- {path}")
+        for m in pat.finditer(src): print(f"  {m.group(1)} = {m.group(2)!r}")
+        for m in re.finditer(r"add_argument\(\s*['\"](--[\w-]+)['\"]", src): print(f"  argparse option {m.group(1)}")
+    print("\nPut the variable (or --option) names for the reference image, driving video and output folder in adapter.json.")
+    sys.exit(0)
+
+W, H = (int(v) for v in a.size.split("x"))
+if a.local: W, H = min(W, 384), min(H, 672)               # smaller frames for 6 GB
+stages = set(a.stages.split(","))
+os.makedirs(a.work, exist_ok=True)
+P = lambda *p: os.path.join(a.work, *p)
+
+# ------------------------------------------------------------------ 1. prepare
+if "prepare" in stages:
+    import imageio.v3 as iio
+    import numpy as np
+    from PIL import Image
+    frames = []
+    meta = iio.immeta(a.drive, plugin="pyav") if hasattr(iio, "immeta") else {}
+    src_fps = float(meta.get("fps", 30))
+    step = src_fps / a.fps
+    for i, fr in enumerate(iio.imiter(a.drive, plugin="pyav")):
+        if len(frames) >= a.seconds * a.fps: break
+        if i >= len(frames) * step:
+            im = Image.fromarray(fr).convert("RGB")
+            s = max(W / im.width, H / im.height)                      # cover, then centre-crop to WxH
+            im = im.resize((round(im.width * s), round(im.height * s)), Image.LANCZOS)
+            l, t = (im.width - W) // 2, (im.height - H) // 2
+            frames.append(np.asarray(im.crop((l, t, l + W, t + H))))
+    iio.imwrite(P("drive.mp4"), np.stack(frames), fps=a.fps, plugin="pyav", codec="libx264")
+    ref = Image.open(a.ref).convert("RGB")
+    s = min(W / ref.width, H / ref.height)
+    canvas = Image.new("RGB", (W, H), (0, 177, 64))                   # pad with the same green
+    r2 = ref.resize((round(ref.width * s), round(ref.height * s)), Image.LANCZOS)
+    canvas.paste(r2, ((W - r2.width) // 2, H - r2.height))
+    canvas.save(P("ref.png"))
+    print(f"prepared {len(frames)} driving frames at {a.fps} fps, {W}x{H}", flush=True)
+
+# ------------------------------------------------------------------ 2. animate (One-to-All, as a subprocess)
+def patched(script, mapping, values):
+    """copy the repo script with our paths written into its variables (names from adapter.json)"""
+    src = open(script, encoding="utf-8").read()
+    for key, var in mapping.items():
+        if key not in values or not var: continue
+        if var.startswith("--"):
+            continue                                                  # argparse option: passed on the command line
+        src, n = re.subn(rf"^(\s*{re.escape(var)}\s*=\s*).*$", lambda m: m.group(1) + repr(values[key]), src, count=1, flags=re.M)
+        if not n: raise SystemExit(f"adapter: variable {var!r} not found in {script}")
+    tmp = tempfile.NamedTemporaryFile("w", suffix=".py", delete=False, dir=os.path.dirname(script), encoding="utf-8")
+    tmp.write(src); tmp.close(); return tmp.name
+if "animate" in stages:
+    if not a.adapter: raise SystemExit("--adapter is required for the animate stage (run --inspect first)")
+    ad = json.load(open(a.adapter))
+    values = {"ref": os.path.abspath(P("ref.png")), "drive": os.path.abspath(P("drive.mp4")), "out": os.path.abspath(P("raw")) + os.sep}
+    os.makedirs(P("raw"), exist_ok=True)
+    env = dict(os.environ, PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True")
+    if a.local: env["NINE_LOW_VRAM"] = "1"                            # read by the patch in adapter.json, if you add one
+    for stage in ("pre", "infer"):
+        mapping = ad.get(stage, {})
+        script = patched(SCRIPTS[stage], mapping, values)
+        cli = [f"{opt}={values[k]}" for k, opt in mapping.items() if opt and opt.startswith("--") and k in values]
+        try:
+            print("running", os.path.basename(SCRIPTS[stage]), cli, flush=True)
+            subprocess.run([sys.executable, os.path.basename(script), *cli], cwd=VSRC, env=env, check=True)
+        finally:
+            os.remove(script)
+
+# ------------------------------------------------------------------ 3-5. matte, head track, export
+def load_raw():
+    import glob, imageio.v3 as iio
+    from PIL import Image
+    vids = sorted(glob.glob(P("raw", "**", "*.mp4"), recursive=True))
+    if not vids: raise SystemExit(f"no output video in {P('raw')}")
+    return [Image.fromarray(f).convert("RGB") for f in iio.imiter(vids[-1], plugin="pyav")]
+if stages & {"matte", "head", "export"}:
+    import numpy as np
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import matting
+    frames = load_raw()
+    alphas = matting.smooth_alphas(frames, matting.raw_alphas(frames, a.matte), loop=False) if a.matte else [np.ones(f.size[::-1], np.float32) for f in frames]
+    track = None
+    if a.head_lock:
+        # neck from the matte: the narrowest row between the shoulders and the head gives the neck centre;
+        # the shoulder line (left/right edge 25% further down) gives the tilt. No pose model needed.
+        track = []
+        for al in alphas:
+            m = al > .5; rows = np.where(m.any(1))[0]
+            if not len(rows): track.append(None); continue
+            top, bot = rows[0], rows[-1]
+            widths = [(m[y].sum(), y) for y in range(top + (bot - top) // 6, top + (bot - top) // 2)]
+            w, ny = min(widths); xs = np.where(m[ny])[0]
+            cx = xs.mean()
+            below = m.copy(); below[: ny + 5] = False                  # ignore the head: shoulders are below the neck
+            topy = np.where(below.any(0), below.argmax(0), -1)
+            def shoulder(x0, x1):
+                c = [x for x in range(max(0, int(x0)), min(al.shape[1], int(x1))) if topy[x] >= 0]
+                return (np.mean(c), float(np.median(topy[c]))) if c else None
+            sl, sr = shoulder(cx - 2.2 * w, cx - 1.2 * w), shoulder(cx + 1.2 * w, cx + 2.2 * w)
+            tilt = float(np.degrees(np.arctan2(sr[1] - sl[1], sr[0] - sl[0]))) if sl and sr else 0.0
+            track.append({"x": float(xs.mean() / al.shape[1]), "y": float(ny / al.shape[0]), "w": float(w / al.shape[1]), "tilt": tilt})
+        json.dump(track, open(P("track.json"), "w"))
+    if a.site_out and "export" in stages:
+        m = matting.export_web(frames, alphas, a.site_out, a.fps, extra={"kind": "animation", "loop": False, "track": "track.json" if track else None})
+        if track: shutil.copy(P("track.json"), os.path.join(a.site_out, "track.json"))
+        print("web frames:", m, flush=True)
+print("done", flush=True)

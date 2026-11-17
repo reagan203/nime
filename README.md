@@ -22,9 +22,9 @@ All free and open models, run locally on a 6 GB laptop GPU:
 | Display head and mechanical neck | `display_head.py` | Blender 5.3, Cycles |
 | Body cut out of the backdrop | `matte.py` | BiRefNet-lite (MIT) |
 | Web layers (body, head, screen corners) | `export_web.py` | |
-| 360 turn video | `wan_clip.py` | Wan 2.2 TI2V-5B (Apache-2.0) |
-| Turn frames cut out for the web | `turn_frames.py` | BiRefNet-lite (MIT) |
-| Full 360 joined from the clips | `join_turn.py` | |
+| 360 turn video | `legacy/wan_clip.py` | Wan 2.2 TI2V-5B (Apache-2.0) |
+| Turn frames cut out for the web | `legacy/turn_frames.py` | BiRefNet-lite (MIT) |
+| Full 360 joined from the clips | `legacy/join_turn.py` | |
 
 The person in the body photo is AI-generated and fictional. The display head is an original design.
 

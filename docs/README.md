@@ -8,6 +8,7 @@ This folder explains how everything in the site was built, so anyone can change 
 | [nine-chat.md](nine-chat.md) | Nine's conversation: the questions, voice, waiting and dozing, and what happens to the answers |
 | [nine-avatar.md](nine-avatar.md) | Nine on the page: the layers, the live screen face and everything it can show, following the pointer, actions, page reactions and the 360 turn |
 | [making-nine.md](making-nine.md) | How Nine's images and video were produced with free models on a laptop, step by step, with commands |
+| [pipeline-v3.md](pipeline-v3.md) | The v3 upgrade: curved head, neck fused into flesh, real fabric and skin, one-still 360 turntable and motion transfer; what the models can and cannot do |
 
 ## The short version
 

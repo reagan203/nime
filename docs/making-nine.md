@@ -1,5 +1,7 @@
 # How Nine was made
 
+This is the v2 process, which made the Nine now on the site. The v3 upgrade (curved head, neck fused into flesh, one-still 360 turntable, motion transfer) is in [pipeline-v3.md](pipeline-v3.md). The v2 turn scripts are in `pipeline/legacy/`.
+
 Everything was made locally with free, open models and Blender, on a laptop with an RTX 3050 (6 GB) graphics card, 32 GB of memory and Windows 11. No paid service and no real person's likeness was used: the body is an AI-generated fictional person, and the display head is an original design.
 
 The scripts are in `pipeline/`. They expect a Python 3.12 virtual environment with PyTorch (CUDA 12.8), `diffusers`, `transformers`, `accelerate`, `torchvision`, `timm`, `kornia` and `einops`, and Blender 5.3.

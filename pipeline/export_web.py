@@ -11,8 +11,9 @@ out = os.path.join(sys.argv[1], "assets", "nine", "photo")
 os.makedirs(out, exist_ok=True)
 
 body = Image.open(os.path.join(base, "matte", "body_7104_headless.png")).convert("RGBA")   # cut out by BiRefNet
-head = Image.open(os.path.join(base, "head", "display_head.png")).convert("RGBA")
-info = json.load(open(os.path.join(base, "head", "display_head.json")))
+HEAD_DIR = os.environ.get("NINE_HEAD_DIR") or os.path.join(base, "head")
+head = Image.open(os.path.join(HEAD_DIR, "display_head.png")).convert("RGBA")
+info = json.load(open(os.path.join(HEAD_DIR, "display_head.json")))
 W, H0 = body.size
 
 NECK_L, NECK_R, NECK_TOP = 305, 480, 486
@@ -37,8 +38,22 @@ body.putalpha(canvas.getchannel("A"))
 body.save(os.path.join(out, "body.webp"), quality=88, method=6)
 hs.save(os.path.join(out, "head.webp"), quality=90, method=6)
 
+# collar layer: the clothes (not skin) in a band below the neck, laid back OVER the head layer,
+# so the hydraulic hoses disappear under the shirt collar and lapels
+rgb = np.asarray(canvas.convert("RGB"), dtype=np.float32) / 255
+mx_, mn_ = rgb.max(2), rgb.min(2); sat = np.where(mx_ > 0, (mx_ - mn_) / np.maximum(mx_, 1e-6), 0)
+skin = (rgb[..., 0] > rgb[..., 1]) & (rgb[..., 1] > rgb[..., 2]) & (sat > 0.18) & (sat < 0.75) & (mx_ > 0.25)
+skin = np.array(Image.fromarray((skin * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.GaussianBlur(2)), dtype=np.float32) / 255
+band = np.zeros((H, W), np.float32); y0, y1 = PAD + NECK_TOP + 24, PAD + NECK_TOP + 260
+band[y0:y1] = 1; band = np.array(Image.fromarray((band * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(8)), dtype=np.float32) / 255
+ca = (np.asarray(canvas.getchannel("A"), dtype=np.float32) / 255) * band * (1 - skin)
+collar_layer = canvas.copy(); collar_layer.putalpha(Image.fromarray((ca * 255).astype(np.uint8)))
+collar_layer = collar_layer.crop(collar_layer.getchannel("A").getbbox() or (0, 0, 1, 1))
+cl_x, cl_y = Image.fromarray((ca * 255).astype(np.uint8)).getbbox()[:2]
+collar_layer.save(os.path.join(out, "collar.webp"), quality=88, method=6)
+
 # full stills: transparent, and on chroma green for the video model
-full = body.copy(); full.alpha_composite(hs, (hx, hy))
+full = body.copy(); full.alpha_composite(hs, (hx, hy)); full.alpha_composite(collar_layer, (cl_x, cl_y))
 os.makedirs(os.path.join(base, "final"), exist_ok=True)
 full.save(os.path.join(base, "final", "nine_full.png"))
 green = Image.new("RGBA", full.size, (0, 177, 64, 255)); green.alpha_composite(full)
@@ -48,9 +63,12 @@ def rel(p):  # head-image coordinates as fractions of the head image
 
 data = {
     "frame": [W, H],
+    "collar": {"x": cl_x, "y": cl_y, "w": collar_layer.width, "h": collar_layer.height},
     "head": {"x": hx, "y": hy, "w": hs.width, "h": hs.height,
              "pivot": rel(info["collar_bottom"]),
-             "screen": {k: rel(v) for k, v in info["screen"].items()}},
+             "screen": {k: rel(v) for k, v in info["screen"].items()},
+             "screen_grid": {"cols": info["screen_grid"]["cols"], "rows": info["screen_grid"]["rows"],
+                             "points": [[rel(p) for p in row] for row in info["screen_grid"]["points"]]} if "screen_grid" in info else None},
 }
 json.dump(data, open(os.path.join(out, "nine.json"), "w"), indent=2)
 print(json.dumps(data))
