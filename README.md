@@ -25,8 +25,8 @@ All free and open models, run locally on a 6 GB laptop GPU:
 | Neck skin detail | `refine_neck.py` | RealVisXL V5.0 inpainting |
 | 360 turntable from one still | `gen_360_turntable.py` | Wan 2.2 I2V-A14B, GGUF Q4_K_S (Apache-2.0) + 360 Rotation LoRA (CC0) |
 | Frames cut out for the web | `matting.py` | BiRefNet-lite (MIT) |
-| Driving videos (no real person) | `make_drive.py` | Blender 5.3, rigged MakeHuman figure (CC0) |
-| Gestures with moving clothes | `gen_animation.py` + `o2a_runner.py` | One-to-All Animation 1.3B (code Apache-2.0) |
+| Gestures with moving clothes (wave, talk) | `gen_360_turntable.py --motion wave` | Wan 2.2 I2V-A14B, GGUF Q4_K_S (Apache-2.0) |
+| Motion transfer, tried and not used | `gen_animation.py`, `o2a_runner.py`, `make_drive.py` | One-to-All Animation 1.3B (code Apache-2.0) |
 
 The first turn (two Wan 2.2 TI2V-5B clips joined) is kept in `pipeline/legacy/`. Details: [docs/pipeline-v3.md](docs/pipeline-v3.md).
 

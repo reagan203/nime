@@ -105,7 +105,19 @@ What it does, in order:
 
 **Run on this PC (RTX 3050, 6 GB).** Q4_K_S experts from QuantStack's GGUF repo, the A14B text encoder borrowed from TI2V-5B (the same file), group offloading, 384 × 528, 81 frames, 20 steps: about 2.5 minutes per step, 63 minutes in all. The result turns through front, side, back (the vents show) and side, and comes back to the front without a seam. It is on the site as `assets/nine/turn/` (80 frames at 16 fps). On Kaggle, use GGUF Q4_K_M experts (about 9–10 GB each) with `--offload model`. A T4 has no bf16, so the script falls back to fp16 automatically.
 
-## 5. `gen_animation.py` architecture
+## 5. Gestures: what worked and what did not
+
+**What is on the site.** The wave (and talk) clips come from the same model as the turntable, Wan 2.2 I2V-A14B, run by `gen_360_turntable.py --motion wave` (or `talk`). There is no LoRA and no driving video. The prompt describes the gesture, and the still is given as the first **and** last frame, so every clip starts and ends exactly on the photo and the site can cut back to the live still without a jump. At 384 × 528, 81 frames and 20 steps, a clip takes about 55 minutes on the 6 GB GPU (about 3 minutes per step). The model keeps the jacket, its buttons and pocket, the shirt cuff and the display intact while the arm moves.
+
+**What did not work: motion transfer with One-to-All 1.3B** (`gen_animation.py`, kept for reference). It runs on 6 GB, at about 90 seconds per step, after the fixes below, but it could not hold Nine:
+
+- Its pose detector finds no head (the display is not a face) and reads her jacket shoulders as arms held straight out.
+- With retargeting on, every driving pose is stretched onto that wrong skeleton: arms out in a T, no wave.
+- With retargeting off, the driving video framed to her neck and shoulders, and the first driving pose used as her reference pose, the motion lines up. Even so, the model turned her jacket into a cape and then a sleeveless shirt.
+
+The model is trained on people with faces, filmed full-length or nearly so. Nine is outside that.
+
+### `gen_animation.py` architecture (One-to-All, not used on the site)
 
 ```text
 make_drive.py (Blender) ──► drives/drive_<motion>.mp4      a rigged CC0 MakeHuman figure, no real person
@@ -134,6 +146,7 @@ export: f000.webp … + manifest.json (with the still's box) → assets/nine/ani
 - **Frame count.** Their chunking assumes 4k+1 frames (81 per chunk). An 80-frame clip fails with a tensor size mismatch (22176 against 21168), so prepare holds the last frame until the count fits.
 - **Head lock.** The model also redraws the display head, and that is where drift shows. `--head-lock` writes the neck position and shoulder tilt for every frame, measured from the matte (no pose model needed), so the site could pin the crisp Blender head to the moving body.
 - **Cloth.** The folds come from the reference still. One-to-All carries the clothes from the reference and deforms them with the pose, so the jacket and shirt swing and crease as she moves.
+- **Framing the driving video.** `prepare` detects the neck and shoulders in the first driving frame and in the still, then scales and shifts every driving frame so the figure's neck sits on Nine's and its shoulders are as wide as hers (`--shoulder-ratio`, 0.62 of the jacket edge the detector reads). Their video comes out as [pose overlay | result] side by side; only the result is kept.
 - **On the website.** `manifest.js` sets `window.NINE_CLIPS`. When Nine is asked to `wave` or `talk` and that clip has loaded, she plays it once on the turn canvas, mapped through the still's box so it starts and ends on the photo, then goes back to the live still. Without a clip she falls back to the CSS moves.
 
 ## What was tested here, and what was not
@@ -145,6 +158,7 @@ export: f000.webp … + manifest.json (with the still's box) → assets/nine/ani
 | `gen_portrait.py` / `refine_neck.py` | Neck pass run at strength 0.55 with grain matching; on the site |
 | `matting.py` | Used for the turntable (80 frames) |
 | `gen_360_turntable.py` | Run on this PC: Q4_K_S GGUF, group offload, 63 minutes; on the site |
-| `make_drive.py` | wave, talk and walk clips rendered (80 frames each at 16 fps) |
-| `gen_animation.py` + `o2a_runner.py` | Pose and prompt stages run; generation runs at about 90 s per step on this PC (wave first) |
+| `make_drive.py` | wave, talk and walk clips rendered (80 frames each at 16 fps); only used by One-to-All |
+| `gen_360_turntable.py --motion wave/talk` | Wave run on this PC (55 minutes) and on the site; talk generated the same way |
+| `gen_animation.py` + `o2a_runner.py` | Run end to end on this PC twice; output not usable for Nine (see section 5) |
 | Website: action-clip player, collar layer, LED-matrix mouth, reading the manifests | Done; the clips appear as each one is generated |

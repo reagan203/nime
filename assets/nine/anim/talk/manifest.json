@@ -1,0 +1,13 @@
+{
+  "frames": 81,
+  "fps": 16,
+  "src": "f{i}.webp",
+  "kind": "animation",
+  "loop": false,
+  "stage": [
+    0,
+    0,
+    384,
+    528
+  ]
+}

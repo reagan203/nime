@@ -1,1 +1,1 @@
-window.NINE_CLIPS = {"wave": {"frames": 81, "fps": 16, "src": "f{i}.webp", "kind": "animation", "loop": false, "stage": [0, 0, 384, 528], "dir": "wave"}};
+window.NINE_CLIPS = {"talk": {"frames": 81, "fps": 16, "src": "f{i}.webp", "kind": "animation", "loop": false, "stage": [0, 0, 384, 528], "dir": "talk"}, "wave": {"frames": 81, "fps": 16, "src": "f{i}.webp", "kind": "animation", "loop": false, "stage": [0, 0, 384, 528], "dir": "wave"}};
