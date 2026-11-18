@@ -1909,14 +1909,17 @@ const Nine = (() => {
     return (voice = vs.find(x => /^en/i.test(x.lang)) || null);
   }
   if (synth && synth.addEventListener) synth.addEventListener("voiceschanged", () => { voice = null; });
-  function speak(text) {
-    if (!sound || !synth || !text || !isOpen()) return Promise.resolve();
+  // onStart runs when the voice is actually heard (online voices can take a second or more to start),
+  // or straight away when Nine is muted, so the text never runs ahead of her voice
+  function speak(text, onStart = () => {}) {
+    if (!sound || !synth || !text || !isOpen()) { onStart(); return Promise.resolve(); }
     return new Promise(res => {
-      let finished = false; const end = () => { if (!finished) { finished = true; res(); } };
-      synth.cancel();
+      let finished = false; const end = () => { if (!finished) { finished = true; onStart(); res(); } };
+      if (synth.speaking || synth.pending) synth.cancel();   // cancelling an idle engine delays the next line in Chrome
       const u = new SpeechSynthesisUtterance(text.replace(/·/g, ","));
       const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; }
       u.rate = Math.max(.6, Math.min(1.6, TONES[tone].rate + rateAdj)); u.pitch = TONES[tone].pitch;
+      u.onstart = onStart;
       u.onboundary = () => Faces.bump(asFace);
       u.onend = end; u.onerror = end;
       synth.speak(u);
@@ -1982,12 +1985,19 @@ const Nine = (() => {
         const isHtml = typeof msg === "object";
         if (lastAnswer) { prevEl.textContent = lastAnswer; prevEl.classList.add("is-user"); lastAnswer = null; }
         else { const t = nowEl.textContent.replace(/\s+/g, " ").trim(); prevEl.textContent = t.length > 150 ? t.slice(0, 147) + "…" : t; prevEl.classList.remove("is-user"); }
-        setState("speaking"); Faces.talk(asFace, true);
-        if (o.gesture) asBody.act(o.gesture, 2200);
-        let typed;
-        if (isHtml) { nowEl.innerHTML = msg.html; nowEl.classList.remove("is-fade"); void nowEl.offsetWidth; nowEl.classList.add("is-fade"); typed = Promise.resolve(); }
-        else typed = typeOut(msg, g);
-        const spoken = speak(isHtml ? msg.speak : msg);
+        // the line appears when her voice starts (she keeps "thinking" until then), at most 1.5 s later
+        let shownRes; const typed = new Promise(r => { shownRes = r; });
+        let begun = false;
+        const begin = () => {
+          if (begun) return; begun = true;
+          if (g !== gen) return shownRes();
+          setState("speaking"); Faces.talk(asFace, true);
+          if (o.gesture) asBody.act(o.gesture, 2200);
+          if (isHtml) { nowEl.innerHTML = msg.html; nowEl.classList.remove("is-fade"); void nowEl.offsetWidth; nowEl.classList.add("is-fade"); shownRes(); }
+          else typeOut(msg, g).then(shownRes);
+        };
+        const spoken = speak(isHtml ? msg.speak : msg, begin);
+        setTimeout(begin, 1500);
         typed.then(() => { if (g === gen && o.ask) showAnswer(o); if (!sound || !synth) Faces.talk(asFace, false); });
         Promise.all([typed, spoken]).then(() => {
           Faces.talk(asFace, false);
@@ -1997,7 +2007,7 @@ const Nine = (() => {
           if (o.ask && voiceMode && step !== "finished") listen();
           done();
         });
-      }, reduce ? 0 : 380 + Math.random() * 380);
+      }, reduce ? 0 : 220 + Math.random() * 220);
     }));
     return queue;
   }
@@ -2496,8 +2506,11 @@ const Nine = (() => {
     if (f) out.push(f.title);
     return out;
   }
+  let warmed = false;
   function open(opts = {}) {
     openerFocus = document.activeElement;
+    // wake the speech engine with a silent word, so Nine's first line isn't the slow one
+    if (sound && synth && !warmed) { warmed = true; pickVoice(); const w = new SpeechSynthesisUtterance(" "); w.volume = 0; const v = pickVoice(); if (v) w.voice = v; synth.speak(w); }
     root.classList.add("is-open"); root.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
     if (opts.voice) { if (SR) voiceMode = true; else statusEl.textContent = NO_SR; }

@@ -64,6 +64,7 @@ At the end Nine reads back a summary that the visitor can edit, then thanks them
 - Nine speaks with the browser's built-in speech (`speechSynthesis`), choosing a natural English voice where one exists. The sound button turns it off, and the choice is remembered (`nm-voice`).
 - Visitors can answer by voice with the browser's speech recognition (Chrome and Edge). If the microphone is blocked, Nine says so and the visitor types instead.
 - While Nine speaks, the mouth on the screen moves with the words.
+- Each line appears when her voice actually starts (`speak(text, onStart)`), not before: online voices can take a second or more to begin, and until then Nine shows her thinking face. If the voice never starts, the line appears after 1.5 seconds anyway. Opening the chat wakes the speech engine with a silent word first.
 
 ## Waiting
 
