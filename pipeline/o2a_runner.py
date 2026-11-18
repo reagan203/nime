@@ -15,9 +15,12 @@ Usage (from <repo>/video-generation):
 """
 import argparse, gc, glob, hashlib, importlib.util, os, sys, time
 ap = argparse.ArgumentParser()
-ap.add_argument("--stage", choices=["pre", "prompt", "gen"], required=True)
+ap.add_argument("--stage", choices=["keypoints", "pre", "prompt", "gen"], required=True)
 ap.add_argument("--ref", required=True); ap.add_argument("--drive", required=True)
-ap.add_argument("--ckpt", required=True); ap.add_argument("--out", required=True)
+ap.add_argument("--ckpt"); ap.add_argument("--out")
+ap.add_argument("--align", action="store_true", help="let their retargeting stretch the driving poses to the reference's skeleton")
+ap.add_argument("--ref-pose", choices=["drive", "detect"], default="drive",
+                help="drive: use the first driving pose as the reference pose (the detector misreads Nine: no face, jacket shoulders as arms)")
 ap.add_argument("--base", default="../pretrained_models/Wan2.1-T2V-1.3B-Diffusers")
 ap.add_argument("--prompt", default="a woman in a tailored navy suit jacket and white shirt, whose head is a curved graphite display on a mechanical neck, "
                                      "moving naturally; the jacket and shirt fold and swing with her movement; plain green background")
@@ -44,6 +47,17 @@ def drop_stub():
     if getattr(sys.modules.get("deepspeed"), "__file__", None) is None: sys.modules.pop("deepspeed", None)
 
 t0 = time.time()
+if a.stage == "keypoints":
+    # body keypoints of one image, as JSON on stdout (gen_animation.py uses them to frame the driving video like the still)
+    import json, numpy as np
+    from PIL import Image
+    U = load("o2a_utils", "infer_utils.py"); drop_stub()
+    for path in (a.ref, a.drive):
+        im = np.array(Image.open(path).convert("RGB")); H, W = im.shape[:2]
+        c = np.array(U.aaposemeta_to_dwpose(U.wanpose2d(im[None])[0])["bodies"]["candidate"])[:, :2]
+        if c.max() <= 1.5: c = c * [W, H]
+        print("KP " + json.dumps({"path": path, "size": [W, H], "pts": c.round(1).tolist()}), flush=True)
+    sys.exit(0)
 os.makedirs(a.out, exist_ok=True)
 refname = os.path.splitext(os.path.basename(a.ref))[0]
 cache_ptr = os.path.join(a.out, "cache_dir.txt")
@@ -108,8 +122,9 @@ else:  # gen
             # the whole model is 4.7 GB: with the activations of an 81-frame chunk it overflows a 6 GB card and
             # Windows silently spills into shared memory (35 min per step). Keep only one block on the GPU at a time.
             from diffusers.hooks import apply_group_offloading
+            model.to(dtype=dt); pipe.vae.to(dtype=dt)            # set_up_controlnet/refextractor add float32 layers
             apply_group_offloading(model, onload_device=torch.device(device), offload_device=torch.device("cpu"),
-                                   offload_type="block_level", num_blocks_per_group=1, use_stream=True)
+                                   offload_type="block_level", num_blocks_per_group=1, use_stream=False)   # no prefetch: controlnet blocks run interleaved with the main ones
             pipe.vae.to(device)
         elif a.offload == "sequential": pipe.enable_sequential_cpu_offload()
         elif a.offload == "model": pipe.enable_model_cpu_offload()

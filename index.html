@@ -1560,7 +1560,8 @@ const Photo = (() => {
     k.imgs = Array.from({ length: k.frames }, (_, i) => { const im = new Image(); im.decoding = "async"; im.src = `assets/nine/anim/${k.dir}/` + k.src.replace("{i}", String(i).padStart(3, "0")); return im; });
   }
   const clipReady = name => { const k = CLIPS[name]; return !!(k && k.imgs && k.imgs.every(im => im.complete && im.naturalWidth)); };
-  addEventListener("load", () => setTimeout(() => Object.keys(CLIPS).forEach(loadClip), 4000));
+  loadClip("wave");                                                  // the greeting uses it within seconds
+  addEventListener("load", () => setTimeout(() => Object.keys(CLIPS).forEach(loadClip), 2500));
   // actions that also put something on the display
   const SCREEN_FOR = { dance: "music", watch: "clock", celebrate: "star", juggle: "services", hiccup: "glitch", sneeze: "glitch", trip: "dizzy", shrug: "question", stretch: "battery", bow: "heart", tap: "dots", kick: "wow", jump: "wow" };
   const all = [];
@@ -1687,7 +1688,7 @@ const Photo = (() => {
     all.forEach(c => { c.el.style.setProperty("--lx", (c.face._lx || 0).toFixed(3)); c.el.style.setProperty("--ly", (c.face._ly || 0).toFixed(3)); });
     requestAnimationFrame(follow);
   })();
-  return { mount };
+  return { mount, clipReady, hasClip: name => !!CLIPS[name] };
 })();
 const heroNine = Photo.mount(document.getElementById("heroBody"));
 const asBody = Photo.mount(document.getElementById("asBody"));
@@ -2442,7 +2443,12 @@ new IntersectionObserver(checkHero, { threshold: [0, .25, .5, 1] }).observe(hero
 checkHero();
 document.addEventListener("nine:toggle", syncWalker);
 addEventListener("resize", () => { if (walkerPilot.x > innerWidth - 60) walkerPilot.place(innerWidth - 120, 0); });
-setTimeout(() => { heroNine.act("wave", 2400); Faces.mood(heroNine.face, "happy"); setTimeout(() => Faces.mood(heroNine.face, "idle"), 2400); }, 900);
+// the greeting: wait (up to 4 s) for the real wave clip, else wave with the CSS move
+function greet(t0) {
+  if (Photo.hasClip("wave") && !Photo.clipReady("wave") && performance.now() - t0 < 4000) return setTimeout(() => greet(t0), 150);
+  heroNine.act("wave", 2400); Faces.mood(heroNine.face, "happy"); setTimeout(() => Faces.mood(heroNine.face, "idle"), 2400);
+}
+setTimeout(() => greet(performance.now()), 900);
 /* ---------- Nine follows the pointer ----------
    Mini Nine glides along the bottom toward wherever the pointer rests; every Nine's head and eyes track it. */
 let ptrX = innerWidth / 2, ptrStill = 0;

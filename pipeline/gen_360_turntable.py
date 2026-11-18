@@ -32,7 +32,9 @@ ap.add_argument("--base", default="Wan-AI/Wan2.2-I2V-A14B-Diffusers", help="diff
 ap.add_argument("--gguf-high", help="GGUF file of the high-noise expert (transformer)")
 ap.add_argument("--gguf-low", help="GGUF file of the low-noise expert (transformer_2)")
 ap.add_argument("--text-encoder", help="folder holding text_encoder/ (umT5-XXL); defaults to --base. The TI2V-5B download has the same encoder")
-ap.add_argument("--lora-dir", required=True)
+ap.add_argument("--motion", choices=["turn", "wave", "talk"], default="turn",
+                help="turn: the 360 with the LoRA; wave/talk: a gesture from the prompt alone, starting and ending on the still")
+ap.add_argument("--lora-dir")
 ap.add_argument("--lora-high", default="[WAN2.2]360Rotation_Redmond_high_noise.safetensors")
 ap.add_argument("--lora-low", default="[WAN2.2]360Rotation_Redmond_low_noise.safetensors")
 ap.add_argument("--lora-scale", type=float, default=0.9)
@@ -51,19 +53,34 @@ ap.add_argument("--site-out", help="write transparent web frames + manifest.json
 ap.add_argument("--dry-run", action="store_true")
 a = ap.parse_args()
 
-PROMPT = ("360 Rotation. A woman in a tailored navy wool suit jacket and a white shirt, whose head is a thick, gently curved "
-          "graphite display on a heavy mechanical neck with pistons and a bolted steel ring, stands on the spot in front of a flat "
-          "green screen and turns a full circle: her side, then her back with the back seam of the jacket and the back of the display "
-          "with its rear housing and vents, then her other side, until she faces the camera again. The display keeps the same thick, "
-          "curved, boxy shape at every angle. The jacket swings and folds naturally as she turns. Static camera, even studio light.")
+NINE = ("A woman in a tailored navy wool suit jacket and a white shirt, whose head is a thick, gently curved graphite display "
+        "on a heavy mechanical neck with pistons and a bolted steel ring, ")
+PROMPTS = {
+    "turn": "360 Rotation. " + NINE + "stands on the spot in front of a flat green screen and turns a full circle: her side, then her back "
+            "with the back seam of the jacket and the back of the display with its rear housing and vents, then her other side, until she "
+            "faces the camera again. The display keeps the same thick, curved, boxy shape at every angle. The jacket swings and folds "
+            "naturally as she turns. Static camera, even studio light.",
+    # gestures: One-to-All motion transfer could not hold Nine (no face, waist-up), while this model keeps her intact,
+    # so the motion is described in words and the still is given as the first AND last frame
+    "wave": NINE + "stands facing the camera in front of a flat green screen. She lifts her right hand up beside her shoulder, palm "
+            "forward, and waves hello three times from the elbow, then lowers her arm and stands as she started. The jacket sleeve "
+            "bunches at the elbow and the jacket shifts with her arm. The display stays still and keeps its shape. Static camera, even studio light.",
+    "talk": NINE + "stands facing the camera in front of a flat green screen and explains something with her hands: both forearms come "
+            "up in front of her waist, her hands open, turn and gesture, her shoulders move a little, then she lowers her arms and "
+            "stands as she started. The jacket creases and swings with every movement. The display stays still and keeps its shape. "
+            "Static camera, even studio light.",
+}
+PROMPT = PROMPTS[a.motion]
 NEGATIVE = ("flat panel, thin monitor, tablet, television, morphing head, changing head shape, human head, face, hair, extra arms, "
-            "deformed hands, camera movement, zoom, background change, shadows on background, flicker, blurry, low quality, text, watermark")
+            "deformed hands, camera movement, zoom, background change, shadows on background, flicker, blurry, low quality, text, watermark"
+            + ("" if a.motion == "turn" else ", turning around, back view, walking away, missing jacket, sleeveless"))
+USE_LORA = a.motion == "turn"
 
 def check():
     probs = []
     if not os.path.exists(a.still): probs.append(f"still not found: {a.still}")
-    for f in (a.lora_high, a.lora_low):
-        if not os.path.exists(os.path.join(a.lora_dir, f)): probs.append(f"LoRA file not found: {os.path.join(a.lora_dir, f)}")
+    for f in ((a.lora_high, a.lora_low) if USE_LORA else ()):
+        if not a.lora_dir or not os.path.exists(os.path.join(a.lora_dir, f)): probs.append(f"LoRA file not found: {os.path.join(a.lora_dir, f)}")
     for f in (a.gguf_high, a.gguf_low):
         if f and not os.path.exists(f): probs.append(f"GGUF not found: {f}")
     if bool(a.gguf_high) != bool(a.gguf_low): probs.append("give both --gguf-high and --gguf-low, or neither (bf16)")
@@ -112,9 +129,10 @@ if a.gguf_high:
     kw["transformer"] = WanTransformer3DModel.from_single_file(a.gguf_high, quantization_config=q, config=a.base, subfolder="transformer", torch_dtype=dtype)
     kw["transformer_2"] = WanTransformer3DModel.from_single_file(a.gguf_low, quantization_config=q, config=a.base, subfolder="transformer_2", torch_dtype=dtype)
 pipe = WanImageToVideoPipeline.from_pretrained(a.base, text_encoder=None, torch_dtype=dtype, **kw)
-pipe.load_lora_weights(a.lora_dir, weight_name=a.lora_high, adapter_name="rot_high")
-pipe.load_lora_weights(a.lora_dir, weight_name=a.lora_low, adapter_name="rot_low", load_into_transformer_2=True)
-pipe.set_adapters(["rot_high", "rot_low"], adapter_weights=[a.lora_scale, a.lora_scale])
+if USE_LORA:
+    pipe.load_lora_weights(a.lora_dir, weight_name=a.lora_high, adapter_name="rot_high")
+    pipe.load_lora_weights(a.lora_dir, weight_name=a.lora_low, adapter_name="rot_low", load_into_transformer_2=True)
+    pipe.set_adapters(["rot_high", "rot_low"], adapter_weights=[a.lora_scale, a.lora_scale])
 print(f"model and LoRA loaded in {time.time() - t0:.0f}s", flush=True)
 
 if a.offload == "group":
@@ -143,7 +161,9 @@ for i, f in enumerate(frames): f.save(os.path.join(a.out, f"frame_{i:03d}.png"))
 # make it loop: with --close-loop the last frame IS the still, so drop it (it repeats frame 0);
 # otherwise cut at the frame most like frame 0 (in the last third) and cross-fade into it
 small = lambda im: np.asarray(im.resize((64, 88)), dtype=np.float32)
-if a.close_loop:
+if a.motion != "turn":
+    loop = frames                       # a gesture plays once: keep the return to the still
+elif a.close_loop:
     loop = frames[:-1]
 else:
     ref = small(frames[0]); lo = len(frames) * 2 // 3
@@ -157,8 +177,13 @@ else:
 
 if a.matte:
     import matting
-    alphas = matting.smooth_alphas(loop, matting.raw_alphas(loop, a.matte), loop=True)
-    if a.site_out:
+    alphas = matting.smooth_alphas(loop, matting.raw_alphas(loop, a.matte), loop=a.motion == "turn")
+    if a.site_out and a.motion == "turn":
         m = matting.export_web(loop, alphas, a.site_out, a.fps, extra={"kind": "turntable", "loop": True}, js_var="NINE_TURN")
+        print("web frames:", m, flush=True)
+    elif a.site_out:
+        # an action clip for the site's player (<site>/assets/nine/anim/<motion>/), same format as gen_animation.py
+        m = matting.export_web(loop, alphas, a.site_out, a.fps, extra={"kind": "animation", "loop": False, "stage": [0, 0, a.width, a.height]})
+        matting.list_clips(os.path.dirname(os.path.abspath(a.site_out)))
         print("web frames:", m, flush=True)
 print(f"done in {time.time() - t0:.0f}s", flush=True)

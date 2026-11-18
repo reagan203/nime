@@ -63,12 +63,15 @@ if MOTION == "axes":
 
 T = FRAMES
 if MOTION == "wave":
-    # a friendly wave: raise the right arm, forearm up, wave from the elbow three times, lower it again
-    up = {**RELAXED, **arm("Right", down=-50, fwd=10, elbow=5, side_bend=85), "Head": (4, 0, -4), "Spine1": (0, 0, 3)}
+    # a friendly wave, kept close to the body so it stays inside a waist-up frame: the upper arm swings
+    # forward, the forearm comes up in front of the shoulder, and the hand waves from the elbow three times
+    WV = [float(v) for v in os.environ.get("NINE_WAVE", "20,-20,5,120").split(",")]          # down, fwd, elbow, side_bend
+    def up_arm(sway=0): return arm("Right", down=WV[0], fwd=WV[1], elbow=WV[2], side_bend=WV[3] + sway)
+    up = {**RELAXED, **up_arm(), "Head": (4, 0, -4), "Spine1": (0, 0, 3)}
     key(1, RELAXED); key(int(T * .18), up)
     for k in range(6):
         f = int(T * .18 + (T * .55) * (k + 1) / 6)
-        key(f, {**up, **arm("Right", down=-50, fwd=10, elbow=5, side_bend=85 + (22 if k % 2 == 0 else -18)), "RightHand": (0, 0, 10 if k % 2 else -10)})
+        key(f, {**up, **up_arm(28 if k % 2 == 0 else -22), "RightHand": (0, 0, 12 if k % 2 else -12)})
     key(int(T * .85), up); key(T, RELAXED)
 elif MOTION == "talk":
     # explaining: both forearms up in front, hands opening and turning, small nods and a little sway

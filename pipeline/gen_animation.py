@@ -49,6 +49,9 @@ ap.add_argument("--ref", help="Nine still on green (final/nine_green.png)")
 ap.add_argument("--drive", help="driving video (a person walking or gesturing)")
 ap.add_argument("--work", default="clips/anim")
 ap.add_argument("--seconds", type=float, default=5.0)
+ap.add_argument("--shoulder-ratio", type=float, default=0.62, help="Nine's shoulder-joint width as a share of what the detector reads (her jacket edge)")
+ap.add_argument("--drive-fps", type=float, default=16, help="frame rate of a --drive folder of images")
+ap.add_argument("--no-fit", dest="fit", action="store_false", help="cover-crop the driving video instead of framing it like the still")
 ap.add_argument("--fps", type=int, default=16)
 ap.add_argument("--size", default="480x832", help="WxH; portrait")
 ap.add_argument("--local", action="store_true", help="try the 6 GB GPU (smaller size, offload); default assumes a 16 GB GPU")
@@ -66,38 +69,60 @@ os.makedirs(a.work, exist_ok=True)
 P = lambda *p: os.path.join(a.work, *p)
 
 # ------------------------------------------------------------------ 1. prepare
+here = os.path.dirname(os.path.abspath(__file__))
+py = a.o2a_python or os.path.join(here, ".venv-o2a", "Scripts" if os.name == "nt" else "bin", "python.exe" if os.name == "nt" else "python")
 if "prepare" in stages:
-    import imageio.v3 as iio
+    import glob, imageio.v3 as iio
     import numpy as np
     from PIL import Image
-    frames = []
-    meta = iio.immeta(a.drive, plugin="pyav") if hasattr(iio, "immeta") else {}
-    src_fps = float(meta.get("fps", 30))
-    step = src_fps / a.fps
-    for i, fr in enumerate(iio.imiter(a.drive, plugin="pyav")):
-        if len(frames) >= a.seconds * a.fps: break
-        if i >= len(frames) * step:
-            im = Image.fromarray(fr).convert("RGB")
-            s = max(W / im.width, H / im.height)                      # cover, then centre-crop to WxH
-            im = im.resize((round(im.width * s), round(im.height * s)), Image.LANCZOS)
-            l, t = (im.width - W) // 2, (im.height - H) // 2
-            frames.append(np.asarray(im.crop((l, t, l + W, t + H))))
-    # the model works in chunks of 4k+1 frames (81 at most): hold the last frame until the count fits
-    while len(frames) < 81 and (len(frames) - 1) % 4: frames.append(frames[-1])
-    if len(frames) < 81: frames += [frames[-1]] * (81 - len(frames))
-    iio.imwrite(P("drive.mp4"), np.stack(frames), fps=a.fps, plugin="pyav", codec="libx264")
+    # Nine on green, fitted and bottom-centred on a WxH canvas
     ref = Image.open(a.ref).convert("RGB")
     s = min(W / ref.width, H / ref.height)
     canvas = Image.new("RGB", (W, H), (0, 177, 64))                   # pad with the same green
     r2 = ref.resize((round(ref.width * s), round(ref.height * s)), Image.LANCZOS)
     canvas.paste(r2, ((W - r2.width) // 2, H - r2.height))
     canvas.save(P("ref.png"))
+    # driving frames: a folder of images (make_drive.py) or a video
+    if os.path.isdir(a.drive):
+        src = [np.asarray(Image.open(f).convert("RGB")) for f in sorted(glob.glob(os.path.join(a.drive, "*.png")))]
+        src_fps = a.drive_fps
+    else:
+        src = list(iio.imiter(a.drive, plugin="pyav"))
+        src_fps = float(iio.immeta(a.drive, plugin="pyav").get("fps", 30))
+    step = src_fps / a.fps
+    src = [src[int(i * step)] for i in range(int(min(len(src) / step, a.seconds * a.fps)))]
+    if a.fit:
+        # Frame the driving figure like the still: its neck on Nine's neck, its shoulders as wide as hers.
+        # Without this, Nine (waist-up, no face) and the full-length figure disagree on scale, and the
+        # model gets a stretched skeleton. The detector reads the jacket's outer edge as Nine's shoulders,
+        # so the joint width is taken as --shoulder-ratio of it (0.62 checked by overlaying the two).
+        Image.fromarray(src[0]).save(P("drive0.png"))
+        out = subprocess.run([py, os.path.join(here, "o2a_runner.py"), "--stage", "keypoints", "--ref", os.path.abspath(P("ref.png")),
+                              "--drive", os.path.abspath(P("drive0.png"))], cwd=VSRC, capture_output=True, text=True, encoding="utf-8",
+                             env=dict(os.environ, PYTHONIOENCODING="utf-8"), check=True).stdout
+        kp = [json.loads(l[3:]) for l in out.splitlines() if l.startswith("KP ")]
+        (nN, rN, lN), (nD, rD, lD) = [[np.array(k["pts"][i]) for i in (1, 2, 5)] for k in kp]
+        sc = a.shoulder_ratio * np.linalg.norm(lN - rN) / np.linalg.norm(lD - rD)
+        bg = tuple(int(v) for v in src[0][2, 2])
+        inv = (1 / sc, 0, nD[0] - nN[0] / sc, 0, 1 / sc, nD[1] - nN[1] / sc)       # output pixel -> source pixel
+        frames = [np.asarray(Image.fromarray(f).transform((W, H), Image.AFFINE, inv, Image.BICUBIC, fillcolor=bg)) for f in src]
+        json.dump({"scale": sc, "nine_neck": nN.tolist(), "drive_neck": nD.tolist()}, open(P("fit.json"), "w"))
+        print(f"fitted the driving figure: scale {sc:.2f}, neck {nD.round()} -> {nN.round()}", flush=True)
+    else:
+        frames = []
+        for f in src:                                                  # cover, then centre-crop to WxH
+            im = Image.fromarray(f); s2 = max(W / im.width, H / im.height)
+            im = im.resize((round(im.width * s2), round(im.height * s2)), Image.LANCZOS)
+            l, t = (im.width - W) // 2, (im.height - H) // 2
+            frames.append(np.asarray(im.crop((l, t, l + W, t + H))))
+    # the model works in chunks of 4k+1 frames (81 at most): hold the last frame until the count fits
+    while len(frames) < 81 and (len(frames) - 1) % 4: frames.append(frames[-1])
+    if len(frames) < 81: frames += [frames[-1]] * (81 - len(frames))
+    iio.imwrite(P("drive.mp4"), np.stack(frames), fps=a.fps, plugin="pyav", codec="libx264")
     print(f"prepared {len(frames)} driving frames at {a.fps} fps, {W}x{H}", flush=True)
 
 # ------------------------------------------------------------------ 2. animate (One-to-All in its own environment)
 if "animate" in stages:
-    here = os.path.dirname(os.path.abspath(__file__))
-    py = a.o2a_python or os.path.join(here, ".venv-o2a", "Scripts" if os.name == "nt" else "bin", "python.exe" if os.name == "nt" else "python")
     ckpt = a.ckpt
     if not ckpt:
         from huggingface_hub import snapshot_download
@@ -116,9 +141,12 @@ if "animate" in stages:
 def load_raw():
     import glob, imageio.v3 as iio
     from PIL import Image
-    vids = sorted(glob.glob(P("raw", "**", "*.mp4"), recursive=True))
+    vids = sorted(glob.glob(P("raw", "**", "*.mp4"), recursive=True), key=os.path.getmtime)
     if not vids: raise SystemExit(f"no output video in {P('raw')}")
-    return [Image.fromarray(f).convert("RGB") for f in iio.imiter(vids[-1], plugin="pyav")]
+    frames = [Image.fromarray(f).convert("RGB") for f in iio.imiter(vids[-1], plugin="pyav")]
+    if frames[0].width >= 2 * W - 8:          # their video is [pose overlay | result] side by side: keep the result
+        frames = [f.crop((f.width - W, 0, f.width, f.height)) for f in frames]
+    return frames
 if stages & {"matte", "head", "export"}:
     import numpy as np
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -147,7 +175,19 @@ if stages & {"matte", "head", "export"}:
             track.append({"x": float(xs.mean() / al.shape[1]), "y": float(ny / al.shape[0]), "w": float(w / al.shape[1]), "tilt": tilt})
         json.dump(track, open(P("track.json"), "w"))
     if a.site_out and "export" in stages:
-        m = matting.export_web(frames, alphas, a.site_out, a.fps, extra={"kind": "animation", "loop": False, "track": "track.json" if track else None})
+        # where the still sits inside the clip frame (prepare pads it to WxH, bottom-centred): the site maps this
+        # box onto Nine's photo frame, so the clip lines up with the still it starts and ends on
+        from PIL import Image
+        rw, rh = Image.open(a.ref).size; fw, fh = frames[0].size; s = min(fw / rw, fh / rh)
+        bw, bh = round(rw * s), round(rh * s)
+        m = matting.export_web(frames, alphas, a.site_out, a.fps, extra={"kind": "animation", "loop": False,
+                               "stage": [(fw - bw) // 2, fh - bh, bw, bh], "track": "track.json" if track else None})
         if track: shutil.copy(P("track.json"), os.path.join(a.site_out, "track.json"))
-        print("web frames:", m, flush=True)
+        # one script listing every clip next to this one (<site>/assets/nine/anim/manifest.js), for file:// pages
+        root = os.path.dirname(os.path.abspath(a.site_out)); clips = {}
+        for d in sorted(os.listdir(root)):
+            mf = os.path.join(root, d, "manifest.json")
+            if os.path.isfile(mf): clips[d] = {**json.load(open(mf)), "dir": d}
+        open(os.path.join(root, "manifest.js"), "w").write("window.NINE_CLIPS = " + json.dumps(clips) + ";" + chr(10))
+        print("web frames:", m, "| clips listed:", list(clips), flush=True)
 print("done", flush=True)

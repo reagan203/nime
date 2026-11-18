@@ -70,3 +70,12 @@ def export_web(frames, alphas, out_dir, fps, extra=None, quality=86, js_var=None
     if js_var:   # the same, as a script the page can load from disk (file:// has no fetch)
         open(os.path.join(out_dir, "manifest.js"), "w").write(f"window.{js_var} = " + json.dumps(manifest) + ";" + chr(10))
     return manifest
+
+def list_clips(root):
+    """write <root>/manifest.js listing every action clip folder under root (window.NINE_CLIPS), for file:// pages"""
+    clips = {}
+    for d in sorted(os.listdir(root)):
+        mf = os.path.join(root, d, "manifest.json")
+        if os.path.isfile(mf): clips[d] = {**json.load(open(mf)), "dir": d}
+    open(os.path.join(root, "manifest.js"), "w").write("window.NINE_CLIPS = " + json.dumps(clips) + ";" + chr(10))
+    return clips
