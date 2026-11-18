@@ -1673,6 +1673,7 @@ const Photo = (() => {
     // ---- the 360 turn ----
     const cv = el.querySelector(".np-turn"), ctx = cv.getContext("2d");
     let raf = 0, idx = 0, drag = null, moved = false;
+    let stopClip = null;
     const N = () => TURN ? TURN.frames : 0;
     function draw(i) {
       const n = N(); idx = ((Math.round(i) % n) + n) % n;
@@ -1685,7 +1686,8 @@ const Photo = (() => {
     const front = () => idx < 3 || idx > N() - 4;
     function settle() { cancelAnimationFrame(raf); if (front()) { el.classList.remove("is-turning"); return; } play(idx); }
     function play(from = 0) {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(raf); if (stopClip) stopClip();     // a spin takes over from a gesture: no live face on her back
+
       const n = N(), t0 = performance.now() - from / TURN.fps * 1000;
       el.dataset.move = ""; el.classList.add("is-turning");
       const step = t => {
@@ -1710,7 +1712,7 @@ const Photo = (() => {
       const t0 = performance.now(), n = k.frames, dur = n / k.fps * 1000;
       const paint = i => { ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(k.imgs[i], sx, sy, sw, sh, 0, 0, cv.width, cv.height); };
       // never leave her hidden: if frames stop coming (background tab, an error), show the still again
-      const end = () => { cancelAnimationFrame(raf); clearTimeout(guard); el.classList.remove("is-turning", "is-clip"); fit(); };
+      const end = () => { cancelAnimationFrame(raf); clearTimeout(guard); stopClip = null; el.classList.remove("is-turning", "is-clip"); fit(); };
       // the clip frame fills the stage; the screen's corners = the still's corners + how far the display moved in this frame
       const stageEl = el.querySelector(".np-stage");
       const placeScreen = i => {
@@ -1719,6 +1721,8 @@ const Photo = (() => {
         screen.style.transform = quadMatrix(["tl", "tr", "br", "bl"].map((c, j) => [QUAD[c][0] * w + d[j * 2] * W, QUAD[c][1] * h + d[j * 2 + 1] * H]));
       };
       const guard = setTimeout(end, dur + 1500);
+      // a spin or a drag that interrupts the clip: drop the clip's face-on-the-video mode and its timer
+      stopClip = () => { clearTimeout(guard); el.classList.remove("is-clip"); fit(); stopClip = null; };
       const step = t => {
         // a frame's timestamp can be a little before t0: clamp, or frame -1 throws and the canvas stays blank
         const i = Math.max(0, Math.min(n - 1, Math.floor((t - t0) / 1000 * k.fps)));
@@ -1738,7 +1742,7 @@ const Photo = (() => {
       if (!drag) return;
       const dx = e.clientX - drag.x;
       if (!moved && Math.abs(dx) < 6) return;
-      if (!moved) { moved = true; cancelAnimationFrame(raf); el.classList.add("is-turning", "is-dragging"); el.dataset.move = ""; }
+      if (!moved) { moved = true; cancelAnimationFrame(raf); if (stopClip) { stopClip(); drag.from = 0; } el.classList.add("is-turning", "is-dragging"); el.dataset.move = ""; }
       draw(drag.from - dx / clip.offsetWidth * N() * .9);      // one width of drag is about one full turn
     }, { passive: true });
     addEventListener("pointerup", () => {
