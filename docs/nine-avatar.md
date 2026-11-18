@@ -25,9 +25,10 @@ There is no frame or backdrop: Nine sits on the page's own background, with a so
 
 ## Following the pointer
 
-- The eyes and head of every Nine track the pointer (`Faces` animation loop), and the head turns, tilts and leans toward it. When the pointer has been still for a few seconds, Nine looks around on her own.
+- The eyes and head of every Nine track the pointer (`Faces` animation loop), and the head turns, tilts and leans toward it. When the pointer has been still for about nine seconds, Nine looks around on her own.
 - The whole figure leans a little toward the pointer, in perspective, so she feels three-dimensional.
-- Mini Nine glides along the bottom of the screen to wherever the pointer rests, and winks when she gets there.
+- Mini Nine glides along the bottom of the screen to wherever the pointer rests (a quarter of a second still, 90 px away or more), and winks when she gets there.
+- While a gesture clip plays (wave, talk) the figure is a video frame and does not track the pointer; she picks it up again when the clip ends. A clip always hands back to the still, even if frames stop arriving, so Nine can never be left invisible.
 - A click on an empty part of the page makes Nine look at that spot.
 
 ## The screen: faces and pictures

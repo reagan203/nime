@@ -161,6 +161,16 @@
   .nm-hero h1 em { font-style: normal; color: var(--accent-fg); display: block; }
   .nm-hero-lead { margin-top: 28px; font-size: clamp(17px, 1.6vw, 19px); line-height: 1.6; color: var(--text-muted); max-width: 600px; }
   .nm-hero-actions { display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap; }
+  /* the hero leads with Nine: a box to tell her about the organisation, and a few starting points */
+  .nm-hero-ask { display: flex; align-items: center; gap: 6px; margin-top: 34px; max-width: 600px; padding: 6px 6px 6px 22px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); box-shadow: var(--shadow-lift); transition: border-color .15s; }
+  .nm-hero-ask:focus-within { border-color: var(--accent-fg); }
+  .nm-hero-ask input { flex: 1; min-width: 0; border: 0; outline: none; background: none; font: 400 16px var(--font); color: var(--ink); padding: 11px 0; }
+  .nm-hero-ask input::placeholder { color: var(--text-soft); }
+  .nm-hero-ask button { width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; cursor: pointer; border: 1px solid var(--line); background: none; color: var(--text-muted); }
+  .nm-hero-ask .nm-hero-ask-send { border: 0; background: var(--accent); color: var(--accent-text); }
+  .nm-hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; max-width: 600px; }
+  .nm-hero-chips > * { font: 500 13px var(--font); padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: none; color: var(--text-muted); cursor: pointer; text-decoration: none; transition: color .15s, border-color .15s; }
+  .nm-hero-chips > *:hover { color: var(--ink); border-color: var(--text-soft); }
   .nm-hero-nine { position: relative; justify-self: center; width: min(380px, 100%); }
   .nm-nine { display: block; width: 100%; background: none; border: 0; padding: 0; cursor: pointer; border-radius: 50%; }
   .nm-nine:focus-visible { outline: 2px solid var(--accent-fg); outline-offset: 10px; }
@@ -703,6 +713,11 @@
   .nm-as-opt:hover, .nm-as-opt:focus-visible { color: var(--ink); outline: none; }
   .nm-as-opt:hover .nm-arr, .nm-as-opt:focus-visible .nm-arr { color: var(--accent-fg); transform: translateX(4px); }
   @keyframes nmOpt { to { opacity: 1; } }
+  .nm-as-chk { width: 18px; height: 18px; flex: none; border: 1.5px solid var(--text-soft); border-radius: 5px; display: grid; place-items: center; transition: background .15s, border-color .15s; }
+  .nm-as-opt.is-on { color: var(--ink); }
+  .nm-as-opt.is-on .nm-as-chk { background: var(--accent); border-color: var(--accent); }
+  .nm-as-opt.is-on .nm-as-chk::after { content: ""; width: 8px; height: 4px; border: 2px solid var(--accent-text); border-top: 0; border-right: 0; transform: translateY(-1px) rotate(-45deg); }
+  .nm-as-done span { color: var(--accent-fg); font-weight: 600; }
   .nm-as-form { display: flex; align-items: center; gap: 10px; margin-top: 20px; border-bottom: 2px solid var(--line); transition: border-color .15s; }
   .nm-as-form:focus-within { border-color: var(--accent-fg); }
   .nm-as-form input { flex: 1; min-width: 0; background: none; border: 0; outline: none; font: 400 18px var(--font); color: var(--ink); padding: 12px 0; }
@@ -957,12 +972,20 @@
     <div>
       <h1 data-src="F">AI is not the answer. <em>AI is the process.</em></h1>
       <p class="nm-hero-lead" data-src="F">Buying ChatGPT, Claude, Gemini, Copilot or any other platform won't transform an organisation. Redesigning how work gets done, and building the people who can work that way, will. That is the work we do.</p>
-      <div class="nm-hero-actions">
-        <button class="nm-btn nm-btn-primary" type="button" data-talk data-voice>
+      <form class="nm-hero-ask" id="heroAsk" autocomplete="off">
+        <input id="heroAskInput" aria-label="Tell Nine about your organisation" placeholder="Tell Nine what your organisation does, or what AI should fix" enterkeyhint="send">
+        <button class="nm-hero-ask-mic" type="button" data-talk data-voice aria-label="Talk to Nine out loud" title="Talk to Nine">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
-          Talk to Nine
         </button>
-        <a class="nm-btn nm-btn-ghost" href="#approach">See the five levels</a>
+        <button class="nm-hero-ask-send" type="submit" aria-label="Send to Nine">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+      <div class="nm-hero-chips">
+        <button type="button" data-ask="We're a microfinance lender and loan appraisal takes too long">Loan appraisal takes too long</button>
+        <button type="button" data-ask="We want to train our staff to use AI safely">Train our staff on AI</button>
+        <button type="button" data-talk="level">Where are we on the AI ladder?</button>
+        <a href="#approach">See the five levels</a>
       </div>
     </div>
     <div class="nm-hero-nine">
@@ -1431,8 +1454,8 @@ const Faces = (() => {
       const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
       let tx = px, ty = py;
       if (f._lookAt && f._lookAt.isConnected) { const b = f._lookAt.getBoundingClientRect(); tx = b.left + b.width / 2; ty = b.top + b.height / 2; }
-      else if (t - lastMove > 3500 && !reduce) { tx = cx + Math.sin(t / 1900 + r.left) * W * .35; ty = cy + Math.cos(t / 2600) * H * .18; }
-      const reach = f.classList.contains("nf-screen") ? .32 : .4;   // Photo Nine follows the pointer more keenly
+      else if (t - lastMove > 9000 && !reduce) { tx = cx + Math.sin(t / 1900 + r.left) * W * .35; ty = cy + Math.cos(t / 2600) * H * .18; }
+      const reach = f.classList.contains("nf-screen") ? .26 : .4;   // Photo Nine follows the pointer more keenly
       let lx = Math.max(-1, Math.min(1, (tx - cx) / (W * reach))), ly = Math.max(-1, Math.min(1, (ty - cy) / (H * .45)));
       if (f._force) { lx = f._force.x; ly = f._force.y; }
       f._lx += (lx - f._lx) * .1; f._ly += (ly - f._ly) * .1;
@@ -1778,11 +1801,21 @@ const Nine = (() => {
   let cur = { options: null, free: true, placeholder: "" };
   let sound = (() => { try { return localStorage.getItem("nm-voice") !== "off"; } catch (e) { return true; } })();
   let voiceMode = false, listening = false, rec = null, recCancelled = false;
+  // Nine's tone: changes her acknowledgements, how chatty she is, and her voice. Asked for in the chat ("be more formal").
+  const TONES = {
+    friendly: { rate: 1.03, pitch: 1.05, ack: ["Thanks.", "Good to know.", "Thank you.", "Got it."], hi: n => `Nice to meet you, ${n}.` },
+    formal: { rate: .97, pitch: .95, ack: ["Thank you.", "Noted, thank you.", "Understood."], hi: n => `Thank you, ${n}.` },
+    brief: { rate: 1.12, pitch: 1, ack: ["Noted."], hi: () => "" },
+    playful: { rate: 1.07, pitch: 1.2, ack: ["Brilliant, thanks!", "Love it.", "Ooh, good to know.", "Perfect!"], hi: n => `Lovely to meet you, ${n}!` }
+  };
+  let tone = (() => { try { const t = localStorage.getItem("nm-tone"); return TONES[t] ? t : "friendly"; } catch (e) { return "friendly"; } })();
+  let rateAdj = 0;
 
   const ALL = STAGES.flatMap((s, si) => s.services.map((v, vi) => ({ ...v, si, vi, area: s.area })));
   const svc = (si, vi) => ALL.find(x => x.si === si && x.vi === vi);
   const byTitle = v => ALL.find(x => x.title === v.title);
   const pick = a => a[Math.floor(Math.random() * a.length)];
+  const ack = () => pick(TONES[tone].ack);
   const first = () => (S.name || "").split(/\s+/)[0];
   const isOpen = () => root.classList.contains("is-open");
 
@@ -1792,7 +1825,7 @@ const Nine = (() => {
     [/\bdata\b|database|infrastructure|cloud|server|pipeline|storage|classif/i, 0, 1],
     [/vendor|procure|purchas|buy|which tool|choose|select|tender|supplier|licen[cs]e/i, 0, 2],
     [/grant|fund|donor|financing|impact/i, 0, 3],
-    [/automat|process|workflow|integrat|manual|repetitive|efficien|erp|crm|transform|agent|invoice|reconcil|sop|report|mis\b/i, 1, 0],
+    [/automat|process|workflow|integrat|manual|repetitive|efficien|erp|crm|transform|agent|invoice|reconcil|sop|report|mis\b|slow|too long|takes (ages|days|weeks|hours)|by hand|paperwork|backlog|apprais|data entry|bottleneck/i, 1, 0],
     [/offline|private|gpt|chatbot|chat bot|assistant|model|machine learning|\bml\b|llm|on-?prem|confidential|sensitive|knowledge/i, 1, 1],
     [/product|saas|\bapp\b|platform|software|portal|launch|build a/i, 1, 2],
     [/train|workshop|upskill|staff|skills|team|employee|capacity|learn|hackathon|edge series|literacy/i, 2, 0],
@@ -1811,7 +1844,7 @@ const Nine = (() => {
   const norm = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
   const STOP = new Set(["the", "and", "our", "with", "for", "you", "your", "are", "just", "that", "this", "want", "would", "like", "about", "some", "level", "let", "its", "can", "please"]);
   const NUM = { one: 1, first: 1, two: 2, second: 2, three: 3, third: 3, four: 4, fourth: 4, five: 5, fifth: 5, six: 6, sixth: 6 };
-  function matchOption(text, list, free) {
+  function matchOption(text, list, free, min) {
     const t = norm(text); if (!t) return null;
     const exact = list.find(o => norm(o[0]) === t); if (exact) return exact;
     const words = t.split(" ");
@@ -1819,7 +1852,7 @@ const Nine = (() => {
     if (num) {
       const lv = list.find(o => new RegExp(`^level ${num}\\b`, "i").test(o[0]));
       if (lv) return lv;
-      if (!free && words.length <= 4 && num <= list.length) return list[num - 1];
+      if ((!free || words.length === 1) && words.length <= 4 && num <= list.length) return list[num - 1];
     }
     if (words.length <= 5 && /^(no|nope|nothing|that s (all|everything)|all good)\b/.test(t)) { const n = list.find(o => /^no\b/i.test(o[0])); if (n) return n; }
     if (!free && /^(yes|yeah|yep|sure|ok|okay|go ahead|send it|please do)\b/.test(t)) return list[0];
@@ -1832,7 +1865,7 @@ const Nine = (() => {
       const s = hit / lw.length;
       if (s > score) { score = s; best = o; }
     });
-    return score >= (free ? .6 : .34) ? best : null;
+    return score >= (min ?? (free ? .6 : .34)) ? best : null;
   }
 
   /* ---- Nine's face and voice ---- */
@@ -1860,7 +1893,7 @@ const Nine = (() => {
       synth.cancel();
       const u = new SpeechSynthesisUtterance(text.replace(/·/g, ","));
       const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; }
-      u.rate = 1.03;
+      u.rate = Math.max(.6, Math.min(1.6, TONES[tone].rate + rateAdj)); u.pitch = TONES[tone].pitch;
       u.onboundary = () => Faces.bump(asFace);
       u.onend = end; u.onerror = end;
       synth.speak(u);
@@ -1886,13 +1919,22 @@ const Nine = (() => {
   }
   function hideAnswer() { optsEl.innerHTML = ""; form.classList.add("nm-as-hidden"); stopWait(); }
   function showAnswer(o) {
-    cur = { options: o.options || null, free: o.free ?? !o.options, placeholder: o.placeholder || "Type or say your answer" };
+    cur = { options: o.options || null, free: o.free ?? !o.options, placeholder: o.placeholder || "Type or say your answer", multi: !!o.multi, picked: new Set() };
     optsEl.innerHTML = "";
-    (cur.options || []).forEach(([label, value], i) => {
+    const ARR = `<svg class="nm-arr" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+    const rows = [...(cur.options || [])];
+    if (cur.multi) rows.push(["Continue", "__done"]);
+    rows.forEach(([label, value], i) => {
       const b = document.createElement("button");
-      b.type = "button"; b.className = "nm-as-opt"; b.style.animationDelay = (i * 60) + "ms";
-      b.innerHTML = `<span>${esc(label)}</span><svg class="nm-arr" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
-      b.onclick = () => { voiceMode = false; lastAnswer = label; hideAnswer(); Faces.lookAt(asFace, null); handle(value ?? label); };
+      const pickable = cur.multi && value !== "__done" && value !== "-";
+      b.type = "button"; b.className = "nm-as-opt" + (value === "__done" ? " nm-as-done" : ""); b.style.animationDelay = (i * 45) + "ms";
+      b.innerHTML = `<span>${esc(label)}</span>` + (pickable ? `<i class="nm-as-chk" aria-hidden="true"></i>` : ARR);
+      if (pickable) {
+        b.setAttribute("aria-pressed", "false");
+        b.onclick = () => { const on = !cur.picked.has(label); on ? cur.picked.add(label) : cur.picked.delete(label); b.classList.toggle("is-on", on); b.setAttribute("aria-pressed", String(on)); };
+      } else if (value === "__done") {
+        b.onclick = () => { const v = [...cur.picked]; voiceMode = false; lastAnswer = v.length ? v.join(", ") : "Skip"; hideAnswer(); Faces.lookAt(asFace, null); handle(v.length ? v.join("; ") : "-"); };
+      } else b.onclick = () => { voiceMode = false; lastAnswer = label; hideAnswer(); Faces.lookAt(asFace, null); handle(value ?? label); };
       b.onpointerenter = () => Faces.lookAt(asFace, b);
       b.onpointerleave = () => Faces.lookAt(asFace, null);
       optsEl.appendChild(b);
@@ -1906,6 +1948,8 @@ const Nine = (() => {
   }
   function say(msg, o = {}) {
     const g = gen;
+    if (o.chat && tone === "brief" && !o.ask) return queue;
+    if (tone === "playful" && !o.mood) o = { ...o, mood: "happy" };
     queue = queue.then(() => new Promise(done => {
       if (g !== gen) return done();
       hideAnswer(); rouse(); setState("thinking");
@@ -1992,6 +2036,140 @@ const Nine = (() => {
   function askNotes() { step = "notes"; remember(askNotes); ask("Is there anything else the team should know?", { options: [["No, that's everything", "-"]], free: true, placeholder: "Anything else (optional)" }); }
   function askMessage() { step = "message"; remember(askMessage); ask("What would you like to tell the team?", { placeholder: "Your message" }); }
 
+  /* ---- getting to know the organisation: asked before the contact details, so the team's first call starts
+     in the right place. Every question can be skipped; anything the visitor mentions in passing is picked up
+     (glean) so Nine doesn't ask it twice. ---- */
+  const SKIP = ["Skip this one", "-"];
+  const INDUSTRIES = [
+    { label: "Microfinance & SACCOs", re: /micro ?financ|\bmfis?\b|sacco|lender|lending|loans?\b|credit union|chama/i, pains: ["Loan appraisal and credit checks", "Collections and arrears follow-up", "Customer onboarding and KYC", "Branch and field-officer reporting", "Regulatory and donor reporting"] },
+    { label: "Banking & insurance", re: /\bbank|insur|fintech|financial services|invest|asset manag|pension|brokerage/i, pains: ["Customer onboarding and KYC", "Claims or loan processing", "Fraud and risk monitoring", "Customer questions and service", "Regulatory reporting"] },
+    { label: "Healthcare", re: /hospital|clinic|health|medic|pharma|patient|laborator/i, pains: ["Patient records and admin", "Appointments and scheduling", "Claims and billing", "Stock and pharmacy", "Reporting to funders or the ministry"] },
+    { label: "Education", re: /school|universit|college|educat|academ|training provider|tvet/i, pains: ["Admissions and student records", "Marking and feedback", "Timetabling", "Fees and finance", "Reporting"] },
+    { label: "Government & public sector", re: /government|public sector|ministry|county|municipal|council|parastatal|state agency/i, pains: ["Citizen requests and services", "Documents and records", "Procurement and tenders", "Tracking approvals", "Reporting and MIS"] },
+    { label: "NGOs & development", re: /\bngos?\b|non-?profit|charity|foundation|donor|development partner|humanitarian/i, pains: ["Grant proposals and donor reports", "Monitoring and evaluation data", "Field data collection", "Finance and compliance", "Finding knowledge across projects"] },
+    { label: "Manufacturing & engineering", re: /manufactur|factory|engineer|construct|industrial|\bplant\b|fabricat/i, pains: ["Quotations and tender reviews", "Procurement and inventory", "Production planning", "Quality and maintenance", "Client reporting"] },
+    { label: "Retail, trade & distribution", re: /retail|\bshops?\b|\bstores?\b|e-?commerce|wholesale|distribut|trading|fmcg|supermarket/i, pains: ["Sales and quotations", "Stock and inventory", "Delivery and logistics", "After-sales service", "Finance and reconciliation"] },
+    { label: "Agriculture", re: /agri|farm|crops?\b|livestock|dairy|co-?operative|coffee|\btea\b|horticult/i, pains: ["Farmer records and payments", "Inputs and stock", "Prices and sales", "Extension and advice", "Reporting to buyers or funders"] },
+    { label: "Professional services", re: /law firm|legal|consult|accounting|audit firm|\bagency\b|marketing|architect/i, pains: ["Proposals and tenders", "Reviewing documents", "Client reporting", "Research", "Billing and time tracking"] },
+    { label: "Transport & logistics", re: /logistic|transport|freight|shipping|courier|fleet|clearing and forwarding/i, pains: ["Bookings and quotations", "Fleet and route planning", "Tracking and customer updates", "Invoicing and reconciliation", "Compliance paperwork"] },
+    { label: "Technology & telecoms", re: /software|\btech\b|technology|telecom|\bsaas\b|start-?up|digital agency/i, pains: ["Customer support", "Sales and onboarding", "Building AI into our product", "Internal knowledge and docs", "Reporting and analytics"] }
+  ];
+  const GENERIC_PAINS = ["Reports and paperwork", "Answering customer questions", "Typing data from one system into another", "Approvals and follow-ups", "Finding information in documents"];
+  const SYSTEMS = ["Spreadsheets and paper", "Microsoft 365", "Google Workspace", "An ERP or accounting system", "A CRM", "A core banking or loan system", "Software built for us", "WhatsApp and email"];
+  const DATA = ["Customers' personal details", "Financial records", "Health records", "Children's or students' records", "Mostly internal documents"];
+  const industryOf = t => INDUSTRIES.find(i => i.re.test(t));
+  const orgName = () => S.org || "your organisation";
+  const low = x => x && !/^[A-Z]{2}/.test(x) ? x.charAt(0).toLowerCase() + x.slice(1) : x;   // keeps KYC, MIS
+  const listOf = (x, keep) => { const a = String(x).split(/;\s*/).filter(Boolean).map(keep ? (y => y) : low); return a.length > 1 ? a.slice(0, -1).join(", ") + " and " + a[a.length - 1] : a[0] || ""; };
+  function glean(t) {
+    const got = [];
+    if (S.industry == null && !S.industryGuess) { const i = industryOf(t); if (i) S.industryGuess = i; }
+    if (S.size == null) {
+      const m = t.match(/(\d[\d,.]*\s*k?)\s*\+?\s*(staff|employees|people|workers|members|officers|branches|clients|customers|students|farmers|patients)\b/i);
+      if (m) { S.size = `${m[1].trim()} ${m[2].toLowerCase()}`; got.push(S.size); }
+    }
+    if (S.systems == null) {
+      const hits = [[/excel|spreadsheet|on paper|paper-?based/i, "Spreadsheets and paper"], [/\b(microsoft|outlook|teams|sharepoint|office 365|m365)\b/i, "Microsoft 365"], [/google (workspace|docs|sheets|drive)|gmail/i, "Google Workspace"],
+        [/\b(sap|odoo|sage|dynamics|erp|quickbooks|tally|xero)\b/i, "An ERP or accounting system"], [/salesforce|hubspot|zoho|\bcrm\b/i, "A CRM"], [/core banking|t24|temenos|finacle|mambu|musoni|loan (system|software)/i, "A core banking or loan system"], [/whatsapp/i, "WhatsApp and email"]]
+        .filter(([re]) => re.test(t)).map(x => x[1]);
+      if (hits.length) { S.systems = hits.join("; "); got.push(listOf(S.systems)); }
+    }
+    if (S.aiNow == null) { const m = t.match(/chat ?gpt|copilot|gemini|claude|\bai tools?\b/i); if (m) S.aiNow = `Some people already use ${m[0]}`; }
+    return got;
+  }
+  function askIndustry() {
+    step = "industry"; remember(askIndustry);
+    const g = S.industryGuess || (S.org ? industryOf(S.org) : null);
+    if (g) return ask(`It sounds like ${S.org ? S.org + " is" : "you're"} in ${low(g.label)}. Is that right?`, { options: [["Yes, that's right", "ind:" + INDUSTRIES.indexOf(g)], ["No, it's something else", "ind:list"]] });
+    industryList();
+  }
+  function industryList() {
+    step = "industry";
+    ask(`Which industry is ${orgName()} in?`, { options: [...INDUSTRIES.slice(0, 9).map((i, k) => [i.label, "ind:" + k]), ["Something else", "ind:other"], SKIP], free: true, placeholder: "e.g. a microfinance lender with 30 branches" });
+  }
+  function askSize() {
+    step = "size"; remember(askSize);
+    ask(S.org === "" ? "How big is the team you're asking for?" : `Roughly how many people work at ${orgName()}?`, { options: [["Fewer than 20"], ["20 to 100"], ["100 to 500"], ["500 to 2,000"], ["More than 2,000"], SKIP], free: true, placeholder: "e.g. 250 staff in 12 branches" });
+  }
+  function askPains() {
+    step = "pains"; remember(askPains);
+    const ind = INDUSTRIES.find(i => i.label === S.industry);
+    ask(`Where does most of the time go at ${orgName()}? Choose any that apply.`, { options: (ind ? ind.pains : GENERIC_PAINS).map(x => [x]), multi: true, free: true, placeholder: "Or describe it in your own words" });
+  }
+  function askSystems() { step = "systems"; remember(askSystems); ask("What does that work run on today? Choose any that apply.", { options: SYSTEMS.map(x => [x]), multi: true, free: true, placeholder: "Or name the systems" }); }
+  function askAiNow() { step = "ai-now"; remember(askAiNow); ask(`How is AI used at ${orgName()} today?`, { options: [["Not at all yet"], ["A few people use ChatGPT or similar on their own"], ["We have a pilot or a small project"], ["AI is already part of how we work"], SKIP], free: true }); }
+  function askData() { step = "data"; remember(askData); ask("What kind of information would the AI work with? It decides how private the setup needs to be.", { options: DATA.map(x => [x]), multi: true, free: true }); }
+  function askRole() { step = "role"; remember(askRole); ask(`And what's your role${S.org ? " at " + S.org : ""}?`, { options: [["Owner, CEO or leadership"], ["IT or digital"], ["Operations"], ["HR, learning or training"], ["Finance"], SKIP], free: true, placeholder: "Your role" }); }
+  function askBudget() { step = "budget"; remember(askBudget); ask("Is there a budget for this yet?", { options: [["Yes, it's approved"], ["It's being planned"], ["We're looking for funding or grants"], ["Not yet"], SKIP], free: true }); }
+  function reflect() {
+    S.reflected = true;
+    const lines = [], who = S.org || "You";
+    const size = S.size ? (/\d$/.test(S.size) || /^(fewer|more)/i.test(S.size) ? low(S.size) + " people" : S.size) : "";
+    if (S.industry) lines.push(`${who} ${S.org ? "is" : "are"} in ${low(S.industry)}${size ? ", with " + size : ""}.`);
+    else if (size) lines.push(`${who} ${S.org ? "has" : "have"} ${size}.`);
+    if (S.pains) lines.push(`Most of the time goes into ${listOf(S.pains)}.`);
+    if (S.systems) lines.push(`The work runs on ${listOf(S.systems)}.`);
+    if (S.aiNow) lines.push(`AI today: ${low(S.aiNow)}.`);
+    if (lines.length < 2) return;
+    Faces.show(asFace, "idea", 2600);
+    say(`So here's the picture. ${lines.join(" ")}`, { mood: "happy", gesture: "talk" });
+    if (S.data && /personal|financial|health|children/i.test(S.data)) say("Because the AI would work with sensitive records, I'll ask the team to look at private, on-premise options and data protection from the start.", { chat: true });
+    if (S.budget && /funding|grant/i.test(S.budget)) say("I'll also mention our grant and funding support, since you're looking for funding.", { chat: true });
+    say(tone === "formal" ? "Thank you. That gives the team a clear starting point." : "That gives the team a clear place to start.", { chat: true });
+  }
+  const FIELDS = { size: "size", pains: "pains", systems: "systems", "ai-now": "aiNow", data: "data", role: "role", budget: "budget" };
+  const ABOUT = ["industry", "industryGuess", "size", "pains", "systems", "aiNow", "data", "role", "budget", "reflected"];
+
+  /* ---- things the visitor can ask Nine to do at any point: theme, tone, voice, go to a section ---- */
+  const SECTIONS = [[/services?/, "services"], [/approach|levels?|ladder|maturity/, "approach"], [/how (you|we) work|programme|program|process/, "programme"], [/training|upskill/, "training"],
+                    [/contact|email|phone|address/, "contact"], [/micro ?financ|mfi/, "mfi"], [/plans|future|planned/, "planned"], [/\btop\b|home|start of the page/, "top"]];
+  function commandFor(raw) {
+    const s = raw.toLowerCase().replace(/[.!?]+$/, "").trim();
+    const t = s.replace(/^(please\s+|can you\s+|could you\s+|nine,?\s+)*/, "");
+    const dark = document.documentElement.getAttribute("data-theme") === "dark";
+    if (/\b(dark|night)\s*(mode|theme)\b|^(go |switch to |turn on |use )?dark$|lights? off/.test(t)) return () => setTheme("dark");
+    if (/\b(light|day)\s*(mode|theme)\b|^(go |switch to |turn on |use )?light$|lights? on/.test(t)) return () => setTheme("light");
+    if (/^(change|switch|toggle|flip)\b.*\b(theme|mode|colou?rs?|look)\b/.test(t)) return () => setTheme(dark ? "light" : "dark");
+    if (/^(be|sound|talk|speak|act|use|switch to|change|set)\b.*\b(tone|formal|professional|serious|brief|short|concise|to the point|chatty|playful|fun|funny|cheerful|friendl|casual|relaxed|warm|normal)/.test(t) || /\b(your|the) tone\b/.test(t)) {
+      if (/formal|professional|serious/.test(t)) return () => setTone("formal");
+      if (/brief|short|concise|to the point|less chatty/.test(t)) return () => setTone("brief");
+      if (/playful|fun|cheerful|silly|excited/.test(t)) return () => setTone("playful");
+      if (/friendl|casual|relax|warm|normal|usual|default|chatty/.test(t)) return () => setTone("friendly");
+    }
+    if (/^(speak|talk)\b.*\bslow|^slow down/.test(t)) return () => setSpeed(-.15);
+    if (/^(speak|talk)\b.*\b(fast|quick)|^speed up/.test(t)) return () => setSpeed(.15);
+    if (/^(mute|be quiet|quiet|shh+|stop talking|stop speaking|silence|don'?t speak|no voice)\b/.test(t)) return () => setVoice(false);
+    if (/^(unmute|speak( out loud| up)?|talk to me|use your voice|read (it )?out loud|turn (your )?voice on)$/.test(t)) return () => setVoice(true);
+    if (/^(take me|go|show me|scroll|jump|bring me|navigate|open)( to| me)?\b/.test(t)) { const hit = SECTIONS.find(([re]) => re.test(t)); if (hit) return () => goTo(hit[1]); }
+    if (/^(start over|restart|reset|begin again|new conversation)\b/.test(t)) return () => reset();
+    if (/^(help|what can you do|what else can you do|commands)$/.test(t)) return () => { say("Besides the questions, you can ask me to switch the site to dark or light mode, change my tone to formal, friendly, brief or playful, speak slower or faster, stay quiet, take you to a part of the site such as services or contact, or start over."); resume(); };
+    return null;
+  }
+  function resume() {
+    if (step === "finished") return ask("Is there anything else I can help with?", { options: [["Back to the website", "close"], ["Start a new conversation", "reset"]] });
+    const fn = history.pop(); fn ? fn() : menu(false);
+  }
+  function setTheme(mode) {
+    if (window.nmSetTheme) window.nmSetTheme(mode);
+    Faces.show(asFace, mode === "dark" ? "star" : "idea", 1600);
+    say(tone === "brief" ? "Done." : mode === "dark" ? "Done. The site is in dark mode now." : "Done. The site is in light mode now.", { mood: "happy" }); resume();
+  }
+  function setTone(k) {
+    tone = k; try { localStorage.setItem("nm-tone", k); } catch (e) {}
+    const line = { formal: "Certainly. I'll keep things formal from here.", brief: "OK. Short answers from now on.", playful: "Ooh, fun mode! Let's do this.", friendly: "Sure, back to my usual self." }[k];
+    say(line, { mood: k === "formal" ? "idle" : "happy", gesture: k === "playful" ? "dance" : k === "formal" ? "nod" : undefined }); resume();
+  }
+  function setSpeed(d) { rateAdj = Math.max(-.4, Math.min(.5, rateAdj + d)); say(d < 0 ? "Of course. I'll speak more slowly." : "Sure, I'll speak a little faster."); resume(); }
+  function setVoice(on) {
+    sound = on; try { localStorage.setItem("nm-voice", on ? "on" : "off"); } catch (e) {}
+    if (!on && synth) synth.cancel(); syncSound();
+    say(on ? "I'll speak out loud again." : "OK, I'll stay quiet and just type."); resume();
+  }
+  function goTo(id) {
+    say("Taking you there.", { mood: "happy" });
+    setTimeout(() => { close(); const el = id === "top" ? document.body : $(id); if (el) el.scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); }, reduce ? 300 : 1200);
+  }
+
   function next() {
     if (editing) return summary();
     if (route === "quick") {
@@ -2002,7 +2180,16 @@ const Nine = (() => {
     }
     if (!S.name) return askName();
     if (S.org == null) return askOrg();
+    if (S.industry == null) return askIndustry();
+    if (S.size == null) return askSize();
     if (!S.service && !S.needDone) return route === "train" ? offerStage(2, "Which kind of training are you looking for?") : askNeed();
+    if (route !== "train" && S.pains == null) return askPains();
+    if (route !== "train" && S.systems == null) return askSystems();
+    if (S.aiNow == null) return askAiNow();
+    if (route !== "train" && S.data == null) return askData();
+    if (S.role == null) return askRole();
+    if (S.budget == null) return askBudget();
+    if (!S.reflected) reflect();
     if (!S.situation) return askSituation();
     if (!S.timing) return askTiming();
     if (!S.email) return askEmail();
@@ -2044,7 +2231,9 @@ const Nine = (() => {
     const lv = n => n ? `Level ${n} · ${cap(LEVELS[n - 1].name)}` : "";
     const rows = route === "quick"
       ? row("Name", S.name) + row("Email", S.email) + row("Message", S.message)
-      : row("Name", S.name) + row("Organisation", S.org) + row("Interested in", S.service ? S.service.title : "Not sure yet") + row("Today", lv(S.levelNow)) +
+      : row("Name", S.name) + row("Organisation", S.org) + row("Industry", S.industry) + row("Size", S.size) + row("Your role", S.role) +
+        row("Interested in", S.service ? S.service.title : "Not sure yet") + row("Time goes into", S.pains && listOf(S.pains, 1)) + row("Runs on", S.systems && listOf(S.systems, 1)) +
+        row("AI today", S.aiNow) + row("Information involved", S.data && listOf(S.data, 1)) + row("Budget", S.budget) + row("Today", lv(S.levelNow)) +
         row("In 12 months", S.levelGoal !== S.levelNow ? lv(S.levelGoal) : "") + row("What you need", S.need) + row("Where you are", S.situation) +
         row("Timing", S.timing) + row("Email", S.email) + row("Notes", S.notes);
     say({ html: `Here's what I'll send to the team.<dl>${rows}</dl>`, speak: "Here's what I'll send to the team. Shall I send it?" },
@@ -2054,7 +2243,7 @@ const Nine = (() => {
     step = "edit"; remember(editMenu);
     const opts = route === "quick"
       ? [["Name", "e:name"], ["Email", "e:email"], ["Message", "e:message"]]
-      : [["Name", "e:name"], ["Organisation", "e:org"], ["What I need", "e:need"], ["Email", "e:email"], ["Notes", "e:notes"]];
+      : [["Name", "e:name"], ["Organisation", "e:org"], ["About the organisation", "e:about"], ["What I need", "e:need"], ["Email", "e:email"], ["Notes", "e:notes"]];
     ask("What would you like to change?", { options: opts });
   }
   function finish() {
@@ -2068,7 +2257,25 @@ const Nine = (() => {
   function handle(t) {
     if (asBody.pose === "stand") asBody.act("nod", 900);   // Nine acknowledges every answer
     Faces.show(asFace, "check", 900);
+    if (typeof t === "string" && !/^[a-zA-Z_]+:|^-$/.test(t) && !["name", "email", "confirm"].includes(step)) {
+      const got = glean(t);
+      if (got.length && ["need", "org", "industry", "notes", "message"].includes(step)) say(`Noted: ${got.join("; ")}.`, { chat: true });
+    }
+    if (FIELDS[step]) {
+      S[FIELDS[step]] = t === "-" ? "" : t;
+      if (!editing && t !== "-" && Math.random() < .5) say(ack(), { chat: true });
+      return next();
+    }
     switch (step) {
+      case "industry": {
+        if (t === "ind:list") return industryList();
+        if (t === "ind:other") { step = "industry"; return ask("Tell me in a few words what the organisation does.", { placeholder: "e.g. we import and service medical equipment" }); }
+        if (t.startsWith("ind:")) S.industry = INDUSTRIES[+t.slice(4)].label;
+        else if (t === "-") S.industry = "";
+        else { const i = industryOf(t); S.industry = i ? i.label : t; }
+        if (!editing && S.industry) say(ack(), { chat: true });
+        return next();
+      }
       case "menu":
         if (t === "m:project") { route = "project"; return next(); }
         if (t === "m:level") return levelNow();
@@ -2080,19 +2287,19 @@ const Nine = (() => {
         const n = t.replace(/^(hi|hello|hey)[,!.\s]*/i, "").replace(/^(i am|i'm|my name is|it's|this is|call me)\s+/i, "").replace(/[.!]+$/, "").trim();
         if (!n) return ask("Sorry, I didn't catch that. What's your name?", { placeholder: "Your name" });
         S.name = n.replace(/\b\w/g, c => c.toUpperCase());
-        if (!editing) say(`Nice to meet you, ${first()}.`, { mood: "happy" });
+        if (!editing && TONES[tone].hi(first())) say(TONES[tone].hi(first()), { mood: "happy" });
         return next();
       }
       case "org":
         S.org = /^(-|just me|myself|me|none|personal|no organi[sz]ation)$/i.test(t) ? "" : t;
-        if (!editing) say(pick(["Thanks.", "Good to know.", "Thank you."]));
+        if (!editing) say(ack(), { chat: true });
         return next();
       case "need": {
         if (t.startsWith("stage:")) return offerStage(+t.slice(6));
         if (t === "unsure") { say("That's fine. Working it out is what the first conversation is for. I'll note strategy and readiness as a starting point."); return chooseService(svc(0, 0)); }
         S.need = t;
         if (/government|public sector|ministry|municipal|council|e-?gov|citizen|sovereign/i.test(t)) say("That's one of our future plans, so the team will want to hear about it.");
-        const found = match(t);
+        const found = match(t.replace(/\d[\d,.]*\s*k?\s*\+?\s*(staff|employees|people|workers|members|officers|branches)\b/gi, ""));   // "300 staff" is a size, not a training request
         if (found.length) return offerServices(found, found.length === 1 ? "From what you've described, this looks like the closest fit:" : "From what you've described, these look like the closest fit:");
         if (++misses > 1) { S.needDone = true; say("Thanks. I'll pass that on to the team as you've written it."); return next(); }
         step = "need"; return ask("Thanks. Which of these areas is it closest to?", { options: AREAS, free: true });
@@ -2101,7 +2308,7 @@ const Nine = (() => {
         if (t.startsWith("svc:")) { const [, si, vi] = t.split(":").map(Number); return chooseService(svc(si, vi)); }
         if (t === "other") { step = "need"; return ask("Which area is it closer to? Or tell me a bit more.", { options: AREAS, free: true }); }
         step = "need"; return handle(t);
-      case "situation": S.situation = t; say(pick(["Understood.", "Thanks.", "Got it."])); return next();
+      case "situation": S.situation = t; say(ack(), { chat: true }); return next();
       case "timing": S.timing = t; return next();
       case "email": {
         let e = t.trim();
@@ -2121,6 +2328,7 @@ const Nine = (() => {
         const f = t.slice(2);
         if (f === "name") return askName();
         if (f === "org") return askOrg();
+        if (f === "about") { editing = false; ABOUT.forEach(k => { S[k] = null; }); return next(); }
         if (f === "need") { S.service = null; S.need = ""; S.needDone = false; misses = 0; return route === "train" ? offerStage(2) : askNeed(); }
         if (f === "email") return askEmail();
         if (f === "notes") return askNotes();
@@ -2164,6 +2372,13 @@ const Nine = (() => {
     const t = String(raw || "").trim(); if (!t || step === null) return;
     voiceMode = !!byVoice;
     input.value = ""; Faces.lookAt(asFace, null);
+    const cmd = ["email", "message", "notes"].includes(step) ? null : commandFor(t);
+    if (cmd) { cancelAll(); lastAnswer = t; hideAnswer(); return cmd(); }
+    if (cur.multi) {
+      const parts = t.split(/,|;|\band\b|\bplus\b/i).map(x => x.trim()).filter(Boolean);
+      const vals = [...cur.picked, ...parts.map(x => { const o = matchOption(x, cur.options, false, .3); return o ? o[0] : x; })];
+      lastAnswer = t; hideAnswer(); return handle([...new Set(vals)].join("; "));
+    }
     if (cur.options) {
       const o = matchOption(t, cur.options, cur.free);
       if (o) { lastAnswer = t; hideAnswer(); return handle(o[1] ?? o[0]); }
@@ -2244,7 +2459,11 @@ const Nine = (() => {
     document.body.style.overflow = "hidden";
     if (opts.voice) { if (SR) voiceMode = true; else statusEl.textContent = NO_SR; }
     const v = opts.service ? byTitle(opts.service) : null;
-    if (!started) {
+    if (opts.text) {
+      if (!started) { started = true; Faces.mood(asFace, "surprised"); say("Hi, I'm Nine, Ninth Mind's assistant.", { mood: "happy" }); step = "menu"; remember(() => menu(false)); cur = { options: null }; }
+      else cancelAll();
+      submitText(opts.text, false);
+    } else if (!started) {
       started = true;
       Faces.mood(asFace, "surprised");
       if (v) { route = "project"; S.service = v; S.noted = true; say("Hi, I'm Nine, Ninth Mind's assistant.", { mood: "happy" }); say(`I see you were reading about ${v.title}. I'll make sure the right person on our team hears about it.`); next(); }
@@ -2270,7 +2489,7 @@ const Nine = (() => {
     if (openerFocus && openerFocus.focus) openerFocus.focus({ preventScroll: true });
   }
   function reset() {
-    cancelAll(); S = {}; history = []; editing = false; misses = 0; route = "project"; lastAnswer = null;
+    cancelAll(); S = {}; history = []; editing = false; misses = 0; route = "project"; lastAnswer = null; rateAdj = 0;
     prevEl.textContent = ""; nowEl.textContent = "";
     menu(true);
   }
@@ -2281,6 +2500,13 @@ document.querySelectorAll("[data-talk]").forEach(b => b.addEventListener("click"
   e.preventDefault();
   Nine.open({ voice: b.hasAttribute("data-voice"), flow: b.getAttribute("data-talk") || undefined });
 }));
+// the hero box: the visitor's first words go straight to Nine
+document.querySelectorAll("[data-ask]").forEach(b => b.addEventListener("click", () => Nine.open({ text: b.dataset.ask })));
+document.getElementById("heroAsk").addEventListener("submit", e => {
+  e.preventDefault();
+  const i = document.getElementById("heroAskInput"), t = i.value.trim();
+  Nine.open(t ? { text: t } : {}); i.value = "";
+});
 
 
 /* ======================================================================
@@ -2443,8 +2669,8 @@ addEventListener("pointermove", e => { ptrX = e.clientX; ptrStill = performance.
 setInterval(() => {
   if (!walkerOn || walker.pose !== "stand" || walker.el.dataset.act || walker.el.classList.contains("is-turning")) return;
   const w = walker.el.offsetWidth || 120, target = Math.max(16, Math.min(innerWidth - w - 16, ptrX - w / 2));
-  if (performance.now() - ptrStill > 500 && Math.abs(target - walkerPilot.x) > 160) walkerPilot.walkTo(target, () => Faces.show(walker.face, "wink", 1200), 220);
-}, 700);
+  if (performance.now() - ptrStill > 250 && Math.abs(target - walkerPilot.x) > 90) walkerPilot.walkTo(target, () => Faces.show(walker.face, "wink", 1200), 260);
+}, 400);
 
 /* ---------- Nine reacts to the page ---------- */
 const photoNines = [heroNine, walker, asBody];
@@ -2493,11 +2719,13 @@ function syncThemeLabel() {
   const dark = document.documentElement.getAttribute("data-theme") === "dark";
   document.querySelectorAll("[data-theme-toggle]").forEach(b => { b.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode"); b.title = dark ? "Light mode" : "Dark mode"; });
 }
-document.querySelectorAll("[data-theme-toggle]").forEach(b => b.addEventListener("click", () => {
-  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", next);
-  try { localStorage.setItem("nm-theme", next); } catch (e) {}
+window.nmSetTheme = mode => {           // also used by Nine ("switch to dark mode")
+  document.documentElement.setAttribute("data-theme", mode);
+  try { localStorage.setItem("nm-theme", mode); } catch (e) {}
   syncThemeLabel();
+};
+document.querySelectorAll("[data-theme-toggle]").forEach(b => b.addEventListener("click", () => {
+  window.nmSetTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
 }));
 syncThemeLabel();
 

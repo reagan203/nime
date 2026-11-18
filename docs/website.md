@@ -6,7 +6,7 @@
 
 | Section | Id | What it shows |
 |---|---|---|
-| Hero | | "AI is not the answer. AI is the process.", the main buttons, and Nine |
+| Hero | | "AI is not the answer. AI is the process.", a box to tell Nine about your organisation (with a microphone button), starting-point chips, and Nine |
 | Band | | "Everyone is buying AI. Very few organisations are becoming AI-first." |
 | Five levels of AI maturity | `#approach` | A ladder of the five levels; select a level to read what it looks like |
 | Training | `#training` | Upskilling as the thread through every stage |
@@ -19,15 +19,23 @@
 
 The services, levels and programme content are JavaScript data (`STAGES`, `LEVELS` and friends near the top of the script), and the page builds the tiles, cards and ladder from them. To change a service, edit its entry in `STAGES`.
 
-## Sources switch
+## AI first
 
-Every factual element carries a `data-src` attribute: `P` (Service Portfolio), `S §n` (AI Adoption Strategy, section n) or `F` (AI Transformation Journey Framework). The **Sources** button at the bottom left adds the class `show-src` to the page, and CSS then shows a small badge on each element. The legend explains the letters.
+The page leads with Nine rather than with buttons. The hero box (`#heroAsk`) sends whatever the visitor types straight into Nine's conversation (`Nine.open({ text })`), and the chips under it are ready-made first messages (`data-ask`) or the level questions (`data-talk="level"`). Nine then learns about the organisation before asking for contact details: see [Nine's conversation](nine-chat.md).
+
+## Where each statement comes from
+
+Every factual element carries a `data-src` attribute: `P` (Service Portfolio), `S §n` (AI Adoption Strategy, section n) or `F` (AI Transformation Journey Framework). The attributes are not shown on the page (the Sources button was removed on 2026-11-17); they stay in the HTML as a record for whoever edits the copy.
 
 Rule for edits: a new statement needs a `data-src`, and it must come from one of the three documents.
 
+## The logo
+
+The header, footer and chat use a lockup: the wave mark as an image (`assets/ninth-mind-mark.png`, cut from `assets/ninth-mind-logo.png`) and "NINTH MIND" plus the tagline as real text in Montserrat. In the original PNG the tagline is a twentieth of the image height, so at header size it was under 2 pixels tall and unreadable.
+
 ## Light and dark mode
 
-Colours are CSS variables (tokens) on `:root`, redefined under `[data-theme="dark"]`. The moon or sun button switches the theme and remembers the choice in `localStorage` (`nm-theme`). A tiny script at the very top applies the saved theme before the page draws, so it never flashes the wrong colours.
+Colours are CSS variables (tokens) on `:root`, redefined under `[data-theme="dark"]`. The moon or sun button, or asking Nine ("switch to dark mode"), switches the theme through `window.nmSetTheme(mode)` and remembers the choice in `localStorage` (`nm-theme`). A tiny script at the very top applies the saved theme before the page draws, so it never flashes the wrong colours.
 
 ## Phones, tablets and laptops
 
