@@ -31,6 +31,12 @@ There is no frame or backdrop: Nine sits on the page's own background, with a so
 - While a gesture clip plays (wave, talk) the figure is a video frame and does not track the pointer; she picks it up again when the clip ends. A clip always hands back to the still, even if frames stop arriving, so Nine can never be left invisible.
 - A click on an empty part of the page makes Nine look at that spot.
 
+## Talking
+
+- While Nine speaks (in the chat, or a speech bubble on the page), the LED mouth on her screen bounces with a syllable rhythm of its own, with short gaps between words, and small sound waves pulse out on both sides of it. Most browser voices send no word timings, so the rhythm doesn't wait for them; when they do arrive they add extra bounce.
+- During the wave and talk clips her live screen stays on: `track_screen.py` (in `pipeline/`) finds the display in every clip frame and stores how far each corner moved (`screen` in the clip's manifest), and the player places the face on the display frame by frame (`is-clip`). So she keeps talking, blinking and showing pictures while she gestures.
+- The clips fade out at the left and right edges like the bottom does, so a hand that reaches past the video's frame fades instead of ending in a hard line.
+
 ## The screen: faces and pictures
 
 `Faces.show(face, kind, ms, arg)` puts something on Nine's display for `ms` milliseconds (0 keeps it until cleared). The kinds:

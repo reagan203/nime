@@ -218,6 +218,13 @@
   .nf-mouth { position: absolute; left: 50%; bottom: 13%; transform: translateX(-50%); display: flex; gap: 1cqw; align-items: center; height: 16%; transition: transform .2s ease; }
   .nf-mouth i { width: 1.7cqw; height: var(--m, 1.3cqw); border-radius: 1cqw; background: #c8f1ff; box-shadow: 0 0 1.4cqw #5fd0f7; transform: translateY(calc(var(--c, 0cqw) * var(--k))); transition: height .07s linear, transform .2s ease; }
   .nf.is-talking .nf-mouth i { transform: none; }
+  /* talking: little sound waves pulse out on both sides of the mouth */
+  .nf-mouth::before, .nf-mouth::after { content: ""; position: absolute; top: 50%; width: 4.5cqw; height: 9cqw; margin-top: -4.5cqw; border: .9cqw solid transparent; border-radius: 50%; opacity: 0; filter: drop-shadow(0 0 1cqw #5fd0f7); pointer-events: none; }
+  .nf-mouth::before { right: -7.5cqw; border-right-color: #c8f1ff; }
+  .nf-mouth::after { left: -7.5cqw; border-left-color: #c8f1ff; }
+  .nf.is-talking .nf-mouth::before, .nf.is-talking .nf-mouth::after { animation: nfWave .7s ease-out infinite; }
+  .nf.is-talking .nf-mouth::after { animation-delay: .35s; }
+  @keyframes nfWave { 0% { opacity: .9; transform: scale(.6); } 100% { opacity: 0; transform: scale(1.35); } }
   .nf-ring { position: absolute; inset: 10%; border-radius: 50%; border: .6cqw solid #36b6ea; opacity: 0; pointer-events: none; }
   .nf-shadow { position: absolute; left: 26%; right: 26%; bottom: -1%; height: 5%; border-radius: 50%; background: radial-gradient(ellipse, rgba(10, 30, 60, .28), transparent 70%); animation: nfShadow 6s ease-in-out infinite; }
   [data-theme="dark"] .nf-shadow { background: radial-gradient(ellipse, rgba(0, 0, 0, .6), transparent 70%); }
@@ -833,7 +840,10 @@
      The head is its own layer, so it can look, nod and tilt; the face is live HTML mapped onto the screen. */
   .np { position: relative; width: 100%; container-type: inline-size; --lx: 0; --ly: 0; }
   .np-clip { position: relative; aspect-ratio: var(--frame-ar, 896 / 1233); isolation: isolate;
-    -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 99%); mask-image: linear-gradient(to bottom, #000 80%, transparent 99%); }
+    -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 99%), linear-gradient(to right, transparent 0, #000 9%, #000 91%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to bottom, #000 80%, transparent 99%), linear-gradient(to right, transparent 0, #000 9%, #000 91%, transparent 100%);
+    mask-composite: intersect; }
   .np-clip::before { content: ""; position: absolute; left: 8%; right: 8%; top: 6%; height: 62%; border-radius: 50%; background: radial-gradient(closest-side, rgba(54, 182, 234, .16), transparent); filter: blur(10px); z-index: -1; }
   .np-stage { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: var(--frame-ar, 896 / 1233); transform: translate(calc(var(--lx) * -1.1%), calc(var(--ly) * -.7%)); transition: transform .4s ease-out; }
   .np-body { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; transform-origin: 50% 100%; animation: npBreath 4.8s ease-in-out infinite; }
@@ -902,6 +912,11 @@
   .np.is-turning .np-turn { opacity: 1; }
   .np-body, .np-head { transition: opacity .18s; }
   .np.is-turning .np-body, .np.is-turning .np-head { opacity: 0; }
+  /* during a gesture clip the head photo is hidden but its live screen stays, placed on the clip's display frame by frame */
+  .np.is-turning.is-clip .np-head { opacity: 1; z-index: 2; animation: none; transform: none; translate: none; rotate: none; }
+  .np.is-clip .np-head > .np-neck, .np.is-clip .np-act { transform: none !important; animation: none !important; translate: none !important; rotate: none !important; }
+  .np.is-clip .np-act > img { opacity: 0; }
+  .np.is-clip .np-turn { z-index: 1; }
   .np.can-turn .np-clip { cursor: grab; touch-action: pan-y; }
   .np.is-dragging .np-clip { cursor: grabbing; }
   /* poses */
@@ -940,7 +955,7 @@
   @keyframes npRoll { 0%, 100% { transform: none; } 30% { transform: rotate(-9deg) translateY(-1%); } 70% { transform: rotate(8deg) translateY(-1%); } }
   /* where Photo Nine lives */
   .nm-hero-nine .nm-nine { border-radius: 0; }
-  .nm-hero-nine .nm-bubble { top: 56%; }
+  .nm-hero-nine .nm-bubble { top: 40%; left: auto; right: -14%; }
   .nm-as-face .np { width: 100%; }
   @media (max-width: 820px) {
     .nm-as-face .np-clip { aspect-ratio: 1; }
@@ -1485,7 +1500,12 @@ const Faces = (() => {
       f.style.setProperty("--lx", f._lx.toFixed(3)); f.style.setProperty("--ly", f._ly.toFixed(3));
       f.style.setProperty("--ry", (f._lx * 16).toFixed(2) + "deg"); f.style.setProperty("--rx", (-f._ly * 12).toFixed(2) + "deg");
       if (f._talk && t - lastBars > 75) {
-        f._energy = Math.max(.25, f._energy * .82);
+        // most voices send no word timings, so the mouth makes its own syllables, with short gaps between words
+        if (t > (f._syl || 0)) {
+          const gap = Math.random() < .16;
+          f._energy = gap ? .05 : .55 + Math.random() * .45; f._syl = t + (gap ? 170 + Math.random() * 120 : 90 + Math.random() * 150);
+        }
+        f._energy = Math.max(.12, f._energy * .86);
         f._bars.forEach((b, i) => {
           const mid = (f._bars.length - 1) / 2, centre = 1 - Math.abs(i - mid) / (mid + 1);
           b.style.setProperty("--m", (1.2 + Math.random() * (1.5 + 5 * f._energy) * (.45 + centre)).toFixed(2) + "cqw");
@@ -1546,7 +1566,11 @@ const Bodies = (() => {
       get pose() { return el.dataset.pose; },
       setPose(p) { el.dataset.pose = p; if (p === "sleep") Faces.mood(face, "sleep"); else if (face.dataset.mood === "sleep") Faces.mood(face, "idle"); },
       act(a, ms) { clearTimeout(actT); el.dataset.act = a || ""; if (ms) actT = setTimeout(() => { if (el.dataset.act === a) el.dataset.act = ""; }, ms); },
-      say(text, ms = 2800) { bubble.textContent = text; bubble.classList.add("is-on"); clearTimeout(sayT); sayT = setTimeout(() => bubble.classList.remove("is-on"), ms); }
+      say(text, ms = 2800) {
+        bubble.textContent = text; bubble.classList.add("is-on"); clearTimeout(sayT); clearTimeout(bubble._mouthT);
+        Faces.talk(face, true); bubble._mouthT = setTimeout(() => Faces.talk(face, false), Math.min(ms, 500 + text.length * 55));
+        sayT = setTimeout(() => bubble.classList.remove("is-on"), ms);
+      }
     };
   }
   return { mount };
@@ -1640,7 +1664,11 @@ const Photo = (() => {
         clearTimeout(actT); el.dataset.act = a || ""; el.dataset.move = el.dataset.pose === "stand" ? (MOVES[a] ?? "") : "";
         if (ms) actT = setTimeout(() => { if (el.dataset.act === a) { el.dataset.act = ""; el.dataset.move = ""; } }, ms);
       },
-      say(text, ms = 2800) { bubble.textContent = text; bubble.classList.add("is-on"); clearTimeout(sayT); sayT = setTimeout(() => bubble.classList.remove("is-on"), ms); }
+      say(text, ms = 2800) {
+        bubble.textContent = text; bubble.classList.add("is-on"); clearTimeout(sayT); clearTimeout(bubble._mouthT);
+        Faces.talk(face, true); bubble._mouthT = setTimeout(() => Faces.talk(face, false), Math.min(ms, 500 + text.length * 55));
+        sayT = setTimeout(() => bubble.classList.remove("is-on"), ms);
+      }
     };
     // ---- the 360 turn ----
     const cv = el.querySelector(".np-turn"), ctx = cv.getContext("2d");
@@ -1677,19 +1705,27 @@ const Photo = (() => {
       if (!clipReady(name)) return 0;
       const [sx, sy, sw, sh] = k.stage || [0, 0, k.imgs[0].naturalWidth, k.imgs[0].naturalHeight];
       cancelAnimationFrame(raf); el.dataset.move = ""; el.classList.add("is-turning");
+      if (k.screen) el.classList.add("is-clip");
       cv.width = Math.round(sw); cv.height = Math.round(sh);
       const t0 = performance.now(), n = k.frames, dur = n / k.fps * 1000;
       const paint = i => { ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(k.imgs[i], sx, sy, sw, sh, 0, 0, cv.width, cv.height); };
       // never leave her hidden: if frames stop coming (background tab, an error), show the still again
-      const end = () => { cancelAnimationFrame(raf); clearTimeout(guard); el.classList.remove("is-turning"); };
+      const end = () => { cancelAnimationFrame(raf); clearTimeout(guard); el.classList.remove("is-turning", "is-clip"); fit(); };
+      // the clip frame fills the stage; the screen's corners = the still's corners + how far the display moved in this frame
+      const stageEl = el.querySelector(".np-stage");
+      const placeScreen = i => {
+        const d = k.screen && k.screen[i]; if (!d) return;
+        const w = head.offsetWidth, h = head.offsetHeight, W = stageEl.offsetWidth, H = stageEl.offsetHeight; if (!w) return;
+        screen.style.transform = quadMatrix(["tl", "tr", "br", "bl"].map((c, j) => [QUAD[c][0] * w + d[j * 2] * W, QUAD[c][1] * h + d[j * 2 + 1] * H]));
+      };
       const guard = setTimeout(end, dur + 1500);
       const step = t => {
         // a frame's timestamp can be a little before t0: clamp, or frame -1 throws and the canvas stays blank
         const i = Math.max(0, Math.min(n - 1, Math.floor((t - t0) / 1000 * k.fps)));
-        try { paint(i); } catch { return end(); }
+        try { paint(i); placeScreen(i); } catch { return end(); }
         if (i < n - 1 && !drag) raf = requestAnimationFrame(step); else end();
       };
-      paint(0);
+      paint(0); placeScreen(0);
       raf = requestAnimationFrame(step);
       return dur;
     };
