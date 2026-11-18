@@ -6,8 +6,8 @@
 
 | Section | Id | What it shows |
 |---|---|---|
-| Hero | | "AI is not the answer. AI is the process.", a box to tell Nine about your organisation (with a microphone button), starting-point chips, and Nine |
-| Band | | "Everyone is buying AI. Very few organisations are becoming AI-first." |
+| Hero | | Nine's opening: who she is, the headline, her first line, a box to tell her about your organisation (with a microphone), what she understood so far, starting-point chips, and Nine herself |
+| Band | | "Everyone is buying AI. Very few organisations are becoming AI-first." and the "Buying ChatGPT… won't transform an organisation" paragraph |
 | Five levels of AI maturity | `#approach` | A ladder of the five levels; select a level to read what it looks like |
 | Training | `#training` | Upskilling as the thread through every stage |
 | Services | `#services` | Five service areas (Think, Build & Transform, Enable, Sustain, Innovate) as tiles, then cards with a details sheet for each service |
@@ -20,6 +20,12 @@
 The services, levels and programme content are JavaScript data (`STAGES`, `LEVELS` and friends near the top of the script), and the page builds the tiles, cards and ladder from them. To change a service, edit its entry in `STAGES`.
 
 ## AI first
+
+The site is built around Nine:
+
+- **The hero is Nine talking.** A live dot and "Nine · Ninth Mind's AI assistant", the headline, then her first line in a speech bubble. As the visitor types in the box under it, Nine looks at the box, shows dots on her screen, and lists what she understood so far under it ("Nine understood: Healthcare · 400 staff · Spreadsheets and paper", from `Nine.peek`, which reads the sentence without storing anything).
+- **Every section has an "Ask Nine" button** (`.nm-ask-nine`, with a tiny Nine screen) that starts the conversation for that section: find your level, plan training, find the service for a problem, how a programme would start, or interest in a future plan (`data-talk="level|train|need|quick"`).
+- **Mini Nine comments on each section** as it comes into view ("Five levels. Want me to find yours?"), once per section, and a click on her starts that section's conversation (`SECTION_TALK`).
 
 The page leads with Nine rather than with buttons. The hero box (`#heroAsk`) sends whatever the visitor types straight into Nine's conversation (`Nine.open({ text })`), and the chips under it are ready-made first messages (`data-ask`) or the level questions (`data-talk="level"`). Nine then learns about the organisation before asking for contact details: see [Nine's conversation](nine-chat.md).
 

@@ -4,7 +4,7 @@ Nine is a scripted assistant, not a language model: every line Nine says is writ
 
 ## Opening the chat
 
-Any element with `data-talk` opens Nine (`Nine.open()`): the "Talk to Nine" buttons, Nine herself, and "Find your level with Nine" (`data-talk="level"` jumps straight to the level questions). `data-voice` starts in voice mode. The chat covers the screen and shows one line at a time, in the style of a spoken conversation.
+Any element with `data-talk` opens Nine (`Nine.open()`): the "Talk to Nine" buttons, Nine herself, and the "Ask Nine" buttons in each section. The value picks where the conversation starts (`FLOWS`): `level` (the level questions), `train` (training), `need` ("what would you like AI to help with?"), `explore` (the services) or `quick` (a message). Without a value Nine shows her start menu. `data-voice` starts in voice mode. The chat covers the screen and shows one line at a time, in the style of a spoken conversation.
 
 ## What Nine asks
 

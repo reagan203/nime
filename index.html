@@ -156,8 +156,8 @@
     background: linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 56px 56px, linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 56px 56px;
     -webkit-mask-image: radial-gradient(ellipse 70% 80% at 70% 45%, #000 0%, transparent 75%); mask-image: radial-gradient(ellipse 70% 80% at 70% 45%, #000 0%, transparent 75%); }
   .nm-hero::after { content: ""; position: absolute; width: 760px; height: 760px; right: -160px; top: 50%; transform: translateY(-50%); border-radius: 50%; background: radial-gradient(circle, var(--accent-quiet) 0%, transparent 65%); pointer-events: none; }
-  .nm-hero-in { position: relative; z-index: 1; display: grid; grid-template-columns: 1.2fr .8fr; gap: 48px; align-items: center; }
-  .nm-hero h1 { font-size: clamp(40px, 6.4vw, 80px); line-height: 1.02; letter-spacing: -0.04em; font-weight: 700; }
+  .nm-hero-in { position: relative; z-index: 1; display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+  .nm-hero h1 { font-size: clamp(36px, 5vw, 64px); line-height: 1.02; letter-spacing: -0.04em; font-weight: 700; }
   .nm-hero h1 em { font-style: normal; color: var(--accent-fg); display: block; }
   .nm-hero-lead { margin-top: 28px; font-size: clamp(17px, 1.6vw, 19px); line-height: 1.6; color: var(--text-muted); max-width: 600px; }
   .nm-hero-actions { display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap; }
@@ -168,10 +168,25 @@
   .nm-hero-ask input::placeholder { color: var(--text-soft); }
   .nm-hero-ask button { width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; cursor: pointer; border: 1px solid var(--line); background: none; color: var(--text-muted); }
   .nm-hero-ask .nm-hero-ask-send { border: 0; background: var(--accent); color: var(--accent-text); }
+  /* the hero is Nine talking: who she is, what she says, what she understood */
+  .nm-hero-who { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 18px; font: 600 13px var(--font); letter-spacing: .04em; text-transform: uppercase; color: var(--accent-fg); }
+  .nm-live { width: 8px; height: 8px; border-radius: 50%; background: #2fc77a; box-shadow: 0 0 0 0 rgba(47, 199, 122, .5); animation: nmLive 2s infinite; }
+  @keyframes nmLive { 70% { box-shadow: 0 0 0 8px rgba(47, 199, 122, 0); } 100% { box-shadow: 0 0 0 0 rgba(47, 199, 122, 0); } }
+  .nm-hero-say { position: relative; margin-top: 26px; max-width: 600px; padding: 16px 20px; border-radius: 4px 20px 20px 20px; background: var(--accent-quiet); color: var(--ink); font: 500 clamp(17px, 1.5vw, 19px)/1.55 var(--font); }
+  .nm-hero-heard { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 0; margin: 10px 0 0; font-size: 12.5px; color: var(--text-soft); }
+  .nm-hero-heard:empty { display: none; }
+  .nm-hero-heard b { font-weight: 600; color: var(--accent-fg); background: var(--accent-quiet); border-radius: 999px; padding: 3px 10px; animation: nmOpt .25s ease both; }
+  /* "Ask Nine" in each section: a tiny Nine screen and a line */
+  .nm-ask-nine { display: inline-flex; align-items: center; gap: 10px; margin-top: 18px; padding: 8px 16px 8px 8px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 14px var(--font); cursor: pointer; box-shadow: var(--shadow-lift); transition: border-color .15s, transform .15s; }
+  .nm-ask-nine:hover { border-color: var(--accent-fg); transform: translateY(-1px); }
+  .nm-ask-nine-face { width: 30px; height: 22px; flex: none; border-radius: 5px; background: #0d2233; border: 2px solid #1b1d22; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: inset 0 0 6px rgba(127, 220, 255, .35); }
+  .nm-ask-nine-face b { width: 4px; height: 8px; border-radius: 2px; background: #9fe6ff; box-shadow: 0 0 4px #7fdcff; animation: nmBlink 4s infinite; }
+  @keyframes nmBlink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.15); } }
+  .nm-walker .np .nb-say { white-space: normal; width: max-content; max-width: 210px; text-align: center; }
   .nm-hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; max-width: 600px; }
   .nm-hero-chips > * { font: 500 13px var(--font); padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: none; color: var(--text-muted); cursor: pointer; text-decoration: none; transition: color .15s, border-color .15s; }
   .nm-hero-chips > *:hover { color: var(--ink); border-color: var(--text-soft); }
-  .nm-hero-nine { position: relative; justify-self: center; width: min(380px, 100%); }
+  .nm-hero-nine { position: relative; justify-self: center; width: min(460px, 100%); }
   .nm-nine { display: block; width: 100%; background: none; border: 0; padding: 0; cursor: pointer; border-radius: 50%; }
   .nm-nine:focus-visible { outline: 2px solid var(--accent-fg); outline-offset: 10px; }
   .nm-bubble { position: absolute; z-index: 2; left: -6%; top: 2%; max-width: 230px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px 18px 18px 4px; padding: 12px 16px; font-size: 14px; line-height: 1.45; color: var(--text-muted); box-shadow: var(--shadow-lift); animation: nmBubble .5s .8s ease both; }
@@ -969,9 +984,10 @@
 <main>
 <section class="nm-hero">
   <div class="nm-wrap nm-hero-in">
-    <div>
+    <div class="nm-hero-talk">
+      <p class="nm-hero-who"><i class="nm-live" aria-hidden="true"></i>Nine · Ninth Mind's AI assistant</p>
       <h1 data-src="F">AI is not the answer. <em>AI is the process.</em></h1>
-      <p class="nm-hero-lead" data-src="F">Buying ChatGPT, Claude, Gemini, Copilot or any other platform won't transform an organisation. Redesigning how work gets done, and building the people who can work that way, will. That is the work we do.</p>
+      <p class="nm-hero-say" id="heroSay">Hi, I'm Nine. Tell me what your organisation does and where the work gets stuck. I'll find the right starting point and brief our team.</p>
       <form class="nm-hero-ask" id="heroAsk" autocomplete="off">
         <input id="heroAskInput" aria-label="Tell Nine about your organisation" placeholder="Tell Nine what your organisation does, or what AI should fix" enterkeyhint="send">
         <button class="nm-hero-ask-mic" type="button" data-talk data-voice aria-label="Talk to Nine out loud" title="Talk to Nine">
@@ -981,6 +997,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </button>
       </form>
+      <p class="nm-hero-heard" id="heroHeard" aria-live="polite"></p>
       <div class="nm-hero-chips">
         <button type="button" data-ask="We're a microfinance lender and loan appraisal takes too long">Loan appraisal takes too long</button>
         <button type="button" data-ask="We want to train our staff to use AI safely">Train our staff on AI</button>
@@ -989,7 +1006,7 @@
       </div>
     </div>
     <div class="nm-hero-nine">
-      <div class="nm-bubble"><strong>Hi, I'm Nine.</strong>Ninth Mind's assistant. Tap me, or just say hello.</div>
+      <div class="nm-bubble"><strong>Tap me, or just say hello.</strong>I listen, type and talk.</div>
       <button class="nm-nine" type="button" data-talk aria-label="Talk to Nine, Ninth Mind's assistant"><span id="heroBody"></span></button>
     </div>
   </div>
@@ -998,6 +1015,7 @@
 <section class="nm-band">
   <div class="nm-wrap">
     <h2 data-src="F">Everyone is buying AI. <span>Very few organisations are becoming AI-first.</span></h2>
+    <p data-src="F">Buying ChatGPT, Claude, Gemini, Copilot or any other platform won't transform an organisation. Redesigning how work gets done, and building the people who can work that way, will. That is the work we do.</p>
     <p data-src="F">If AI is used only to draft emails or summarise meetings, a task has improved. If it is embedded into every stage of the business, and every person is equipped to use it, the business has been transformed.</p>
   </div>
 </section>
@@ -1007,6 +1025,7 @@
     <div class="nm-section-head">
       <h2>Five levels of AI maturity</h2>
       <p data-src="F">Each level changes more of how work gets done, from individual tasks to the whole business. Select a level to see what it looks like.</p>
+      <button class="nm-ask-nine" type="button" data-talk="level"><i class="nm-ask-nine-face" aria-hidden="true"><b></b><b></b></i>Ask Nine to find your level</button>
     </div>
     <div class="nm-ladder" id="ladder" role="tablist" aria-label="AI maturity levels"></div>
     <div class="nm-level" id="levelPanel" role="tabpanel" aria-live="polite"></div>
@@ -1022,6 +1041,7 @@
     <div>
       <h2 class="nm-h2" data-src="F">Tools can be purchased in a day. Capability cannot.</h2>
       <p data-src="F">That is why upskilling is not a stage in the journey. It is the thread that holds every stage together.</p>
+      <button class="nm-ask-nine" type="button" data-talk="train"><i class="nm-ask-nine-face" aria-hidden="true"><b></b><b></b></i>Plan training with Nine</button>
       <p class="nm-quote" data-src="F">An organisation moves up the maturity ladder only as fast as its people do.</p>
     </div>
     <div class="nm-list">
@@ -1038,6 +1058,7 @@
     <div class="nm-section-head">
       <h2 data-src="P">Our service portfolio: where we create impact</h2>
       <p>Five service areas, one for each stage. Select a service to see what it involves.</p>
+      <button class="nm-ask-nine" type="button" data-talk="need"><i class="nm-ask-nine-face" aria-hidden="true"><b></b><b></b></i>Tell Nine the problem, she'll find the service</button>
     </div>
     <div class="nm-bento" id="bento"></div>
     <div id="stages"></div>
@@ -1049,6 +1070,7 @@
     <div class="nm-section-head">
       <h2 data-src="S §10">How a two-year programme runs</h2>
       <p data-src="S §1">Five workstreams (awareness, use-case discovery, implementation, governance and institutionalisation) delivered in four phases.</p>
+      <button class="nm-ask-nine" type="button" data-talk="need"><i class="nm-ask-nine-face" aria-hidden="true"><b></b><b></b></i>Ask Nine how this would start for you</button>
     </div>
     <div class="nm-timeline">
       <div class="nm-phase"><small>Months 1–6</small><h3>Foundation &amp; awareness</h3><ul><li>AI Edge Series and awareness sessions</li><li>Department-wise process understanding</li><li>Draft AI usage, governance and data classification frameworks</li><li>Form the AI Steering Committee and identify AI champions</li></ul></div>
@@ -1112,6 +1134,7 @@
     <div class="nm-section-head">
       <h2 data-src="P">Future plans</h2>
       <p>Areas we plan to offer next. They are not available yet.</p>
+      <button class="nm-ask-nine" type="button" data-talk="quick"><i class="nm-ask-nine-face" aria-hidden="true"><b></b><b></b></i>Tell Nine you're interested</button>
     </div>
     <div class="nm-future">
       <div class="nm-future-card"><span class="nm-pill">Planned</span><h3 data-src="P">AI for Government &amp; Public Sector, E-Governance Solutions</h3></div>
@@ -2061,17 +2084,19 @@ const Nine = (() => {
   const orgName = () => S.org || "your organisation";
   const low = x => x && !/^[A-Z]{2}/.test(x) ? x.charAt(0).toLowerCase() + x.slice(1) : x;   // keeps KYC, MIS
   const listOf = (x, keep) => { const a = String(x).split(/;\s*/).filter(Boolean).map(keep ? (y => y) : low); return a.length > 1 ? a.slice(0, -1).join(", ") + " and " + a[a.length - 1] : a[0] || ""; };
+  const SIZE_RE = /(\d[\d,.]*\s*k?)\s*\+?\s*(staff|employees|people|workers|members|officers|branches|clients|customers|students|farmers|patients)\b/i;
+  const SIZE_RE_G = new RegExp(SIZE_RE.source, "gi");
+  const SYS = [[/excel|spreadsheet|on paper|paper-?based/i, "Spreadsheets and paper"], [/\b(microsoft|outlook|teams|sharepoint|office 365|m365)\b/i, "Microsoft 365"], [/google (workspace|docs|sheets|drive)|gmail/i, "Google Workspace"],
+    [/\b(sap|odoo|sage|dynamics|erp|quickbooks|tally|xero)\b/i, "An ERP or accounting system"], [/salesforce|hubspot|zoho|\bcrm\b/i, "A CRM"], [/core banking|t24|temenos|finacle|mambu|musoni|loan (system|software)/i, "A core banking or loan system"], [/whatsapp/i, "WhatsApp and email"]];
   function glean(t) {
     const got = [];
     if (S.industry == null && !S.industryGuess) { const i = industryOf(t); if (i) S.industryGuess = i; }
     if (S.size == null) {
-      const m = t.match(/(\d[\d,.]*\s*k?)\s*\+?\s*(staff|employees|people|workers|members|officers|branches|clients|customers|students|farmers|patients)\b/i);
+      const m = t.match(SIZE_RE);
       if (m) { S.size = `${m[1].trim()} ${m[2].toLowerCase()}`; got.push(S.size); }
     }
     if (S.systems == null) {
-      const hits = [[/excel|spreadsheet|on paper|paper-?based/i, "Spreadsheets and paper"], [/\b(microsoft|outlook|teams|sharepoint|office 365|m365)\b/i, "Microsoft 365"], [/google (workspace|docs|sheets|drive)|gmail/i, "Google Workspace"],
-        [/\b(sap|odoo|sage|dynamics|erp|quickbooks|tally|xero)\b/i, "An ERP or accounting system"], [/salesforce|hubspot|zoho|\bcrm\b/i, "A CRM"], [/core banking|t24|temenos|finacle|mambu|musoni|loan (system|software)/i, "A core banking or loan system"], [/whatsapp/i, "WhatsApp and email"]]
-        .filter(([re]) => re.test(t)).map(x => x[1]);
+      const hits = SYS.filter(([re]) => re.test(t)).map(x => x[1]);
       if (hits.length) { S.systems = hits.join("; "); got.push(listOf(S.systems)); }
     }
     if (S.aiNow == null) { const m = t.match(/chat ?gpt|copilot|gemini|claude|\bai tools?\b/i); if (m) S.aiNow = `Some people already use ${m[0]}`; }
@@ -2453,6 +2478,24 @@ const Nine = (() => {
   $("asClose").addEventListener("click", () => close());
   document.addEventListener("keydown", e => { if (e.key === "Escape" && isOpen()) close(); });
 
+  // conversations a page element can start with data-talk="<flow>"
+  const FLOWS = {
+    level: () => levelNow(),
+    train: () => { route = "train"; say("Let's plan the training.", { chat: true }); next(); },
+    explore: () => explore(),
+    need: () => { route = "project"; askNeed(); },
+    quick: () => { route = "quick"; next(); }
+  };
+  // what Nine would pick up from a sentence, without storing it: shown live under the hero box
+  function peek(t) {
+    const out = [], i = industryOf(t), m = t.match(SIZE_RE);
+    if (i) out.push(i.label);
+    if (m) out.push(`${m[1].trim()} ${m[2].toLowerCase()}`);
+    SYS.filter(([re]) => re.test(t)).forEach(x => out.push(x[1]));
+    const f = t.trim().split(/\s+/).length > 2 ? match(t.replace(SIZE_RE_G, ""))[0] : null;
+    if (f) out.push(f.title);
+    return out;
+  }
   function open(opts = {}) {
     openerFocus = document.activeElement;
     root.classList.add("is-open"); root.setAttribute("aria-hidden", "false");
@@ -2467,13 +2510,13 @@ const Nine = (() => {
       started = true;
       Faces.mood(asFace, "surprised");
       if (v) { route = "project"; S.service = v; S.noted = true; say("Hi, I'm Nine, Ninth Mind's assistant.", { mood: "happy" }); say(`I see you were reading about ${v.title}. I'll make sure the right person on our team hears about it.`); next(); }
-      else if (opts.flow === "level") { say("Hi, I'm Nine, Ninth Mind's assistant.", { mood: "happy" }); levelNow(); }
+      else if (FLOWS[opts.flow]) { say("Hi, I'm Nine, Ninth Mind's assistant.", { mood: "happy" }); FLOWS[opts.flow](); }
       else menu(true);
     } else if (v && !["confirm", "finished", "edit"].includes(step)) {
       cancelAll(); S.service = v; S.noted = true; if (route === "quick") route = "project";
       say(`I see you've been looking at ${v.title}. I'll note that as your main interest.`); next();
-    } else if (opts.flow === "level" && !String(step).startsWith("level")) {
-      cancelAll(); levelNow();
+    } else if (FLOWS[opts.flow] && !["confirm", "finished", "edit"].includes(step) && !(opts.flow === "level" && String(step).startsWith("level"))) {
+      cancelAll(); FLOWS[opts.flow]();
     } else if (voiceMode && !listening && step !== "finished" && !form.classList.contains("nm-as-hidden")) listen();
     setTimeout(() => $("asClose").focus({ preventScroll: true }), 50);
     if (!form.classList.contains("nm-as-hidden")) startWait();
@@ -2493,7 +2536,7 @@ const Nine = (() => {
     prevEl.textContent = ""; nowEl.textContent = "";
     menu(true);
   }
-  return { open, close, hear: t => submitText(t, true), get step() { return step; } };
+  return { open, close, peek, hear: t => submitText(t, true), get step() { return step; } };
 })();
 
 document.querySelectorAll("[data-talk]").forEach(b => b.addEventListener("click", e => {
@@ -2502,6 +2545,22 @@ document.querySelectorAll("[data-talk]").forEach(b => b.addEventListener("click"
 }));
 // the hero box: the visitor's first words go straight to Nine
 document.querySelectorAll("[data-ask]").forEach(b => b.addEventListener("click", () => Nine.open({ text: b.dataset.ask })));
+{
+  const box = document.getElementById("heroAskInput"), heard = document.getElementById("heroHeard");
+  let tt = 0;
+  box.addEventListener("focus", () => { Faces.lookAt(heroNine.face, box); Faces.mood(heroNine.face, "happy"); });
+  box.addEventListener("blur", () => { Faces.lookAt(heroNine.face, null); Faces.mood(heroNine.face, "idle"); Faces.show(heroNine.face, null); });
+  box.addEventListener("input", () => {
+    Faces.show(heroNine.face, "dots", 0); Faces.bump && Faces.bump(heroNine.face);
+    clearTimeout(tt);
+    tt = setTimeout(() => {
+      const got = Nine.peek(box.value);
+      heard.innerHTML = got.length ? `<span>Nine understood</span>${got.map(g => `<b>${esc(g)}</b>`).join("")}` : "";
+      Faces.show(heroNine.face, got.length ? "check" : null, got.length ? 900 : 0);
+    }, 350);
+  });
+  document.getElementById("heroAsk").addEventListener("submit", () => { heard.innerHTML = ""; });
+}
 document.getElementById("heroAsk").addEventListener("submit", e => {
   e.preventDefault();
   const i = document.getElementById("heroAskInput"), t = i.value.trim();
@@ -2623,7 +2682,34 @@ walkerHost.className = "nm-walker is-hidden"; walkerHost.setAttribute("aria-hidd
 document.body.appendChild(walkerHost);
 const walker = Photo.mount(walkerHost);
 walker.el.title = "Talk to Nine";
-walker.el.addEventListener("click", () => Nine.open({}));
+// what Nine says as each section comes into view, and the conversation a click on her starts there
+const SECTION_TALK = {
+  approach: ["Five levels. Want me to find yours?", "level"],
+  training: ["Tools take a day. Skills take longer.", "train"],
+  services: ["Tell me the problem, I'll find the service.", "need"],
+  programme: ["This is how a programme runs.", "need"],
+  mfi: ["We start with our own group.", null],
+  planned: ["Coming next. Interested? Tell me.", "quick"],
+  contact: ["Or just talk to me. I'll pass it on.", null]
+};
+let hereNow = null;
+walker.el.addEventListener("click", () => Nine.open(hereNow && SECTION_TALK[hereNow][1] ? { flow: SECTION_TALK[hereNow][1] } : {}));
+{
+  const said = new Set();
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) { if (hereNow === e.target.id) hereNow = null; return; }
+    hereNow = e.target.id;
+    if (said.has(hereNow) || !walkerOn || nineOpen()) return;
+    said.add(hereNow);
+    setTimeout(() => {
+      if (!walkerOn || nineOpen() || hereNow !== e.target.id) return;
+      walker.say(SECTION_TALK[hereNow][0], 4200); Faces.mood(walker.face, "happy");
+      if (walker.pose === "stand" && !walker.el.classList.contains("is-turning")) walker.act("talk", 2000);
+      setTimeout(() => Faces.mood(walker.face, "idle"), 2000);
+    }, 600);
+  }), { rootMargin: "-35% 0px -35% 0px" });
+  Object.keys(SECTION_TALK).forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
+}
 let heroInView = true, walkerOn = false;
 const nineOpen = () => document.getElementById("as").classList.contains("is-open");
 const walkerPilot = autopilot(walker, { host: walkerHost, talks: true, isActive: () => walkerOn });
