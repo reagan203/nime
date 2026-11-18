@@ -132,7 +132,15 @@
   .nm-header { position: sticky; top: 0; z-index: 20; background: var(--header-bg); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid transparent; transition: border-color .2s; }
   .nm-header.is-scrolled { border-bottom-color: var(--line); }
   .nm-header-in { position: relative; display: flex; align-items: center; height: 72px; gap: 20px; }
-  .nm-logo img { height: 36px; width: auto; }
+  /* the logo: the wave mark as an image, the name and tagline as real text so the tagline stays readable at header size */
+  .nm-lockup { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); line-height: 1; white-space: nowrap; }
+  .nm-lockup img { height: 38px; width: auto; flex: none; }
+  .nm-lockup-text { display: flex; flex-direction: column; gap: 5px; font-family: "Montserrat", var(--display); }
+  .nm-lockup-text b { font-size: 21px; font-weight: 600; letter-spacing: .06em; }
+  .nm-lockup-text small { font-size: 9.5px; font-weight: 600; letter-spacing: .045em; text-transform: uppercase; opacity: .85; }
+  .nm-lockup.is-lg img { height: 52px; }
+  .nm-lockup.is-lg .nm-lockup-text b { font-size: 28px; }
+  .nm-lockup.is-lg .nm-lockup-text small { font-size: 12px; }
   .nm-nav { display: flex; align-items: center; gap: 28px; margin-left: auto; }
   .nm-nav a { font-size: 15px; color: var(--text-muted); transition: color .15s; }
   .nm-nav a:hover, .nm-nav a.is-active { color: var(--ink); }
@@ -651,17 +659,6 @@
   .nm-footer-cols a:hover, .nm-footer-cols button:hover { color: var(--ink); }
   .nm-footer-bottom { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 14px; color: var(--text-soft); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
-  /* ---------- Sources switch (for reviewing the mock) ---------- */
-  .nm-src-btn { position: fixed; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 30; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text-muted); font: 500 13px var(--font); cursor: pointer; box-shadow: var(--shadow-lift); }
-  .nm-src-btn[aria-pressed="true"] { color: var(--accent-text); background: var(--accent); border-color: var(--accent); }
-  .nm-src-legend { position: fixed; left: 16px; bottom: calc(64px + env(safe-area-inset-bottom)); z-index: 30; width: min(360px, calc(100vw - 32px)); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; font-size: 13px; color: var(--text-muted); box-shadow: var(--shadow-lift); display: none; }
-  .show-src .nm-src-legend { display: block; }
-  .nm-src-legend strong { color: var(--ink); }
-  .nm-src-legend dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; }
-  .nm-src-legend dt { font-weight: 700; color: var(--accent-fg); }
-  .nm-src-legend dd { margin: 0; }
-  .show-src [data-src]::after { content: attr(data-src); display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 6px; vertical-align: middle; font: 600 11px/1.6 var(--font); letter-spacing: 0; color: var(--accent-fg); background: var(--accent-quiet); border: 1px solid var(--accent-light); white-space: nowrap; }
-  .nm-band .show-src [data-src]::after, .show-src .nm-band [data-src]::after { background: rgba(54, 182, 234, .18); color: #9fdcff; }
 
   /* ---------- Service sheet ---------- */
   .nm-scrim { position: fixed; inset: 0; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
@@ -685,7 +682,7 @@
   .nm-as.is-open { opacity: 1; visibility: visible; transition: opacity .25s; }
   .nm-as-top, .nm-as-bottom { display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; gap: 16px; }
   .nm-as-bottom { padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
-  .nm-as-top img { height: 30px; width: auto; }
+  .nm-as-top .nm-lockup img { height: 32px; } .nm-as-top .nm-lockup-text b { font-size: 18px; }
   .nm-as-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); align-items: center; gap: 56px; padding: 0 32px; max-width: 1240px; width: 100%; margin: 0 auto; min-height: 0; overflow-y: auto; }
   .nm-as-talk { max-width: 560px; padding: 24px 0; }
   .nm-as-prev { font-size: 15px; line-height: 1.5; color: var(--text-soft); min-height: 1.5em; margin-bottom: 16px; }
@@ -783,7 +780,7 @@
   }
   /* ---------- Phone ---------- */
   @media (max-width: 560px) {
-    .nm-logo img { height: 28px; }
+    .nm-lockup img { height: 30px; } .nm-lockup-text b { font-size: 17px; } .nm-lockup-text small { font-size: 8px; letter-spacing: .02em; }
     .nm-header-in { gap: 8px; height: 64px; }
     .nm-nav { top: 64px; }
     .nm-header-cta { padding: 0 14px; font-size: 13px; min-height: 38px; }
@@ -799,7 +796,6 @@
     .nm-talk-actions .nm-btn { flex: 1 1 auto; }
     .nm-as-face { width: 104px; }
     .nm-as-now { min-height: 0; }
-    .nm-src-btn { left: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); width: 40px; height: 40px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
   }
   .nm-theme-row { display: none; align-items: center; justify-content: space-between; padding: 14px 0 0; color: var(--text-muted); font-size: 16px; }
 
@@ -932,7 +928,7 @@
 <header class="nm-header" id="top">
   <div class="nm-wrap nm-header-in">
     <a class="nm-logo" href="#top" aria-label="Ninth Mind home">
-      <img class="nm-logo-img" src="assets/ninth-mind-logo.png" alt="Ninth Mind: AI-Powered Business Transformation & Training">
+      <span class="nm-lockup"><img class="nm-logo-img" src="assets/ninth-mind-mark.png" alt=""><span class="nm-lockup-text"><b>NINTH MIND</b><small>AI-Powered Business Transformation &amp; Training</small></span></span>
     </a>
     <nav class="nm-nav" id="nav" aria-label="Main">
       <a href="#approach">Approach</a>
@@ -1151,7 +1147,7 @@
   <div class="nm-wrap">
     <div class="nm-footer-top">
       <div>
-        <img class="nm-logo-img" src="assets/ninth-mind-logo.png" alt="Ninth Mind: AI-Powered Business Transformation & Training">
+        <span class="nm-lockup is-lg"><img class="nm-logo-img" src="assets/ninth-mind-mark.png" alt=""><span class="nm-lockup-text"><b>NINTH MIND</b><small>AI-Powered Business Transformation &amp; Training</small></span></span>
         <p class="nm-footer-addr">No. 16 Kanjata Road, off James Gichuru Road, Nairobi, Kenya<br><a href="mailto:anup.tabe@ninthmind.ai">anup.tabe@ninthmind.ai</a> · <a href="https://www.ninthmind.ai" target="_blank" rel="noopener">www.ninthmind.ai</a></p>
       </div>
       <div class="nm-footer-cols">
@@ -1177,21 +1173,6 @@
   </div>
 </footer>
 
-<!-- Sources switch: shows which document backs each statement -->
-<div class="nm-src-legend" role="note">
-  <strong>Where each statement comes from</strong>
-  <dl>
-    <dt>P</dt><dd>Our Service Portfolio: Where We Create Impact</dd>
-    <dt>S §</dt><dd>AI Adoption Strategy for Group MFI, management note (section number)</dd>
-    <dt>F</dt><dd>The MFI AI Transformation Journey Framework, V1</dd>
-  </dl>
-  <p style="margin-top:8px">Unmarked text is navigation or instructions, not a claim. Contact details: Anup Tabe's email signature.</p>
-</div>
-<button class="nm-src-btn" id="srcBtn" type="button" aria-pressed="false">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11l5 5v9a1 1 0 0 1-1 1H4z"/><path d="M15 5v5h5M8 13h8M8 17h5"/></svg>
-  Sources
-</button>
-
 <!-- Service detail sheet -->
 <div class="nm-scrim" id="scrim"></div>
 <aside class="nm-sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" aria-hidden="true">
@@ -1208,7 +1189,7 @@
 <!-- Nine: full-screen conversation -->
 <div class="nm-as" id="as" role="dialog" aria-modal="true" aria-label="Nine, Ninth Mind's assistant" aria-hidden="true" data-state="idle">
   <div class="nm-as-top">
-    <img class="nm-logo-img" src="assets/ninth-mind-logo.png" alt="Ninth Mind">
+    <span class="nm-lockup"><img class="nm-logo-img" src="assets/ninth-mind-mark.png" alt=""><span class="nm-lockup-text"><b>NINTH MIND</b><small>AI-Powered Business Transformation &amp; Training</small></span></span>
     <button class="nm-icon-btn" id="asClose" type="button" aria-label="Close Nine">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
     </button>
@@ -1651,14 +1632,20 @@ const Photo = (() => {
       const [sx, sy, sw, sh] = k.stage || [0, 0, k.imgs[0].naturalWidth, k.imgs[0].naturalHeight];
       cancelAnimationFrame(raf); el.dataset.move = ""; el.classList.add("is-turning");
       cv.width = Math.round(sw); cv.height = Math.round(sh);
-      const t0 = performance.now(), n = k.frames;
+      const t0 = performance.now(), n = k.frames, dur = n / k.fps * 1000;
+      const paint = i => { ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(k.imgs[i], sx, sy, sw, sh, 0, 0, cv.width, cv.height); };
+      // never leave her hidden: if frames stop coming (background tab, an error), show the still again
+      const end = () => { cancelAnimationFrame(raf); clearTimeout(guard); el.classList.remove("is-turning"); };
+      const guard = setTimeout(end, dur + 1500);
       const step = t => {
-        const i = Math.min(n - 1, Math.floor((t - t0) / 1000 * k.fps));
-        ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(k.imgs[i], sx, sy, sw, sh, 0, 0, cv.width, cv.height);
-        if (i < n - 1 && !drag) raf = requestAnimationFrame(step); else el.classList.remove("is-turning");
+        // a frame's timestamp can be a little before t0: clamp, or frame -1 throws and the canvas stays blank
+        const i = Math.max(0, Math.min(n - 1, Math.floor((t - t0) / 1000 * k.fps)));
+        try { paint(i); } catch { return end(); }
+        if (i < n - 1 && !drag) raf = requestAnimationFrame(step); else end();
       };
+      paint(0);
       raf = requestAnimationFrame(step);
-      return n / k.fps * 1000;
+      return dur;
     };
     const clip = el.querySelector(".np-clip");
     clip.addEventListener("pointerdown", e => {
@@ -2500,13 +2487,6 @@ photoNines.forEach(n => { let t = 0; n.el.addEventListener("pointerenter", () =>
 
 // once she has waved, Nine shows off a full turn (when the 360 frames have loaded)
 setTimeout(() => { if (heroInView && !nineOpen() && heroNine.pose === "stand") heroNine.turn(); }, 6500);
-
-/* ---------- Sources switch ---------- */
-const srcBtn = document.getElementById("srcBtn");
-srcBtn.addEventListener("click", () => {
-  const on = document.documentElement.classList.toggle("show-src");
-  srcBtn.setAttribute("aria-pressed", String(on));
-});
 
 /* ---------- Light / dark mode ---------- */
 function syncThemeLabel() {
